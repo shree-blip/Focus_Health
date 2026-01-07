@@ -86,8 +86,9 @@ export const Footer = () => {
               </li>
             </ul>
             <div className="mt-6">
-              <span className="inline-block px-4 py-2 bg-primary-foreground/10 rounded-full text-xs font-medium">
-                Launch Expected Q4 2025
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full text-xs font-medium text-accent">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                Actively Partnering in Texas Markets
               </span>
             </div>
           </div>
