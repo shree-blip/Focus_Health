@@ -1,199 +1,426 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, Clock, MapPin, Zap } from 'lucide-react';
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+
+// Floating particle component
+const FloatingParticle = ({ delay, duration, x, y, size }: { delay: number; duration: number; x: number; y: number; size: number }) => (
+  <motion.div
+    className="absolute rounded-full bg-primary/20"
+    style={{ width: size, height: size, left: `${x}%`, top: `${y}%` }}
+    animate={{
+      y: [0, -30, 0],
+      x: [0, 15, 0],
+      opacity: [0.2, 0.5, 0.2],
+      scale: [1, 1.2, 1],
+    }}
+    transition={{
+      duration,
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+  />
+);
+
+// Animated gradient orb
+const GradientOrb = ({ className, delay = 0 }: { className: string; delay?: number }) => (
+  <motion.div
+    className={`absolute rounded-full blur-3xl ${className}`}
+    animate={{
+      scale: [1, 1.2, 1],
+      opacity: [0.3, 0.5, 0.3],
+    }}
+    transition={{
+      duration: 8,
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+  />
+);
+
+// Live pulse ring component
+const PulseRing = ({ delay, size, color }: { delay: number; size: number; color: string }) => (
+  <motion.div
+    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+    style={{ 
+      width: size, 
+      height: size,
+      borderColor: color,
+    }}
+    initial={{ scale: 0.8, opacity: 0 }}
+    animate={{ scale: [0.8, 1.5, 2], opacity: [0, 0.4, 0] }}
+    transition={{
+      duration: 3,
+      delay,
+      repeat: Infinity,
+      ease: "easeOut",
+    }}
+  />
+);
+
+// Heartbeat line animation
+const HeartbeatLine = () => {
+  const [key, setKey] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setKey(prev => prev + 1);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <svg className="absolute bottom-20 left-0 w-full h-24 opacity-20" preserveAspectRatio="none">
+      <motion.path
+        key={key}
+        d="M0 50 L100 50 L120 50 L130 20 L140 80 L150 30 L160 50 L200 50 L1400 50"
+        stroke="hsl(var(--accent))"
+        strokeWidth="2"
+        fill="none"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: [0, 1, 1, 0] }}
+        transition={{ duration: 2.5, ease: "easeInOut" }}
+      />
+    </svg>
+  );
+};
+
+// Live stats ticker
+const LiveStatsTicker = () => {
+  const [currentStat, setCurrentStat] = useState(0);
+  const stats = [
+    { value: "24+", label: "Facilities Managed" },
+    { value: "24/7", label: "Operations Model" },
+    { value: "Texas", label: "Growth Markets" },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStat(prev => (prev + 1) % stats.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative h-8 overflow-hidden">
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.label}
+          className="absolute inset-0 flex items-center gap-2"
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ 
+            y: currentStat === index ? 0 : currentStat > index ? -30 : 30,
+            opacity: currentStat === index ? 1 : 0,
+          }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <span className="text-accent font-bold">{stat.value}</span>
+          <span className="text-muted-foreground">{stat.label}</span>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+// Mouse follow effect hook
+const useMousePosition = () => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  return { mouseX, mouseY };
+};
 
 export const HeroSection = () => {
-  return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-hero-pattern">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Abstract Texas Map Effect with Nodes */}
-        <svg
-          className="absolute inset-0 w-full h-full opacity-[0.08]"
-          viewBox="0 0 1200 800"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          {/* Connection Lines */}
-          <motion.path
-            d="M200 400 Q 400 300 600 400 T 1000 350"
-            stroke="hsl(var(--primary))"
-            strokeWidth="2"
-            fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 3, ease: 'easeInOut' }}
-          />
-          <motion.path
-            d="M300 500 Q 500 400 700 500 T 900 450"
-            stroke="hsl(var(--secondary))"
-            strokeWidth="1.5"
-            fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 3, delay: 0.5, ease: 'easeInOut' }}
-          />
-          
-          {/* Network Nodes - Blue */}
-          {[
-            { cx: 200, cy: 400, delay: 0 },
-            { cx: 400, cy: 350, delay: 0.3 },
-            { cx: 600, cy: 400, delay: 0.6 },
-            { cx: 800, cy: 380, delay: 0.9 },
-            { cx: 1000, cy: 350, delay: 1.2 },
-          ].map((node, i) => (
-            <g key={i}>
-              <motion.circle
-                cx={node.cx}
-                cy={node.cy}
-                r="8"
-                fill="hsl(var(--primary))"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: node.delay + 1, duration: 0.5 }}
-              />
-              <motion.circle
-                cx={node.cx}
-                cy={node.cy}
-                r="16"
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth="2"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-                transition={{
-                  delay: node.delay + 1.5,
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatDelay: 1,
-                }}
-              />
-            </g>
-          ))}
-          
-          {/* Red Accent Nodes - Momentum */}
-          {[
-            { cx: 500, cy: 380, delay: 1.5 },
-            { cx: 900, cy: 420, delay: 2 },
-          ].map((node, i) => (
-            <g key={`red-${i}`}>
-              <motion.circle
-                cx={node.cx}
-                cy={node.cy}
-                r="6"
-                fill="hsl(var(--accent))"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: node.delay, duration: 0.5 }}
-              />
-              <motion.circle
-                cx={node.cx}
-                cy={node.cy}
-                r="12"
-                fill="none"
-                stroke="hsl(var(--accent))"
-                strokeWidth="2"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: [1, 1.8], opacity: [0.6, 0] }}
-                transition={{
-                  delay: node.delay + 0.5,
-                  duration: 2.5,
-                  repeat: Infinity,
-                  repeatDelay: 1.5,
-                }}
-              />
-            </g>
-          ))}
-        </svg>
+  const { mouseX, mouseY } = useMousePosition();
+  
+  const springConfig = { stiffness: 100, damping: 30 };
+  const orbX = useSpring(useTransform(mouseX, [0, window.innerWidth], [-30, 30]), springConfig);
+  const orbY = useSpring(useTransform(mouseY, [0, window.innerHeight], [-30, 30]), springConfig);
 
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 8 + 4,
+    delay: Math.random() * 5,
+    duration: Math.random() * 3 + 4,
+  }));
+
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-background">
+      {/* Animated gradient background orbs */}
+      <motion.div style={{ x: orbX, y: orbY }} className="absolute inset-0 pointer-events-none">
+        <GradientOrb className="w-[600px] h-[600px] -top-40 -left-40 bg-gradient-to-br from-primary/30 to-primary/5" />
+        <GradientOrb className="w-[500px] h-[500px] top-1/3 -right-40 bg-gradient-to-bl from-accent/20 to-accent/5" delay={2} />
+        <GradientOrb className="w-[400px] h-[400px] -bottom-20 left-1/3 bg-gradient-to-tr from-secondary/25 to-secondary/5" delay={4} />
+      </motion.div>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        {particles.map((p) => (
+          <FloatingParticle key={p.id} {...p} />
+        ))}
       </div>
 
-      <div className="container-focus relative z-10">
-        <div className="max-w-4xl">
-          {/* Launch Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-6"
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              Now Accepting Strategic Partners
-            </span>
-          </motion.div>
+      {/* Animated grid pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px',
+        }} />
+      </div>
 
-          {/* Main Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-[1.1] mb-6"
-          >
-            Investing in Healthcare.{' '}
-            <span className="text-gradient-blue">Delivering Excellence.</span>
-          </motion.h1>
+      {/* Pulse rings from center */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <PulseRing delay={0} size={300} color="hsl(var(--primary) / 0.3)" />
+        <PulseRing delay={1} size={500} color="hsl(var(--primary) / 0.2)" />
+        <PulseRing delay={2} size={700} color="hsl(var(--accent) / 0.15)" />
+      </div>
 
-          {/* Supporting Line */}
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-4 max-w-2xl"
-          >
-            We're revolutionizing healthcare by partnering with communities and investors to build and operate high-performance medical facilities.
-          </motion.p>
+      {/* Heartbeat line */}
+      <HeartbeatLine />
 
-          {/* Extended Value Prop */}
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-base text-muted-foreground mb-8 max-w-2xl"
-          >
-            Turnkey FSER delivery: site strategy → build-out → staffing → operations → performance optimization.
-          </motion.p>
+      {/* Network connections SVG */}
+      <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+        {/* Animated connection paths */}
+        <motion.path
+          d="M100 300 Q 300 200 500 300 T 900 250 T 1100 350"
+          stroke="hsl(var(--primary))"
+          strokeWidth="1"
+          fill="none"
+          strokeDasharray="10 5"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 4, ease: 'easeInOut' }}
+        />
+        <motion.path
+          d="M200 500 Q 400 400 600 500 T 1000 450"
+          stroke="hsl(var(--accent))"
+          strokeWidth="1"
+          fill="none"
+          strokeDasharray="8 4"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 3.5, delay: 0.5, ease: 'easeInOut' }}
+        />
+        
+        {/* Traveling dot along path */}
+        <motion.circle
+          r="4"
+          fill="hsl(var(--accent))"
+          initial={{ offsetDistance: "0%" }}
+          animate={{ offsetDistance: "100%" }}
+          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          style={{ offsetPath: "path('M100 300 Q 300 200 500 300 T 900 250 T 1100 350')" }}
+        />
+      </svg>
 
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 mb-12"
-          >
-            <Button variant="hero" size="lg" asChild>
-              <Link to="/partners?tab=investors">
-                Partner With Us
-                <ArrowRight className="ml-2" size={18} />
-              </Link>
-            </Button>
-            <Button variant="hero-outline" size="lg" asChild>
-              <Link to="/contact">Get Early Access</Link>
-            </Button>
-          </motion.div>
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
 
-          {/* Trust Strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground"
-          >
-            {[
-              { icon: Zap, label: 'Turnkey' },
-              { icon: Clock, label: '24/7 Model' },
-              { icon: MapPin, label: 'Texas Growth Markets' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-2">
-                <item.icon size={16} className="text-primary" />
-                <span>{item.label}</span>
+      {/* Content */}
+      <div className="container-focus relative z-10 pt-20">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-2xl">
+            {/* Live indicator badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="mb-6"
+            >
+              <span className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/10 border border-primary/20 text-sm font-medium backdrop-blur-sm">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
+                </span>
+                <span className="text-foreground">Now Accepting Strategic Partners</span>
+                <Activity size={14} className="text-accent" />
+              </span>
+            </motion.div>
+
+            {/* Main Headline with gradient animation */}
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-[1.05] mb-6"
+            >
+              <span className="block">Investing in</span>
+              <motion.span 
+                className="block bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] text-transparent bg-clip-text"
+                animate={{ backgroundPosition: ["0% center", "200% center"] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              >
+                Healthcare.
+              </motion.span>
+              <span className="block text-foreground/90">Delivering Excellence.</span>
+            </motion.h1>
+
+            {/* Supporting Line */}
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.25 }}
+              className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-4"
+            >
+              We're revolutionizing healthcare by partnering with communities and investors to build and operate high-performance medical facilities.
+            </motion.p>
+
+            {/* Extended Value Prop with typewriter effect hint */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="flex items-center gap-2 text-sm text-muted-foreground mb-8 font-mono"
+            >
+              <span className="text-primary">→</span>
+              <span>site strategy → build-out → staffing → operations → optimization</span>
+            </motion.div>
+
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.45 }}
+              className="flex flex-col sm:flex-row gap-4 mb-10"
+            >
+              <Button variant="hero" size="lg" asChild className="group">
+                <Link to="/partners?tab=investors">
+                  Partner With Us
+                  <motion.span
+                    className="ml-2"
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <ArrowRight size={18} />
+                  </motion.span>
+                </Link>
+              </Button>
+              <Button variant="hero-outline" size="lg" asChild>
+                <Link to="/contact">Get Early Access</Link>
+              </Button>
+            </motion.div>
+
+            {/* Live stats ticker */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="flex items-center gap-4"
+            >
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-1 h-6 bg-gradient-to-b from-accent to-accent/30 rounded-full" />
+                <LiveStatsTicker />
               </div>
-            ))}
+            </motion.div>
+          </div>
+
+          {/* Right side - Interactive visual element */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="hidden lg:flex items-center justify-center relative"
+          >
+            <div className="relative w-80 h-80">
+              {/* Central hub */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl shadow-primary/30"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <span className="text-3xl font-bold text-primary-foreground">FH</span>
+              </motion.div>
+
+              {/* Orbiting elements */}
+              {[0, 1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  className="absolute top-1/2 left-1/2 w-4 h-4 -ml-2 -mt-2"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8 + i * 2, repeat: Infinity, ease: "linear" }}
+                  style={{ transformOrigin: "2px 130px" }}
+                >
+                  <motion.div
+                    className={`w-4 h-4 rounded-full ${i % 2 === 0 ? 'bg-accent' : 'bg-primary'}`}
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 2, delay: i * 0.5, repeat: Infinity }}
+                  />
+                </motion.div>
+              ))}
+
+              {/* Circular track */}
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 320 320">
+                <circle cx="160" cy="160" r="130" fill="none" stroke="hsl(var(--primary) / 0.1)" strokeWidth="2" strokeDasharray="8 4" />
+                <circle cx="160" cy="160" r="100" fill="none" stroke="hsl(var(--accent) / 0.1)" strokeWidth="1" />
+              </svg>
+
+              {/* Floating labels */}
+              {[
+                { label: "Build", angle: 0 },
+                { label: "Operate", angle: 120 },
+                { label: "Optimize", angle: 240 },
+              ].map((item, i) => {
+                const radians = (item.angle * Math.PI) / 180;
+                const x = 160 + 150 * Math.cos(radians);
+                const y = 160 + 150 * Math.sin(radians);
+                return (
+                  <motion.div
+                    key={item.label}
+                    className="absolute text-xs font-medium text-primary bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-primary/20 shadow-lg"
+                    style={{ left: x - 30, top: y - 12 }}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1 + i * 0.2, duration: 0.5 }}
+                  >
+                    {item.label}
+                  </motion.div>
+                );
+              })}
+            </div>
           </motion.div>
         </div>
+
+        {/* Bottom trust strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="mt-16 pt-8 border-t border-border/50"
+        >
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
+            {[
+              { icon: Zap, label: 'Turnkey Solution' },
+              { icon: Clock, label: '24/7 Operations' },
+              { icon: MapPin, label: 'Texas Growth Markets' },
+            ].map((item, i) => (
+              <motion.div 
+                key={item.label} 
+                className="flex items-center gap-2 hover:text-primary transition-colors cursor-default"
+                whileHover={{ scale: 1.05 }}
+              >
+                <item.icon size={16} className="text-primary" />
+                <span>{item.label}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
