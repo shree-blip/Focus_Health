@@ -122,7 +122,7 @@ export const HeroSection = () => {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              Launch Expected Q4 2025
+              Now Accepting Strategic Partners
             </span>
           </motion.div>
 

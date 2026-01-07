@@ -147,8 +147,9 @@ export const EarlyAccessSection = () => {
 
           <ScrollReveal delay={0.2}>
             <div className="text-center mt-8">
-              <span className="inline-block px-6 py-2 rounded-full bg-muted text-muted-foreground text-sm">
-                Launch Expected Q4 2025
+              <span className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-accent/10 text-accent text-sm font-medium">
+                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                Limited Partnership Spots Available
               </span>
             </div>
           </ScrollReveal>
