@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import focusHealthVideo from '@/assets/FocusHealth.mp4';
+import focusHealthLogo from '@/assets/focus-health-logo.png';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -48,13 +48,10 @@ export const Navbar = () => {
         <nav className="flex items-center justify-between h-20">
           {/* Logo with Video */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-lg overflow-hidden group-hover:scale-105 transition-transform shadow-md">
-              <video
-                src={focusHealthVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
+            <div className="w-10 h-10 rounded-full overflow-hidden group-hover:scale-105 transition-transform">
+              <img
+                src={focusHealthLogo}
+                alt="Focus Health Logo"
                 className="w-full h-full object-cover"
               />
             </div>
