@@ -3,6 +3,7 @@ import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
+import focusHealthVideo from '@/assets/FocusHealth.mp4';
 
 // Floating particle component
 const FloatingParticle = ({ delay, duration, x, y, size }: { delay: number; duration: number; x: number; y: number; size: number }) => (
@@ -338,27 +339,43 @@ export const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="hidden lg:flex items-center justify-center relative"
           >
-            <div className="relative w-80 h-80">
-              {/* Central hub */}
+            <div className="relative w-96 h-96">
+              {/* Video Logo Central Hub */}
               <motion.div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl shadow-primary/30"
-                animate={{ scale: [1, 1.05, 1] }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-2xl overflow-hidden shadow-2xl shadow-primary/40 border-2 border-primary/20"
+                animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                <span className="text-3xl font-bold text-primary-foreground">FH</span>
+                <video
+                  src={focusHealthVideo}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+                {/* Glow overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent pointer-events-none" />
               </motion.div>
+
+              {/* Pulsing glow ring around video */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 rounded-2xl border-2 border-primary/30"
+                animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
 
               {/* Orbiting elements */}
               {[0, 1, 2, 3].map((i) => (
                 <motion.div
                   key={i}
-                  className="absolute top-1/2 left-1/2 w-4 h-4 -ml-2 -mt-2"
+                  className="absolute top-1/2 left-1/2 w-5 h-5 -ml-2.5 -mt-2.5"
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 8 + i * 2, repeat: Infinity, ease: "linear" }}
-                  style={{ transformOrigin: "2px 130px" }}
+                  transition={{ duration: 10 + i * 2, repeat: Infinity, ease: "linear" }}
+                  style={{ transformOrigin: "2.5px 160px" }}
                 >
                   <motion.div
-                    className={`w-4 h-4 rounded-full ${i % 2 === 0 ? 'bg-accent' : 'bg-primary'}`}
+                    className={`w-5 h-5 rounded-full ${i % 2 === 0 ? 'bg-accent shadow-lg shadow-accent/50' : 'bg-primary shadow-lg shadow-primary/50'}`}
                     animate={{ scale: [1, 1.3, 1] }}
                     transition={{ duration: 2, delay: i * 0.5, repeat: Infinity }}
                   />
@@ -366,28 +383,29 @@ export const HeroSection = () => {
               ))}
 
               {/* Circular track */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 320 320">
-                <circle cx="160" cy="160" r="130" fill="none" stroke="hsl(var(--primary) / 0.1)" strokeWidth="2" strokeDasharray="8 4" />
-                <circle cx="160" cy="160" r="100" fill="none" stroke="hsl(var(--accent) / 0.1)" strokeWidth="1" />
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 384 384">
+                <circle cx="192" cy="192" r="160" fill="none" stroke="hsl(var(--primary) / 0.15)" strokeWidth="2" strokeDasharray="10 5" />
+                <circle cx="192" cy="192" r="130" fill="none" stroke="hsl(var(--accent) / 0.1)" strokeWidth="1" strokeDasharray="6 4" />
               </svg>
 
               {/* Floating labels */}
               {[
-                { label: "Build", angle: 0 },
-                { label: "Operate", angle: 120 },
-                { label: "Optimize", angle: 240 },
+                { label: "Build", angle: -30 },
+                { label: "Operate", angle: 90 },
+                { label: "Optimize", angle: 210 },
               ].map((item, i) => {
                 const radians = (item.angle * Math.PI) / 180;
-                const x = 160 + 150 * Math.cos(radians);
-                const y = 160 + 150 * Math.sin(radians);
+                const x = 192 + 175 * Math.cos(radians);
+                const y = 192 + 175 * Math.sin(radians);
                 return (
                   <motion.div
                     key={item.label}
-                    className="absolute text-xs font-medium text-primary bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-primary/20 shadow-lg"
-                    style={{ left: x - 30, top: y - 12 }}
+                    className="absolute text-xs font-semibold text-primary bg-background/90 backdrop-blur-md px-4 py-2 rounded-full border border-primary/30 shadow-xl"
+                    style={{ left: x - 35, top: y - 14 }}
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 1 + i * 0.2, duration: 0.5 }}
+                    whileHover={{ scale: 1.1 }}
                   >
                     {item.label}
                   </motion.div>
