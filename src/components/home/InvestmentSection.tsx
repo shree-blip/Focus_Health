@@ -72,7 +72,7 @@ export const InvestmentSection = () => {
         </ScrollReveal>
 
         {/* Investment Highlights Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16 max-w-4xl mx-auto">
           {investmentHighlights.map((highlight, index) => (
             <ScrollReveal key={highlight.label} delay={index * 0.1}>
               <motion.div
