@@ -22,9 +22,9 @@ const metrics = [
   },
   {
     value: 4,
-    suffix: '',
-    prefix: '3–',
-    label: 'FSER Target in 2–3 Years',
+    suffix: '+',
+    prefix: '',
+    label: 'FSER Target in 3+ Years',
     highlight: false,
   },
 ];
