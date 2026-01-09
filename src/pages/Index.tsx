@@ -4,6 +4,7 @@ import { PillarsSection } from '@/components/home/PillarsSection';
 import { TurnkeyModelSection } from '@/components/home/TurnkeyModelSection';
 import { OperatorDNASection } from '@/components/home/OperatorDNASection';
 import { MarketSection } from '@/components/home/MarketSection';
+import { InvestmentSection } from '@/components/home/InvestmentSection';
 import { SplitCTASection } from '@/components/home/SplitCTASection';
 import { EarlyAccessSection } from '@/components/home/EarlyAccessSection';
 
@@ -15,6 +16,7 @@ const Index = () => {
       <TurnkeyModelSection />
       <OperatorDNASection />
       <MarketSection />
+      <InvestmentSection />
       <SplitCTASection />
       <EarlyAccessSection />
     </Layout>
