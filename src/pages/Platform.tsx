@@ -47,8 +47,40 @@ const PlatformPage = () => {
       </section>
 
       {/* Platform Diagram */}
-      <section className="section-padding bg-card">
-        <div className="container-focus">
+      <section className="section-padding bg-card relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Gradient orbs */}
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+          
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:60px_60px]" />
+          
+          {/* Floating dots */}
+          <motion.div
+            className="absolute top-20 left-20 w-3 h-3 rounded-full bg-primary/20"
+            animate={{ y: [0, -10, 0], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          />
+          <motion.div
+            className="absolute top-32 right-32 w-2 h-2 rounded-full bg-accent/30"
+            animate={{ y: [0, -8, 0], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
+          />
+          <motion.div
+            className="absolute bottom-24 left-1/3 w-4 h-4 rounded-full bg-primary/15"
+            animate={{ y: [0, -12, 0], opacity: [0.2, 0.5, 0.2] }}
+            transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+          />
+          <motion.div
+            className="absolute bottom-32 right-1/4 w-2 h-2 rounded-full bg-accent/25"
+            animate={{ y: [0, -6, 0], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.8 }}
+          />
+        </div>
+
+        <div className="container-focus relative">
           <ScrollReveal>
             <div className="max-w-4xl mx-auto">
               <div className="relative flex items-center justify-center py-16">
