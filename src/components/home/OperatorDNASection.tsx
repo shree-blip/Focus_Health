@@ -15,13 +15,13 @@ const metrics = [
     highlight: false,
   },
   {
-    value: 2,
-    suffix: '',
+    value: 3,
+    suffix: '+',
     label: 'FSER Acquisitions in Focus',
     highlight: true,
   },
   {
-    value: 4,
+    value: 10,
     suffix: '+',
     prefix: '',
     label: 'FSER Target in 3+ Years',
