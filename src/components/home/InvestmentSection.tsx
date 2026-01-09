@@ -27,7 +27,7 @@ const investmentHighlights = [
   {
     icon: Calendar,
     label: 'Payback Period',
-    value: '3-4 yrs',
+    value: '3+ yrs',
     description: 'Projected timeline',
   },
 ];
