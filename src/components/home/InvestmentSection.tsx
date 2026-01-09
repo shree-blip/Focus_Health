@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { DollarSign, Users, TrendingUp, Calendar, Target, Building2 } from 'lucide-react';
+import { DollarSign, Users, TrendingUp, Target, Building2 } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
@@ -24,21 +24,8 @@ const investmentHighlights = [
     value: '15-20%',
     description: 'Average annual return',
   },
-  {
-    icon: Calendar,
-    label: 'Payback Period',
-    value: '3+ yrs',
-    description: 'Projected timeline',
-  },
 ];
 
-const financialProjections = [
-  { year: '2026', revenue: '2.70M', patients: '1,968' },
-  { year: '2027', revenue: '5.81M', patients: '2,208' },
-  { year: '2028', revenue: '6.61M', patients: '2,319' },
-  { year: '2029', revenue: '7.07M', patients: '2,482' },
-  { year: '2030', revenue: '8.49M', patients: '3,078' },
-];
 
 const coreStrengths = [
   {
@@ -106,90 +93,6 @@ export const InvestmentSection = () => {
           ))}
         </div>
 
-        {/* Two Column Layout: Investment Model & Projections */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-16">
-          {/* Investment Model Card */}
-          <ScrollReveal>
-            <div className="bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-8 border border-border h-full">
-              <h3 className="text-xl sm:text-2xl font-heading font-bold mb-6">Investment Model</h3>
-              
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Your Investment</p>
-                    <p className="text-2xl font-heading font-bold text-primary">$2.5M</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-muted-foreground text-sm">10 Investors</p>
-                    <p className="text-lg font-semibold">$250K min</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Our Investment</p>
-                    <p className="text-2xl font-heading font-bold text-accent">$600K</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-muted-foreground text-sm">Stake</p>
-                    <p className="text-lg font-semibold">20%</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Total Raise</p>
-                    <p className="text-3xl font-heading font-bold">$3M</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-muted-foreground text-sm">Revenue CAGR</p>
-                    <p className="text-lg font-semibold text-primary">28-33%</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Projections Table */}
-          <ScrollReveal direction="left">
-            <div className="bg-background rounded-2xl p-8 border border-border h-full">
-              <h3 className="text-xl sm:text-2xl font-heading font-bold mb-6">5-Year Projections</h3>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left text-sm font-medium text-muted-foreground py-3">Year</th>
-                      <th className="text-right text-sm font-medium text-muted-foreground py-3">Revenue</th>
-                      <th className="text-right text-sm font-medium text-muted-foreground py-3">Patients</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {financialProjections.map((row, index) => (
-                      <motion.tr
-                        key={row.year}
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        viewport={{ once: true }}
-                        className="border-b border-border/50 last:border-0"
-                      >
-                        <td className="py-4 font-semibold">{row.year}</td>
-                        <td className="py-4 text-right text-primary font-bold">${row.revenue}</td>
-                        <td className="py-4 text-right text-muted-foreground">{row.patients}</td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Projected 2027 Revenue</span>
-                <span className="text-2xl font-heading font-bold text-primary">$5.81M</span>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
 
         {/* Core Strengths */}
         <ScrollReveal>
