@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { 
   Shield, Target, Users, TrendingUp, Heart, 
   Building2, Briefcase, Award, UserCheck, 
-  Stethoscope, BarChart3, MapPin, Star 
+  Stethoscope, BarChart3, MapPin, Star,
+  HardHat, GraduationCap
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
@@ -12,6 +13,13 @@ const skillBadges = [
   'M&A',
   'Healthcare Leader',
   'Finance Leader',
+];
+
+const rickSkillBadges = [
+  'Hospital Operations',
+  'Facility Management',
+  'Healthcare Construction',
+  'Equipment Planning',
 ];
 
 const experienceItems = [
@@ -48,6 +56,33 @@ const experienceItems = [
     description: 'Proven track record of successful',
     suffix: 'with expertise in scaling multi-site operations',
     stats: [],
+  },
+];
+
+const rickExperienceItems = [
+  {
+    icon: Building2,
+    text: '35+ years of experience in hospital operations, facility management, and healthcare construction/start-ups.',
+  },
+  {
+    icon: HardHat,
+    text: 'Led multiple hospital, medical office building, and stand-alone emergency center projects from concept to completion.',
+  },
+  {
+    icon: Briefcase,
+    text: 'Held leadership and consulting roles with ServiceMaster, Texas Health Resources, and Community Health Systems.',
+  },
+  {
+    icon: MapPin,
+    text: 'Former Project Manager at CallisonRTKL, delivering equipment planning for Stanford Health Care, Sutter Healthcare, and Marshfield Clinic Healthcare.',
+  },
+  {
+    icon: Target,
+    text: 'Expertise in equipment planning, operational efficiency, and healthcare facility development.',
+  },
+  {
+    icon: GraduationCap,
+    text: 'B.A. in Business Administration & Marketing from the University of South Florida.',
   },
 ];
 
@@ -303,6 +338,136 @@ const LeadershipPage = () => {
                   </div>
                   <p className="text-sm text-primary-foreground/90 leading-relaxed">
                     {supportingTeam.join(' • ')}
+                  </p>
+                </motion.div>
+              </ScrollReveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Rick Leonard Section */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+            {/* Left Column - Profile & Experience */}
+            <div className="lg:col-span-7">
+              <ScrollReveal>
+                {/* Profile Header */}
+                <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
+                  {/* Avatar */}
+                  <motion.div 
+                    whileHover={{ scale: 1.02 }}
+                    className="relative flex-shrink-0"
+                  >
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-accent/20 to-primary/10 flex items-center justify-center ring-4 ring-background shadow-premium">
+                      <span className="text-4xl sm:text-5xl font-heading font-bold text-accent">RL</span>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                      <Star size={16} className="text-white fill-white" />
+                    </div>
+                  </motion.div>
+
+                  {/* Name & Title */}
+                  <div className="flex-1">
+                    <h2 className="text-3xl sm:text-4xl font-heading font-bold text-foreground">
+                      Rick Leonard
+                    </h2>
+                    <p className="text-lg sm:text-xl font-medium mt-1">
+                      <span className="text-accent">Healthcare Operations</span>
+                      <span className="text-muted-foreground"> & </span>
+                      <span className="text-primary">Leader</span>
+                    </p>
+                    <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                      Transforming healthcare infrastructure through operational excellence and strategic facility planning.
+                    </p>
+
+                    {/* Skill Badges */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {rickSkillBadges.map((badge, index) => (
+                        <motion.span
+                          key={badge}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.3 + index * 0.1 }}
+                          className="px-4 py-1.5 rounded-full border border-border bg-card text-sm font-medium text-muted-foreground hover:border-accent/50 hover:text-accent transition-colors cursor-default"
+                        >
+                          {badge}
+                        </motion.span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+
+              {/* Divider */}
+              <div className="w-16 h-1 bg-primary rounded-full mb-8" />
+
+              {/* Experience Items */}
+              <div className="space-y-5">
+                {rickExperienceItems.map((item, index) => (
+                  <ScrollReveal key={index} delay={index * 0.1}>
+                    <motion.div
+                      whileHover={{ x: 4 }}
+                      className="flex gap-4 group"
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <item.icon size={20} className="text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-foreground leading-relaxed text-sm sm:text-base">
+                          {item.text}
+                        </p>
+                      </div>
+                    </motion.div>
+                  </ScrollReveal>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column - Highlights */}
+            <div className="lg:col-span-5 space-y-6">
+              <ScrollReveal direction="left">
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="p-6 rounded-2xl bg-accent text-white"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Award size={20} className="text-white" />
+                    </div>
+                    <h3 className="font-heading font-semibold text-lg">Career Highlights</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    <motion.li className="flex items-start gap-2 text-sm text-white/90">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white mt-2 flex-shrink-0" />
+                      35+ years in healthcare operations
+                    </motion.li>
+                    <motion.li className="flex items-start gap-2 text-sm text-white/90">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white mt-2 flex-shrink-0" />
+                      Multiple hospital projects delivered
+                    </motion.li>
+                    <motion.li className="flex items-start gap-2 text-sm text-white/90">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white mt-2 flex-shrink-0" />
+                      Equipment planning for Stanford, Sutter & more
+                    </motion.li>
+                  </ul>
+                </motion.div>
+              </ScrollReveal>
+
+              <ScrollReveal direction="left" delay={0.1}>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="p-6 rounded-2xl bg-accent text-white"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Building2 size={20} className="text-white" />
+                    </div>
+                    <h3 className="font-heading font-semibold text-lg">Previous Roles</h3>
+                  </div>
+                  <p className="text-sm text-white/90 leading-relaxed">
+                    ServiceMaster • Texas Health Resources • Community Health Systems • CallisonRTKL
                   </p>
                 </motion.div>
               </ScrollReveal>
