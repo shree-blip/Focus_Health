@@ -74,8 +74,7 @@ export const TurnkeyModelSection = () => {
 
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-8 pt-4 scrollbar-hide"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="grid grid-cols-5 gap-4 pb-8 pt-4"
           >
             {steps.map((step, index) => (
               <motion.div
@@ -84,7 +83,7 @@ export const TurnkeyModelSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="flex-shrink-0 w-64"
+                className="w-full"
               >
                 <div className="relative">
                   {/* Step Indicator */}
@@ -102,7 +101,7 @@ export const TurnkeyModelSection = () => {
                   <motion.button
                     onClick={() => setActiveStep(activeStep === step.id ? null : step.id)}
                     whileHover={{ scale: 1.02 }}
-                    className={`w-full p-6 rounded-xl text-left transition-all duration-300 ${
+                    className={`w-full p-5 rounded-xl text-left transition-all duration-300 h-full ${
                       activeStep === step.id
                         ? 'bg-primary text-primary-foreground shadow-lg'
                         : 'bg-card border border-border hover:border-primary/30 hover:shadow-md'
@@ -110,13 +109,13 @@ export const TurnkeyModelSection = () => {
                   >
                     <step.icon
                       size={24}
-                      className={`mb-4 ${
+                      className={`mb-3 ${
                         activeStep === step.id ? 'text-primary-foreground' : 'text-primary'
                       }`}
                     />
-                    <h3 className="font-heading font-semibold mb-2">{step.title}</h3>
+                    <h3 className="font-heading font-semibold text-sm mb-1 leading-tight">{step.title}</h3>
                     <p
-                      className={`text-sm ${
+                      className={`text-xs ${
                         activeStep === step.id
                           ? 'text-primary-foreground/80'
                           : 'text-muted-foreground'
@@ -125,8 +124,8 @@ export const TurnkeyModelSection = () => {
                       {step.shortDesc}
                     </p>
                     <ChevronRight
-                      size={16}
-                      className={`mt-4 transition-transform ${
+                      size={14}
+                      className={`mt-3 transition-transform ${
                         activeStep === step.id ? 'rotate-90' : ''
                       } ${activeStep === step.id ? 'text-primary-foreground' : 'text-primary'}`}
                     />
