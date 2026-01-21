@@ -1,1 +1,4 @@
 project_id = "ccylfbpnoayixoicygve"
+
+[functions.send-investor-request]
+verify_jwt = false
