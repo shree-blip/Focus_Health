@@ -51,11 +51,11 @@ export const Navbar = () => {
             <img
               src={focusHealthIcon}
               alt="Focus Health Logo"
-              className="h-12 w-auto group-hover:scale-105 transition-transform"
+              className="h-16 w-auto group-hover:scale-105 transition-transform"
             />
             <div className="hidden sm:flex items-baseline gap-1.5">
-              <span className="font-heading font-bold text-xl text-[#8B1E3F]">Focus</span>
-              <span className="font-heading font-bold text-xl text-[#2E4A7D]">Health</span>
+              <span className="font-heading font-bold text-2xl text-[#8B1E3F]">Focus</span>
+              <span className="font-heading font-bold text-2xl text-[#2E4A7D]">Health</span>
             </div>
           </Link>
 
