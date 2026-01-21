@@ -10,8 +10,9 @@ import TrackRecord from "./pages/TrackRecord";
 import Leadership from "./pages/Leadership";
 import Partners from "./pages/Partners";
 import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -28,6 +29,8 @@ const App = () => (
           <Route path="/leadership" element={<Leadership />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
