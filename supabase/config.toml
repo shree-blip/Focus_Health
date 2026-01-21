@@ -2,3 +2,6 @@ project_id = "ccylfbpnoayixoicygve"
 
 [functions.send-investor-request]
 verify_jwt = false
+
+[functions.send-community-request]
+verify_jwt = false
