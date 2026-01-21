@@ -76,7 +76,7 @@ const TrackRecordPage = () => {
               { value: 24, suffix: '+', label: 'Locations Managed' },
               { value: 5, suffix: '+', label: 'Years Experience' },
               { value: 24, suffix: '/7', label: 'Operating Model' },
-              { value: 2, suffix: '', label: 'Acquisitions in Focus' },
+              { value: 3+, suffix: '', label: 'Acquisitions in Focus' },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
