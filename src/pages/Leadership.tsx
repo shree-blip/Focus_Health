@@ -26,7 +26,7 @@ const leaders = [
       { value: '600+', label: 'Staff Managed' },
     ],
     highlights: [
-      { icon: Briefcase, text: 'Consulting CFO at Total Point Healthcare managing 24 hospitals' },
+      { icon: Briefcase, text: 'Consulting CFO at Total Point Healthcare operating 24 hospitals' },
       { icon: Stethoscope, text: 'Currently managing ER of Irving & ER of Lufkin' },
       { icon: TrendingUp, text: 'Proven track record in scaling multi-site operations' },
     ],
