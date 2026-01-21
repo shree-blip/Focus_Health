@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone } from 'lucide-react';
+import focusHealthLogo from '@/assets/FocusHealthLogo.png';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -10,14 +11,12 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary-foreground flex items-center justify-center">
-                <span className="text-foreground font-heading font-bold text-xl">F</span>
-              </div>
-              <div>
-                <span className="font-heading font-semibold text-lg">Focus</span>
-                <span className="font-heading font-semibold text-lg text-secondary ml-1">Healthcare</span>
-              </div>
+            <Link to="/" className="inline-block">
+              <img
+                src={focusHealthLogo}
+                alt="Focus Health Logo"
+                className="h-14 w-auto brightness-0 invert"
+              />
             </Link>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
               Institutional-grade healthcare infrastructure, made simple. Building and operating high-performance freestanding ERs across Texas.
