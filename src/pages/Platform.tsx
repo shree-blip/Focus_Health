@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { RefreshCw, Building, Zap, Users, LineChart, FileText } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import platformBackground from '@/assets/platform-background.mp4';
 
 const whyFocus = [
   { icon: Zap, title: 'Turnkey Delivery', description: 'Complete end-to-end solution from site selection to operational excellence.' },
@@ -48,12 +49,23 @@ const PlatformPage = () => {
 
       {/* Platform Diagram */}
       <section className="section-padding bg-card relative overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src={platformBackground} type="video/mp4" />
+          </video>
+          {/* Overlay for better contrast */}
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+        </div>
+
         {/* Background decorative elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Gradient orbs */}
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
-          
+        <div className="absolute inset-0 pointer-events-none z-[1]">
           {/* Subtle grid pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:60px_60px]" />
           
@@ -80,7 +92,7 @@ const PlatformPage = () => {
           />
         </div>
 
-        <div className="container-focus relative">
+        <div className="container-focus relative z-[2]">
           <ScrollReveal>
             <div className="max-w-4xl mx-auto">
               <div className="relative flex items-center justify-center py-16">
