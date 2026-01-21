@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import focusHealthLogo from '@/assets/FocusHealthLogo.png';
+import focusHealthIcon from '@/assets/focus-health-icon.png';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -47,12 +47,16 @@ export const Navbar = () => {
       <div className="container-focus">
         <nav className="flex items-center justify-between h-20">
           {/* Logo with Video */}
-          <Link to="/" className="flex items-center group">
+          <Link to="/" className="flex items-center gap-3 group">
             <img
-              src={focusHealthLogo}
+              src={focusHealthIcon}
               alt="Focus Health Logo"
-              className="h-16 w-auto group-hover:scale-105 transition-transform"
+              className="h-12 w-auto group-hover:scale-105 transition-transform"
             />
+            <div className="hidden sm:flex items-baseline gap-1.5">
+              <span className="font-heading font-bold text-xl text-[#8B1E3F]">Focus</span>
+              <span className="font-heading font-bold text-xl text-[#2E4A7D]">Health</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
