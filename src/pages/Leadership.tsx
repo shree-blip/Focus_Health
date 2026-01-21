@@ -28,7 +28,6 @@ const leaders = [
     highlights: [
       { icon: Briefcase, text: 'Consulting CFO at Total Point Healthcare managing 24 hospitals' },
       { icon: Stethoscope, text: 'Currently managing ER of Irving & ER of Lufkin' },
-      { icon: Building2, text: 'Key leadership at Focus Health & Elysian Capital' },
       { icon: TrendingUp, text: 'Proven track record in scaling multi-site operations' },
     ],
     philosophy: [
