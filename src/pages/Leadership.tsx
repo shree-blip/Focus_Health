@@ -27,7 +27,7 @@ const leaders = [
     ],
     highlights: [
       { icon: Briefcase, text: 'Consulting CFO at Total Point Healthcare operating 24 hospitals' },
-      { icon: Stethoscope, text: 'Currently managing ER of Irving & ER of Lufkin' },
+      { icon: Stethoscope, text: 'Currently operating ER of Irving & ER of Lufkin' },
       { icon: TrendingUp, text: 'Proven track record in scaling multi-site operations' },
     ],
     philosophy: [
