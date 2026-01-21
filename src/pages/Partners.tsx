@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, Users, CheckCircle, Send, ArrowRight } from 'lucide-react';
+import { Building2, Users, CheckCircle, Send, ArrowRight, Phone } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ const communityBenefits = [
 const PartnersPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'investors' | 'communities'>('investors');
-  const [investorForm, setInvestorForm] = useState({ name: '', firm: '', email: '' });
+  const [investorForm, setInvestorForm] = useState({ name: '', firm: '', email: '', phone: '' });
   const [communityForm, setCommunityForm] = useState({ name: '', organization: '', email: '', message: '' });
   const [investorSubmitted, setInvestorSubmitted] = useState(false);
   const [communitySubmitted, setCommunitySubmitted] = useState(false);
@@ -205,6 +205,18 @@ const PartnersPage = () => {
                             placeholder="john@capitalpartners.com"
                             value={investorForm.email}
                             onChange={(e) => setInvestorForm({ ...investorForm, email: e.target.value })}
+                            required
+                            className="h-12"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="inv-phone" className="block text-sm font-medium mb-2">Phone Number</label>
+                          <Input
+                            id="inv-phone"
+                            type="tel"
+                            placeholder="(555) 123-4567"
+                            value={investorForm.phone}
+                            onChange={(e) => setInvestorForm({ ...investorForm, phone: e.target.value })}
                             required
                             className="h-12"
                           />
