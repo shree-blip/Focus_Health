@@ -33,7 +33,8 @@ const PartnersPage = () => {
   const [communityForm, setCommunityForm] = useState({ name: '', organization: '', email: '', message: '' });
   const [investorSubmitted, setInvestorSubmitted] = useState(false);
   const [communitySubmitted, setCommunitySubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingInvestor, setIsSubmittingInvestor] = useState(false);
+  const [isSubmittingCommunity, setIsSubmittingCommunity] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -52,7 +53,7 @@ const PartnersPage = () => {
 
   const handleInvestorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsSubmittingInvestor(true);
     
     try {
       const { data, error } = await supabase.functions.invoke('send-investor-request', {
@@ -77,14 +78,39 @@ const PartnersPage = () => {
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingInvestor(false);
     }
   };
 
   const handleCommunitySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setCommunitySubmitted(true);
+    setIsSubmittingCommunity(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('send-community-request', {
+        body: communityForm,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Community request sent:', data);
+      setCommunitySubmitted(true);
+      toast({
+        title: "Message Sent",
+        description: "We'll be in touch soon to discuss partnership opportunities.",
+      });
+    } catch (error: any) {
+      console.error('Error submitting community request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingCommunity(false);
+    }
   };
 
   return (
@@ -250,8 +276,8 @@ const PartnersPage = () => {
                             className="h-12"
                           />
                         </div>
-                        <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
-                          {isSubmitting ? 'Submitting...' : 'Request Deck'}
+                        <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmittingInvestor}>
+                          {isSubmittingInvestor ? 'Submitting...' : 'Request Deck'}
                           <Send size={18} className="ml-2" />
                         </Button>
                       </div>
@@ -353,8 +379,8 @@ const PartnersPage = () => {
                             rows={4}
                           />
                         </div>
-                        <Button type="submit" variant="accent" size="lg" className="w-full">
-                          Send Message
+                        <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmittingCommunity}>
+                          {isSubmittingCommunity ? 'Sending...' : 'Send Message'}
                           <ArrowRight size={18} className="ml-2" />
                         </Button>
                       </div>
