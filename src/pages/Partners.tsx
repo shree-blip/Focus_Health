@@ -7,6 +7,8 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const investorBenefits = [
   'Disciplined operations with standardized playbook',
@@ -31,6 +33,8 @@ const PartnersPage = () => {
   const [communityForm, setCommunityForm] = useState({ name: '', organization: '', email: '', message: '' });
   const [investorSubmitted, setInvestorSubmitted] = useState(false);
   const [communitySubmitted, setCommunitySubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -48,8 +52,33 @@ const PartnersPage = () => {
 
   const handleInvestorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setInvestorSubmitted(true);
+    setIsSubmitting(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('send-investor-request', {
+        body: investorForm,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Investor request sent:', data);
+      setInvestorSubmitted(true);
+      toast({
+        title: "Request Submitted",
+        description: "We'll send the investor deck to your email shortly.",
+      });
+    } catch (error: any) {
+      console.error('Error submitting investor request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCommunitySubmit = async (e: React.FormEvent) => {
@@ -221,8 +250,8 @@ const PartnersPage = () => {
                             className="h-12"
                           />
                         </div>
-                        <Button type="submit" variant="hero" size="lg" className="w-full">
-                          Request Deck
+                        <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
+                          {isSubmitting ? 'Submitting...' : 'Request Deck'}
                           <Send size={18} className="ml-2" />
                         </Button>
                       </div>
