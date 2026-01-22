@@ -9,6 +9,7 @@ import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useState } from 'react';
 import rickHeadshot from '@/assets/rick-leonard-headshot.png';
+import jayHeadshot from '@/assets/jay-dahal-headshot.png';
 
 const leaders = [
   {
@@ -19,6 +20,7 @@ const leaders = [
     subtitle: 'Financial Architect',
     tagline: 'Building healthcare empires through strategic vision and operational excellence.',
     color: 'primary',
+    photo: jayHeadshot,
     accentColor: 'accent',
     skills: ['Private Equity', 'M&A', 'Healthcare Leader', 'Finance Leader'],
     stats: [
@@ -136,14 +138,14 @@ const LeadershipPage = () => {
       {/* Leadership Cards - Side by Side */}
       <section className="section-padding bg-card relative">
         <div className="container-focus">
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8 items-stretch">
             {leaders.map((leader, index) => (
-              <ScrollReveal key={leader.id} delay={index * 0.2}>
+              <ScrollReveal key={leader.id} delay={index * 0.2} className="h-full">
                 <motion.div
                   onHoverStart={() => setActiveLeader(leader.id)}
                   onHoverEnd={() => setActiveLeader(null)}
                   whileHover={{ y: -8 }}
-                  className={`relative rounded-3xl overflow-hidden border-2 transition-all duration-500 ${
+                  className={`relative rounded-3xl overflow-hidden border-2 transition-all duration-500 h-full flex flex-col ${
                     activeLeader === leader.id 
                       ? `border-${leader.color} shadow-2xl` 
                       : 'border-border shadow-lg'
@@ -227,7 +229,7 @@ const LeadershipPage = () => {
 
                   {/* Skills */}
                   <div className="p-6 bg-background">
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 min-h-[72px]">
                       {leader.skills.map((skill, i) => (
                         <motion.span
                           key={skill}
@@ -235,7 +237,7 @@ const LeadershipPage = () => {
                           whileInView={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.2 + i * 0.05 }}
                           viewport={{ once: true }}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium border border-${leader.color}/30 bg-${leader.color}/5 text-${leader.color}`}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium border border-${leader.color}/30 bg-${leader.color}/5 text-${leader.color} h-fit`}
                         >
                           {skill}
                         </motion.span>
@@ -244,7 +246,7 @@ const LeadershipPage = () => {
                   </div>
 
                   {/* Highlights */}
-                  <div className="p-6 pt-0 bg-background">
+                  <div className="p-6 pt-0 bg-background flex-1">
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                       Career Highlights
                     </h3>
@@ -268,7 +270,7 @@ const LeadershipPage = () => {
                   </div>
 
                   {/* Philosophy */}
-                  <div className={`p-6 bg-${leader.color}/5 border-t border-${leader.color}/10`}>
+                  <div className={`p-6 bg-${leader.color}/5 border-t border-${leader.color}/10 mt-auto`}>
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                       Leadership Philosophy
                     </h3>
