@@ -8,6 +8,7 @@ import {
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useState } from 'react';
+import rickHeadshot from '@/assets/rick-leonard-headshot.png';
 
 const leaders = [
   {
@@ -44,6 +45,7 @@ const leaders = [
     subtitle: 'Leader',
     tagline: 'Transforming healthcare infrastructure through operational excellence and strategic facility planning.',
     color: 'accent',
+    photo: rickHeadshot,
     accentColor: 'primary',
     skills: ['Hospital Operations', 'Facility Management', 'Healthcare Construction', 'Equipment Planning'],
     stats: [
@@ -164,11 +166,21 @@ const LeadershipPage = () => {
                         whileHover={{ scale: 1.05, rotate: 5 }}
                         className="relative flex-shrink-0"
                       >
-                        <div className={`w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-xl`}>
-                          <span className="text-4xl font-heading font-bold text-white">
-                            {leader.initials}
-                          </span>
-                        </div>
+                        {'photo' in leader && leader.photo ? (
+                          <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-xl">
+                            <img 
+                              src={leader.photo} 
+                              alt={leader.name}
+                              className="w-full h-full object-cover object-top"
+                            />
+                          </div>
+                        ) : (
+                          <div className={`w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-xl`}>
+                            <span className="text-4xl font-heading font-bold text-white">
+                              {leader.initials}
+                            </span>
+                          </div>
+                        )}
                         <motion.div 
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
