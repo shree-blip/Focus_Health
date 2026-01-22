@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Focus Health <onboarding@resend.dev>",
+        from: "Focus Health <noreply@getfocushealth.com>",
         to: ["info@getfocushealth.com"],
         subject: `Community Partnership Request from ${name}`,
         html: `
