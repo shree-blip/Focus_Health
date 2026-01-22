@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Focus Health <onboarding@resend.dev>",
-        to: ["hello@focusyourfinance.com"],
+        to: ["info@getfocushealth.com"],
         subject: `Investor Deck Request from ${name}`,
         html: `
           <h1>New Investor Deck Request</h1>
