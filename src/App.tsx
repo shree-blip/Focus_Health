@@ -10,6 +10,7 @@ import Market from "./pages/Market";
 import TrackRecord from "./pages/TrackRecord";
 import Leadership from "./pages/Leadership";
 import Partners from "./pages/Partners";
+import Investors from "./pages/Investors";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/track-record" element={<TrackRecord />} />
           <Route path="/leadership" element={<Leadership />} />
           <Route path="/partners" element={<Partners />} />
+          <Route path="/investors" element={<Investors />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
