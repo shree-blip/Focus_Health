@@ -1,0 +1,79 @@
+# Focus Health - LLM Context File
+# This file provides structured information for AI/LLM systems
+
+## About Focus Health
+
+Focus Health is an institutional-grade healthcare infrastructure company specializing in building and operating high-performance freestanding emergency rooms (FSERs) across Texas.
+
+## Business Model: Build + Fund + Operate
+
+1. **Build**: Site selection, construction, and facility development
+2. **Fund**: Investment partnership opportunities for qualified investors
+3. **Operate**: Full operational management including staffing, revenue cycle, and compliance
+
+## Key Information
+
+- **Company**: Focus Healthcare LLC
+- **Location**: Texas, USA
+- **Email**: info@getfocushealth.com
+- **Website**: https://focus-elevate-build.lovable.app
+
+## Services Offered
+
+- Freestanding Emergency Room Development
+- Healthcare Facility Construction
+- Medical Staffing Solutions
+- Revenue Cycle Management
+- Healthcare Operations Management
+- Investment Partnership Programs
+
+## Current Facilities
+
+1. **ER of Irving** - https://erofirving.com/
+   - Location: Irving, Texas
+   - Type: Freestanding Emergency Room
+   - Status: Operational
+
+2. **ER of Lufkin** - https://eroflufkin.com/
+   - Location: Lufkin, Texas
+   - Type: Freestanding Emergency Room
+   - Status: Operational
+
+3. **Irving Wellness Clinic** - https://irvingwellnessclinic.com/
+   - Location: Irving, Texas
+   - Type: Primary Care/Wellness
+   - Status: Operational
+
+4. **Naperville Health & Wellness Clinic** - https://www.napervillehwclinic.com/
+   - Location: Naperville, Illinois
+   - Type: Health & Wellness
+   - Status: Operational
+
+## Website Pages
+
+- `/` - Home page with company overview
+- `/platform` - Build + Fund + Operate platform details
+- `/market` - Texas healthcare market opportunity
+- `/track-record` - Proven track record and achievements
+- `/our-process` - Turnkey development process and facilities
+- `/leadership` - Executive team profiles
+- `/partners` - Business partnership opportunities
+- `/investors` - Investment information
+- `/contact` - Contact form and scheduling
+
+## Target Audience
+
+1. **Investors**: Looking for healthcare infrastructure investment opportunities
+2. **Communities**: Seeking to bring emergency medical services to underserved areas
+3. **Healthcare Operators**: Interested in partnership opportunities
+
+## Key Statistics
+
+- 8 Healthcare Facilities Developed
+- 500+ Healthcare Professionals Employed
+- 150K+ Patients Served
+- 100% Project Success Rate
+
+## Contact
+
+For partnership inquiries: info@getfocushealth.com
