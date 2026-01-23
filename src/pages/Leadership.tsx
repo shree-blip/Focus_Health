@@ -28,18 +28,6 @@ const featuredLeader = {
 
 const teamMembers = [
   {
-    name: 'Jay Dahal',
-    role: 'Founder & CEO',
-    category: 'Finance & Strategy',
-    photo: jayHeadshot,
-  },
-  {
-    name: 'Rick Leonard',
-    role: 'Healthcare Operations Leader',
-    category: 'Operations',
-    photo: rickHeadshot,
-  },
-  {
     name: 'Jamie Alcantar',
     role: 'Healthcare',
     category: 'Healthcare',
