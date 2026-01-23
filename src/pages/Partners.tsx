@@ -222,7 +222,7 @@ const PartnersPage = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1">Prime Texas Markets</h4>
-                      <p className="text-muted-foreground text-sm">Strategic locations in high-growth DFW, Lufkin, Irving, Houston, Austin, and San Antonio metros.</p>
+                      <p className="text-muted-foreground text-sm">Strategic locations in high-growth DFW, Dalls, Lufkin, Irving, Houston, Austin, and San Antonio metros.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
