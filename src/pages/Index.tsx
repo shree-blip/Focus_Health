@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { HeroSection } from '@/components/home/HeroSection';
 import { PillarsSection } from '@/components/home/PillarsSection';
@@ -8,19 +9,27 @@ import { MarketSection } from '@/components/home/MarketSection';
 import { InvestmentSection } from '@/components/home/InvestmentSection';
 import { SplitCTASection } from '@/components/home/SplitCTASection';
 import { EarlyAccessSection } from '@/components/home/EarlyAccessSection';
+import { BusinessOpportunityModal } from '@/components/home/BusinessOpportunityModal';
 
 const Index = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <Layout>
-      <HeroSection />
+      <HeroSection onOpenOpportunities={() => setIsModalOpen(true)} />
       <PillarsSection />
       <TurnkeyModelSection />
       <OperatorDNASection />
       <VideoShowcaseSection />
-      <MarketSection />
+      <MarketSection onOpenOpportunities={() => setIsModalOpen(true)} />
       <InvestmentSection />
       <SplitCTASection />
       <EarlyAccessSection />
+      
+      <BusinessOpportunityModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </Layout>
   );
 };
