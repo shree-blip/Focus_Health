@@ -1,14 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, TrendingUp, ArrowRight } from 'lucide-react';
+import { X, TrendingUp, ArrowRight, Music, Building2, Stethoscope, Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const metroAreas = [
-  { name: 'Dallas-Fort Worth', growth: '+18%', icon: '🏙️' },
-  { name: 'Houston', growth: '+15%', icon: '🌆' },
-  { name: 'Austin', growth: '+25%', icon: '🎸' },
-  { name: 'San Antonio', growth: '+12%', icon: '🏛️' },
+  { 
+    name: 'Austin', 
+    growth: '+25%', 
+    icon: Music,
+    iconBg: 'bg-rose-100',
+    iconColor: 'text-rose-500',
+    description: 'Rapid expansion in North Austin and Round Rock creates immediate demand for specialized urgent care clinics.'
+  },
+  { 
+    name: 'Dallas-Fort Worth', 
+    growth: '+18%', 
+    icon: Building2,
+    iconBg: 'bg-emerald-100',
+    iconColor: 'text-emerald-500',
+    description: 'The Metroplex remains a hub for corporate relocation, driving the need for 24/7 emergency care proximity.'
+  },
+  { 
+    name: 'Houston', 
+    growth: '+15%', 
+    icon: Stethoscope,
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-500',
+    description: 'Medical center saturation is shifting focus to outlying suburban communities requiring robust emergency infrastructure.'
+  },
+  { 
+    name: 'San Antonio', 
+    growth: '+12%', 
+    icon: Landmark,
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-500',
+    description: 'Steady demographic growth in the military and tourism sectors ensures consistent patient volume for new facilities.'
+  },
 ];
 
 interface BusinessOpportunityModalProps {
@@ -17,8 +45,6 @@ interface BusinessOpportunityModalProps {
 }
 
 export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunityModalProps) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -49,86 +75,104 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', duration: 0.4 }}
-            className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-card shadow-2xl border border-border"
+            className="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-card shadow-2xl border border-border"
           >
-            {/* Decorative background */}
-            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
-            <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
-
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute right-3 top-3 z-10 rounded-full bg-muted/80 p-1.5 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+              className="absolute right-4 top-4 z-10 rounded-full bg-muted/80 p-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
             >
               <X size={18} />
             </button>
 
-            {/* Header */}
-            <div className="relative px-6 pt-6 pb-4 text-center">
-              <motion.h2
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-xl font-bold text-foreground sm:text-2xl"
-              >
-                Texas <span className="text-gradient-blue">Business Opportunities</span>
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mt-1 text-sm text-muted-foreground"
-              >
-                High-growth emergency care markets
-              </motion.p>
-            </div>
+            <div className="flex flex-col md:flex-row">
+              {/* Left Image Section */}
+              <div className="relative w-full md:w-2/5 h-48 md:h-auto md:min-h-[480px] bg-gradient-to-br from-primary/20 to-accent/20">
+                <img 
+                  src="https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=600&h=800&fit=crop&crop=bottom"
+                  alt="Austin Texas Skyline"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <span className="text-xs font-semibold uppercase tracking-wider opacity-80">Market Insight</span>
+                  <h3 className="mt-2 text-xl font-bold leading-tight">
+                    The Future of Healthcare Infrastructure in the Lone Star State
+                  </h3>
+                </div>
+              </div>
 
-            {/* Metro Cards Grid */}
-            <div className="relative grid grid-cols-2 gap-3 px-6 pb-4">
-              {metroAreas.map((metro, index) => (
-                <motion.div
-                  key={metro.name}
-                  initial={{ opacity: 0, y: 10 }}
+              {/* Right Content Section */}
+              <div className="flex-1 p-6 md:p-8">
+                <motion.h2
+                  initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 + index * 0.05 }}
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  className="group relative overflow-hidden rounded-xl border border-border bg-muted/30 p-3 text-center transition-all duration-200 hover:border-primary/40 hover:bg-muted/50"
+                  className="text-2xl font-bold text-foreground"
                 >
-                  <div className="mb-1 text-2xl">{metro.icon}</div>
-                  <h3 className="text-sm font-medium text-foreground">{metro.name}</h3>
-                  <div className="mt-1 flex items-center justify-center gap-1">
-                    <TrendingUp size={12} className="text-accent" />
-                    <span className="text-xs font-semibold text-accent">{metro.growth}</span>
-                  </div>
-                  
-                  {/* Hover glow */}
-                  <motion.div
-                    className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"
-                    animate={{ scale: hoveredIndex === index ? 1.02 : 1 }}
-                  />
-                </motion.div>
-              ))}
-            </div>
+                  Texas <span className="text-primary">Business Opportunities</span>
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="mt-2 text-sm text-muted-foreground"
+                >
+                  High-growth emergency care markets across the state.
+                </motion.p>
 
-            {/* Footer CTA */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="relative border-t border-border bg-muted/20 px-6 py-4"
-            >
-              <Button
-                variant="hero"
-                size="default"
-                asChild
-                className="group w-full"
-              >
-                <Link to="/partners" onClick={onClose}>
-                  Partner With Us
-                  <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </motion.div>
+                {/* Metro List */}
+                <div className="mt-6 space-y-4">
+                  {metroAreas.map((metro, index) => {
+                    const IconComponent = metro.icon;
+                    return (
+                      <motion.div
+                        key={metro.name}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.15 + index * 0.08 }}
+                        className="flex items-start gap-4"
+                      >
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-xl ${metro.iconBg} flex items-center justify-center`}>
+                          <IconComponent size={20} className={metro.iconColor} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-foreground">{metro.name}</h4>
+                            <div className="flex items-center gap-1 ml-auto">
+                              <TrendingUp size={14} className="text-accent" />
+                              <span className="text-sm font-semibold text-accent">{metro.growth}</span>
+                            </div>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                            {metro.description}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* CTA Button */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="mt-8 flex justify-end"
+                >
+                  <Button
+                    variant="outline"
+                    size="default"
+                    asChild
+                    className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <Link to="/partners" onClick={onClose}>
+                      Partner With Us
+                      <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}
