@@ -13,7 +13,7 @@ export const SchemaMarkup = ({
   pageDescription,
   pageUrl 
 }: SchemaMarkupProps) => {
-  const baseUrl = 'https://focus-elevate-build.lovable.app';
+  const baseUrl = 'https://getfocushealth.com';
   
   const organizationSchema = {
     "@context": "https://schema.org",
