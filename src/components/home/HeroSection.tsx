@@ -419,32 +419,59 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
           </motion.div>
         </div>
 
-        {/* Bottom trust strip */}
+        {/* Bottom trust strip - Card based design */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="mt-16 pt-8 border-t border-border/50"
+          className="mt-16"
         >
-          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
-            {[
-              { icon: Zap, label: 'Turnkey Solution', clickable: false },
-              { icon: Clock, label: '24/7 Operations', clickable: false },
-              { icon: MapPin, label: 'Texas Growth Markets', clickable: true },
-            ].map((item) => (
-              <motion.div 
-                key={item.label} 
-                className={`flex items-center gap-2 hover:text-primary transition-colors ${item.clickable ? 'cursor-pointer' : 'cursor-default'}`}
-                whileHover={{ scale: 1.05 }}
-                onClick={item.clickable && onOpenOpportunities ? onOpenOpportunities : undefined}
+          <div className="bg-card rounded-2xl border border-border shadow-lg p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Solution Card */}
+              <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Zap size={22} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Solution</p>
+                  <p className="font-semibold text-foreground">Turnkey Solution</p>
+                </div>
+              </div>
+
+              {/* Availability Card */}
+              <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Clock size={22} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Availability</p>
+                  <p className="font-semibold text-foreground">24/7 Operations</p>
+                </div>
+              </div>
+
+              {/* Region Card */}
+              <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin size={22} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Region</p>
+                  <p className="font-semibold text-foreground">Texas Growth Markets</p>
+                </div>
+              </div>
+
+              {/* View Markets Button */}
+              <motion.button
+                onClick={onOpenOpportunities}
+                className="flex items-center justify-center gap-2 p-4 rounded-xl bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition-colors cursor-pointer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <item.icon size={16} className="text-primary" />
-                <span>{item.label}</span>
-                {item.clickable && (
-                  <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-medium">View Markets</span>
-                )}
-              </motion.div>
-            ))}
+                View Markets
+                <ArrowRight size={18} />
+              </motion.button>
+            </div>
           </div>
         </motion.div>
       </div>
