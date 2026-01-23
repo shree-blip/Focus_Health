@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { PageHero } from '@/components/ui/PageHero';
 import rickHeadshot from '@/assets/rick-leonard-headshot.png';
 import jayHeadshot from '@/assets/jay-dahal-headshot.png';
+import jamieHeadshot from '@/assets/jamie-alcantar-headshot.png';
+import anjilaHeadshot from '@/assets/anjila-shrestha-headshot.png';
+import julieHeadshot from '@/assets/julie-moreno-headshot.png';
 import heroLeadership from '@/assets/hero-leadership.jpg';
 
 const featuredLeader = {
@@ -35,6 +38,24 @@ const teamMembers = [
     role: 'Healthcare Operations Leader',
     category: 'Operations',
     photo: rickHeadshot,
+  },
+  {
+    name: 'Jamie Alcantar',
+    role: 'Healthcare',
+    category: 'Healthcare',
+    photo: jamieHeadshot,
+  },
+  {
+    name: 'Anjila Shrestha',
+    role: 'Operations Associate',
+    category: 'Operations',
+    photo: anjilaHeadshot,
+  },
+  {
+    name: 'Julie Moreno',
+    role: 'Healthcare Operations',
+    category: 'Healthcare Operations',
+    photo: julieHeadshot,
   },
 ];
 
