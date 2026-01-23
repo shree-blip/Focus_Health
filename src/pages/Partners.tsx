@@ -110,7 +110,7 @@ const PartnersPage = () => {
       {/* Hero */}
       <PageHero title="Business Opportunities" description="Investing in Freestanding Emergency Room Clinics — End to End Turnkey Healthcare Solutions. Buy and own a turn-key ER location or partner with Focus Health for comprehensive management support." backgroundImage={heroPartners} primaryCta={{
       text: "Request More Info",
-      link: "#opportunity-form"
+      link: "/our-process"
     }} />
 
       {/* Value Proposition */}
