@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, Users, Zap } from 'lucide-react';
+import { TrendingUp, Users, Zap, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
@@ -21,7 +21,11 @@ const points = [
   },
 ];
 
-export const MarketSection = () => {
+interface MarketSectionProps {
+  onOpenOpportunities?: () => void;
+}
+
+export const MarketSection = ({ onOpenOpportunities }: MarketSectionProps) => {
   return (
     <section className="section-padding bg-background relative overflow-hidden">
       {/* Subtle Grid Background */}
@@ -80,9 +84,15 @@ export const MarketSection = () => {
             </div>
 
             <ScrollReveal delay={0.6}>
-              <Button variant="outline" size="lg">
-                Download Overview (Coming Soon)
-              </Button>
+              <div className="flex flex-wrap gap-4">
+                <Button variant="hero" size="lg" onClick={onOpenOpportunities}>
+                  <MapPin size={18} className="mr-2" />
+                  View Texas Markets
+                </Button>
+                <Button variant="outline" size="lg">
+                  Download Overview (Coming Soon)
+                </Button>
+              </div>
             </ScrollReveal>
           </div>
 

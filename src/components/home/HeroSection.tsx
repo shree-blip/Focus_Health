@@ -143,7 +143,11 @@ const useMousePosition = () => {
   return { mouseX, mouseY };
 };
 
-export const HeroSection = () => {
+interface HeroSectionProps {
+  onOpenOpportunities?: () => void;
+}
+
+export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   const { mouseX, mouseY } = useMousePosition();
   
   const springConfig = { stiffness: 100, damping: 30 };
@@ -424,17 +428,21 @@ export const HeroSection = () => {
         >
           <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
             {[
-              { icon: Zap, label: 'Turnkey Solution' },
-              { icon: Clock, label: '24/7 Operations' },
-              { icon: MapPin, label: 'Texas Growth Markets' },
-            ].map((item, i) => (
+              { icon: Zap, label: 'Turnkey Solution', clickable: false },
+              { icon: Clock, label: '24/7 Operations', clickable: false },
+              { icon: MapPin, label: 'Texas Growth Markets', clickable: true },
+            ].map((item) => (
               <motion.div 
                 key={item.label} 
-                className="flex items-center gap-2 hover:text-primary transition-colors cursor-default"
+                className={`flex items-center gap-2 hover:text-primary transition-colors ${item.clickable ? 'cursor-pointer' : 'cursor-default'}`}
                 whileHover={{ scale: 1.05 }}
+                onClick={item.clickable && onOpenOpportunities ? onOpenOpportunities : undefined}
               >
                 <item.icon size={16} className="text-primary" />
                 <span>{item.label}</span>
+                {item.clickable && (
+                  <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full font-medium">View Markets</span>
+                )}
               </motion.div>
             ))}
           </div>
