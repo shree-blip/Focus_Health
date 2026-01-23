@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Platform from "./pages/Platform";
 import Market from "./pages/Market";
 import TrackRecord from "./pages/TrackRecord";
+import OurProcess from "./pages/OurProcess";
 import Leadership from "./pages/Leadership";
 import Partners from "./pages/Partners";
 import Investors from "./pages/Investors";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/platform" element={<Platform />} />
           <Route path="/market" element={<Market />} />
           <Route path="/track-record" element={<TrackRecord />} />
+          <Route path="/our-process" element={<OurProcess />} />
           <Route path="/leadership" element={<Leadership />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/investors" element={<Investors />} />
