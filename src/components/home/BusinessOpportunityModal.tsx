@@ -81,13 +81,13 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
             className="fixed inset-0 z-50 bg-foreground/60 backdrop-blur-sm"
           />
 
-          {/* Modal */}
+          {/* Modal - Improved responsive positioning */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-4xl -translate-x-1/2 -translate-y-1/2"
+            className="fixed inset-4 z-50 m-auto h-fit max-h-[90vh] w-auto max-w-4xl overflow-auto sm:inset-6 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
           >
             <div className="relative overflow-hidden rounded-2xl bg-card shadow-2xl border border-border">
               {/* Decorative background elements */}
@@ -97,27 +97,27 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute right-4 top-4 z-10 rounded-full bg-muted p-2 text-muted-foreground transition-all hover:bg-muted-foreground/20 hover:text-foreground"
+                className="absolute right-3 top-3 z-10 rounded-full bg-muted p-2 text-muted-foreground transition-all hover:bg-muted-foreground/20 hover:text-foreground sm:right-4 sm:top-4"
               >
                 <X size={20} />
               </button>
 
               {/* Header */}
-              <div className="relative px-6 pt-8 pb-4 text-center md:px-10">
+              <div className="relative px-4 pt-6 pb-3 text-center sm:px-6 sm:pt-8 sm:pb-4 md:px-10">
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="mb-3 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 text-sm font-medium text-accent"
+                  className="mb-2 inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent sm:mb-3 sm:px-4 sm:py-1.5 sm:text-sm"
                 >
-                  <Sparkles size={16} />
+                  <Sparkles size={14} className="sm:h-4 sm:w-4" />
                   <span>Exclusive Investment Opportunities</span>
                 </motion.div>
                 <motion.h2
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="text-2xl font-bold text-foreground md:text-3xl"
+                  className="text-xl font-bold text-foreground sm:text-2xl md:text-3xl"
                 >
                   Texas Metro{' '}
                   <span className="text-gradient-blue">Business Opportunities</span>
@@ -126,14 +126,14 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="mt-2 text-muted-foreground"
+                  className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base"
                 >
                   Partner with Focus Health in Texas's fastest-growing emergency care markets
                 </motion.p>
               </div>
 
               {/* Metro Cards Grid */}
-              <div className="relative grid gap-4 px-6 pb-4 md:grid-cols-2 md:px-10">
+              <div className="relative grid gap-3 px-4 pb-3 sm:gap-4 sm:px-6 sm:pb-4 md:grid-cols-2 md:px-10">
                 {metroAreas.map((metro, index) => (
                   <motion.div
                     key={metro.name}
@@ -142,7 +142,7 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                     transition={{ delay: 0.25 + index * 0.1 }}
                     onMouseEnter={() => setHoveredIndex(index)}
                     onMouseLeave={() => setHoveredIndex(null)}
-                    className="group relative overflow-hidden rounded-xl border border-border bg-card/50 p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg"
+                    className="group relative overflow-hidden rounded-xl border border-border bg-card/50 p-3 transition-all duration-300 hover:border-primary/30 hover:shadow-lg sm:p-4 md:p-5"
                   >
                     {/* Gradient overlay on hover */}
                     <motion.div
@@ -150,12 +150,12 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                     />
 
                     <div className="relative flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="text-3xl">{metro.icon}</div>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="text-2xl sm:text-3xl">{metro.icon}</div>
                         <div>
-                          <h3 className="font-semibold text-foreground">{metro.name}</h3>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <MapPin size={14} />
+                          <h3 className="text-sm font-semibold text-foreground sm:text-base">{metro.name}</h3>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground sm:text-sm">
+                            <MapPin size={12} className="sm:h-3.5 sm:w-3.5" />
                             <span>Metro Area</span>
                           </div>
                         </div>
@@ -165,28 +165,28 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                           scale: hoveredIndex === index ? 1.1 : 1,
                           rotate: hoveredIndex === index ? 5 : 0,
                         }}
-                        className="rounded-full bg-primary/10 p-2"
+                        className="rounded-full bg-primary/10 p-1.5 sm:p-2"
                       >
-                        <TrendingUp size={18} className="text-primary" />
+                        <TrendingUp size={14} className="text-primary sm:h-[18px] sm:w-[18px]" />
                       </motion.div>
                     </div>
 
                     {/* Stats */}
-                    <div className="relative mt-4 grid grid-cols-3 gap-3">
-                      <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                        <Users size={16} className="mx-auto mb-1 text-primary" />
-                        <p className="text-sm font-semibold text-foreground">{metro.population}</p>
-                        <p className="text-xs text-muted-foreground">Population</p>
+                    <div className="relative mt-3 grid grid-cols-3 gap-2 sm:mt-4 sm:gap-3">
+                      <div className="rounded-lg bg-muted/50 p-1.5 text-center sm:p-2.5">
+                        <Users size={14} className="mx-auto mb-0.5 text-primary sm:mb-1 sm:h-4 sm:w-4" />
+                        <p className="text-xs font-semibold text-foreground sm:text-sm">{metro.population}</p>
+                        <p className="text-[10px] text-muted-foreground sm:text-xs">Population</p>
                       </div>
-                      <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                        <TrendingUp size={16} className="mx-auto mb-1 text-accent" />
-                        <p className="text-sm font-semibold text-accent">{metro.growth}</p>
-                        <p className="text-xs text-muted-foreground">Growth</p>
+                      <div className="rounded-lg bg-muted/50 p-1.5 text-center sm:p-2.5">
+                        <TrendingUp size={14} className="mx-auto mb-0.5 text-accent sm:mb-1 sm:h-4 sm:w-4" />
+                        <p className="text-xs font-semibold text-accent sm:text-sm">{metro.growth}</p>
+                        <p className="text-[10px] text-muted-foreground sm:text-xs">Growth</p>
                       </div>
-                      <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                        <Building2 size={16} className="mx-auto mb-1 text-secondary" />
-                        <p className="text-sm font-semibold text-foreground">{metro.erVisits}</p>
-                        <p className="text-xs text-muted-foreground">ER Visits/yr</p>
+                      <div className="rounded-lg bg-muted/50 p-1.5 text-center sm:p-2.5">
+                        <Building2 size={14} className="mx-auto mb-0.5 text-secondary sm:mb-1 sm:h-4 sm:w-4" />
+                        <p className="text-xs font-semibold text-foreground sm:text-sm">{metro.erVisits}</p>
+                        <p className="text-[10px] text-muted-foreground sm:text-xs">ER Visits/yr</p>
                       </div>
                     </div>
                   </motion.div>
@@ -198,22 +198,22 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="relative border-t border-border bg-muted/30 px-6 py-6 md:px-10"
+                className="relative border-t border-border bg-muted/30 px-4 py-4 sm:px-6 sm:py-6 md:px-10"
               >
-                <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
+                <div className="flex flex-col items-center justify-between gap-3 text-center sm:gap-4 md:flex-row md:text-left">
                   <div>
-                    <p className="font-semibold text-foreground">
+                    <p className="text-sm font-semibold text-foreground sm:text-base">
                       Ready to explore partnership opportunities?
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground sm:text-sm">
                       Join our investor network and access exclusive market data
                     </p>
                   </div>
                   <Button
                     variant="hero"
-                    size="lg"
+                    size="default"
                     asChild
-                    className="group min-w-[200px]"
+                    className="group w-full sm:w-auto sm:min-w-[200px]"
                   >
                     <Link to="/partners" onClick={onClose}>
                       Partner With Us
