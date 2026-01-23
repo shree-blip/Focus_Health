@@ -10,6 +10,8 @@ interface SEOHeadProps {
   noIndex?: boolean;
 }
 
+const BASE_URL = 'https://getfocushealth.com';
+
 export const SEOHead = ({
   title = 'Focus Health | Build + Fund + Operate Healthcare Infrastructure',
   description = 'Institutional-grade healthcare infrastructure made simple. Focus Health builds and operates high-performance freestanding emergency rooms across Texas.',
@@ -19,7 +21,7 @@ export const SEOHead = ({
   keywords = 'freestanding emergency room, healthcare investment, Texas ER, healthcare infrastructure, emergency room development, healthcare operations, Focus Health',
   noIndex = false
 }: SEOHeadProps) => {
-  const baseUrl = 'https://focus-elevate-build.lovable.app';
+  const baseUrl = BASE_URL;
   const fullCanonicalUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
   const fullOgImage = ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`;
 

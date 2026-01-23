@@ -16,7 +16,7 @@ Focus Health is an institutional-grade healthcare infrastructure company special
 - **Company**: Focus Healthcare LLC
 - **Location**: Texas, USA
 - **Email**: info@getfocushealth.com
-- **Website**: https://focus-elevate-build.lovable.app
+- **Website**: https://getfocushealth.com
 
 ## Services Offered
 

@@ -1,5 +1,5 @@
 # Focus Health - Robots.txt
-# https://focus-elevate-build.lovable.app
+# https://getfocushealth.com
 
 User-agent: Googlebot
 Allow: /
@@ -39,4 +39,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://focus-elevate-build.lovable.app/sitemap.xml
+Sitemap: https://getfocushealth.com/sitemap.xml
