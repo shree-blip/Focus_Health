@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 interface PageHeroProps {
@@ -24,6 +24,22 @@ export const PageHero = ({
   primaryCta,
   secondaryCta,
 }: PageHeroProps) => {
+  const navigate = useNavigate();
+
+  const handleCtaClick = (link: string) => {
+    if (link.startsWith('#')) {
+      // Same-page anchor scroll
+      const element = document.getElementById(link.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(link);
+    }
+  };
+
+  const isHashLink = (link: string) => link.startsWith('#');
+
   return (
     <section className="relative h-[60vh] min-h-[450px] max-h-[650px] flex items-center justify-center overflow-hidden">
       {/* Background Image with blur effect */}
@@ -66,24 +82,47 @@ export const PageHero = ({
             className="flex flex-wrap items-center justify-center gap-4"
           >
             {primaryCta && (
-              <Button asChild size="lg" variant="accent" className="gap-2 px-8">
-                <Link to={primaryCta.link}>
+              isHashLink(primaryCta.link) ? (
+                <Button 
+                  size="lg" 
+                  variant="accent" 
+                  className="gap-2 px-8"
+                  onClick={() => handleCtaClick(primaryCta.link)}
+                >
                   {primaryCta.text}
                   <ArrowRight size={18} />
-                </Link>
-              </Button>
+                </Button>
+              ) : (
+                <Button asChild size="lg" variant="accent" className="gap-2 px-8">
+                  <Link to={primaryCta.link}>
+                    {primaryCta.text}
+                    <ArrowRight size={18} />
+                  </Link>
+                </Button>
+              )
             )}
             {secondaryCta && (
-              <Button 
-                asChild 
-                size="lg" 
-                variant="outline"
-                className="gap-2 px-8 bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/60"
-              >
-                <Link to={secondaryCta.link}>
+              isHashLink(secondaryCta.link) ? (
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="gap-2 px-8 bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/60"
+                  onClick={() => handleCtaClick(secondaryCta.link)}
+                >
                   {secondaryCta.text}
-                </Link>
-              </Button>
+                </Button>
+              ) : (
+                <Button 
+                  asChild 
+                  size="lg" 
+                  variant="outline"
+                  className="gap-2 px-8 bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/60"
+                >
+                  <Link to={secondaryCta.link}>
+                    {secondaryCta.text}
+                  </Link>
+                </Button>
+              )
             )}
           </motion.div>
         )}

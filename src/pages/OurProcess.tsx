@@ -6,8 +6,8 @@ import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { PageHero } from '@/components/ui/PageHero';
 import { Button } from '@/components/ui/button';
 import heroProcess from '@/assets/hero-process.jpg';
-import facilityIrving from '@/assets/facility-er-irving.jpg';
-import facilityLufkin from '@/assets/facility-er-lufkin.jpg';
+import facilityIrving from '@/assets/facility-er-irving-real.webp';
+import facilityLufkin from '@/assets/facility-er-lufkin-real.png';
 import facilityWellness from '@/assets/facility-wellness-clinic.jpg';
 import grandOpeningVideo from '@/assets/ERofIrving-GrandOpening.mp4';
 
