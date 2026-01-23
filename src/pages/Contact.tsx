@@ -74,14 +74,25 @@ const ContactPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
-                      <Calendar size={22} className="text-accent" />
+                </div>
+
+                {/* Google Calendar Scheduling */}
+                <div className="mt-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                      <Calendar size={20} className="text-accent" />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Schedule a Call</p>
-                      <p className="font-medium text-muted-foreground">Calendar link coming soon</p>
-                    </div>
+                    <h3 className="font-heading font-semibold text-lg">Schedule a Call</h3>
+                  </div>
+                  <div className="rounded-xl overflow-hidden border border-border">
+                    <iframe 
+                      src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0XACH-PNq5Nr3upP1QMqeWgEBihqud5N2lESMAMo8UCUxCP7wKAOxpBagtmKR8o3pERE3RwsTO?gv=true" 
+                      style={{ border: 0 }} 
+                      width="100%" 
+                      height="500" 
+                      frameBorder="0"
+                      title="Schedule a meeting"
+                    />
                   </div>
                 </div>
               </div>
