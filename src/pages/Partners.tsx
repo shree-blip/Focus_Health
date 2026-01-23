@@ -122,8 +122,7 @@ const PartnersPage = () => {
         title="Partner With Focus"
         description="Whether you're an investor seeking healthcare infrastructure opportunities or a community looking for emergency care solutions, we're here to partner."
         backgroundImage={heroPartners}
-        ctaText="Get Started"
-        ctaLink="#partnership"
+        primaryCta={{ text: "Get Started", link: "#partnership" }}
       />
 
       {/* Tabs */}

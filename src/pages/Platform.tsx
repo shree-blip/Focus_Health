@@ -23,8 +23,8 @@ const PlatformPage = () => {
         title="Build + Fund + Operate"
         description="Our integrated platform delivers the complete lifecycle of freestanding ER and micro-hospital development—from initial market analysis to ongoing operational optimization."
         backgroundImage={heroPlatform}
-        ctaText="Partner With Us"
-        ctaLink="/partners"
+        primaryCta={{ text: "Partner With Us", link: "/partners" }}
+        secondaryCta={{ text: "Learn More", link: "/track-record" }}
       />
 
       {/* Platform Diagram */}
