@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
-import { CheckCircle, Building2, Clock, Shield, TrendingUp } from 'lucide-react';
+import { Building2, Clock, Shield, TrendingUp } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
+import { PageHero } from '@/components/ui/PageHero';
+import heroTrackRecord from '@/assets/hero-track-record.jpg';
 
 const processSteps = [
   {
@@ -41,36 +43,18 @@ const operatingSystem = [
 const TrackRecordPage = () => {
   return (
     <Layout>
-      {/* Hero with Stats */}
-      <section className="section-padding bg-hero-pattern">
-        <div className="container-focus">
-          <div className="max-w-3xl mb-16">
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
-            >
-              Our Experience
-            </motion.span>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6"
-            >
-              Proven <span className="text-gradient-blue">Track Record</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground leading-relaxed"
-            >
-              Our leadership team brings deep operational experience from managing freestanding emergency rooms across Texas.
-            </motion.p>
-          </div>
+      {/* Hero */}
+      <PageHero
+        title="Proven Track Record"
+        description="Our leadership team brings deep operational experience from managing freestanding emergency rooms across Texas."
+        backgroundImage={heroTrackRecord}
+        ctaText="View Our Process"
+        ctaLink="#process"
+      />
 
-          {/* Stats Grid */}
+      {/* Stats Grid */}
+      <section className="section-padding bg-card">
+        <div className="container-focus">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { value: 24, suffix: '+', label: 'Locations Managed' },
@@ -81,9 +65,10 @@ const TrackRecordPage = () => {
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className="text-center p-6 rounded-xl bg-card border border-border"
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center p-6 rounded-xl bg-background border border-border"
               >
                 <div className="text-3xl sm:text-4xl font-heading font-bold text-primary mb-2">
                   <AnimatedCounter end={stat.value} />
@@ -97,7 +82,7 @@ const TrackRecordPage = () => {
       </section>
 
       {/* Process */}
-      <section className="section-padding bg-card">
+      <section id="process" className="section-padding bg-background">
         <div className="container-focus">
           <ScrollReveal>
             <div className="text-center mb-16">
@@ -115,7 +100,7 @@ const TrackRecordPage = () => {
               <ScrollReveal key={step.title} delay={index * 0.1}>
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="flex gap-4 p-6 rounded-xl bg-background border border-border hover:border-primary/30 transition-all"
+                  className="flex gap-4 p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
                 >
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 font-bold text-sm">
                     {index + 1}
@@ -132,7 +117,7 @@ const TrackRecordPage = () => {
       </section>
 
       {/* Operating System */}
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-card">
         <div className="container-focus">
           <ScrollReveal>
             <div className="text-center mb-16">
