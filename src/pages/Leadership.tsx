@@ -253,7 +253,7 @@ const LeadershipPage = () => {
             </div>
           </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-3xl">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.map((member, index) => (
               <ScrollReveal key={member.name} delay={index * 0.15}>
                 <motion.div
