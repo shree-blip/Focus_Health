@@ -48,7 +48,7 @@ const TrackRecordPage = () => {
         title="Proven Track Record"
         description="Our leadership team brings deep operational experience from managing freestanding emergency rooms across Texas."
         backgroundImage={heroTrackRecord}
-        primaryCta={{ text: "View Our Process", link: "#process" }}
+        primaryCta={{ text: "View Our Process", link: "/our-process" }}
         secondaryCta={{ text: "Meet Our Team", link: "/leadership" }}
       />
 
