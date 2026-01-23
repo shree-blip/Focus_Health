@@ -57,11 +57,11 @@ const LeadershipPage = () => {
     <Layout>
       {/* Hero */}
       <PageHero
-        title="Leadership"
-        description="Meet the experienced team driving Focus Health's mission to build next-generation healthcare infrastructure."
+        title="Empowering Healthcare Through Visionary Leadership"
+        description="Our team is committed to excellence and innovation, driving better outcomes for healthcare providers and patients alike."
         backgroundImage={heroLeadership}
-        ctaText="Partner With Us"
-        ctaLink="/partners"
+        primaryCta={{ text: "Get Started", link: "/partners" }}
+        secondaryCta={{ text: "Learn More", link: "/track-record" }}
       />
 
       {/* Featured Leader - Jay */}

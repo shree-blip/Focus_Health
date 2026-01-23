@@ -38,8 +38,8 @@ const MarketPage = () => {
         title="Why Texas FSERs"
         description="Texas's unique regulatory environment and explosive population growth create compelling opportunities for freestanding emergency room development."
         backgroundImage={heroMarket}
-        ctaText="Explore Opportunities"
-        ctaLink="/partners"
+        primaryCta={{ text: "Explore Opportunities", link: "/partners" }}
+        secondaryCta={{ text: "Our Platform", link: "/platform" }}
       />
 
       {/* Market Drivers */}

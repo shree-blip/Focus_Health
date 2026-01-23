@@ -35,8 +35,6 @@ const ContactPage = () => {
         title="Contact Us"
         description="Ready to explore partnership opportunities? We'd love to hear from you."
         backgroundImage={heroContact}
-        ctaText="Send Message"
-        ctaLink="#contact-form"
       />
 
       {/* Contact Section */}
