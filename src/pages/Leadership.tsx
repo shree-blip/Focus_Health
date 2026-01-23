@@ -1,15 +1,17 @@
 import { motion } from 'framer-motion';
 import { 
-  Shield, Target, Users, TrendingUp, Heart, 
-  Building2, Briefcase, Award, 
+  Shield, Target, Users, Heart, 
+  Building2, Briefcase, 
   Stethoscope, Star, ChevronRight,
-  HardHat, GraduationCap, Sparkles
+  HardHat, TrendingUp, Sparkles
 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { PageHero } from '@/components/ui/PageHero';
 import { useState } from 'react';
 import rickHeadshot from '@/assets/rick-leonard-headshot.png';
 import jayHeadshot from '@/assets/jay-dahal-headshot.png';
+import heroLeadership from '@/assets/hero-leadership.jpg';
 
 const leaders = [
   {
@@ -98,45 +100,16 @@ const LeadershipPage = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding bg-hero-pattern relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        
-        <div className="container-focus relative">
-          <div className="text-center max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
-            >
-              <Sparkles size={16} />
-              Meet Our Leadership
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6"
-            >
-              The Minds Behind <br />
-              <span className="text-gradient-blue">Focus Health</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground leading-relaxed"
-            >
-              Two visionary leaders. Decades of combined experience. One mission: 
-              Building the next generation of healthcare infrastructure.
-            </motion.p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        title="The Minds Behind Focus Health"
+        description="Two visionary leaders. Decades of combined experience. One mission: Building the next generation of healthcare infrastructure."
+        backgroundImage={heroLeadership}
+        ctaText="Meet the Team"
+        ctaLink="#team"
+      />
 
       {/* Leadership Cards - Side by Side */}
-      <section className="section-padding bg-card relative">
+      <section id="team" className="section-padding bg-card relative">
         <div className="container-focus">
           <div className="grid lg:grid-cols-2 gap-8 items-stretch">
             {leaders.map((leader, index) => (

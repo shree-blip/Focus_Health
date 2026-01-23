@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, Users, CheckCircle, Send, ArrowRight, Phone } from 'lucide-react';
+import { Building2, Users, CheckCircle, Send, ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { PageHero } from '@/components/ui/PageHero';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import heroPartners from '@/assets/hero-partners.jpg';
 
 const investorBenefits = [
   'Disciplined operations with standardized playbook',
@@ -116,38 +118,16 @@ const PartnersPage = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding bg-hero-pattern">
-        <div className="container-focus">
-          <div className="max-w-3xl">
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
-            >
-              Partnership Opportunities
-            </motion.span>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6"
-            >
-              Partner With <span className="text-gradient-blue">Focus</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground leading-relaxed"
-            >
-              Whether you're an investor seeking healthcare infrastructure opportunities or a community looking for emergency care solutions, we're here to partner.
-            </motion.p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        title="Partner With Focus"
+        description="Whether you're an investor seeking healthcare infrastructure opportunities or a community looking for emergency care solutions, we're here to partner."
+        backgroundImage={heroPartners}
+        ctaText="Get Started"
+        ctaLink="#partnership"
+      />
 
       {/* Tabs */}
-      <section className="section-padding bg-card">
+      <section id="partnership" className="section-padding bg-card">
         <div className="container-focus">
           {/* Tab Headers */}
           <div className="flex justify-center mb-12">

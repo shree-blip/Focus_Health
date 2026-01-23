@@ -2,7 +2,9 @@ import { motion } from 'framer-motion';
 import { RefreshCw, Building, Zap, Users, LineChart, FileText } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { PageHero } from '@/components/ui/PageHero';
 import platformBackground from '@/assets/platform-background.mp4';
+import heroPlatform from '@/assets/hero-platform.jpg';
 
 const whyFocus = [
   { icon: Zap, title: 'Turnkey Delivery', description: 'Complete end-to-end solution from site selection to operational excellence.' },
@@ -17,35 +19,13 @@ const PlatformPage = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding bg-hero-pattern">
-        <div className="container-focus">
-          <div className="max-w-3xl">
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
-            >
-              Our Platform
-            </motion.span>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6"
-            >
-              Build + Fund + <span className="text-gradient-blue">Operate</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground leading-relaxed"
-            >
-              Our integrated platform delivers the complete lifecycle of freestanding ER and micro-hospital development—from initial market analysis to ongoing operational optimization.
-            </motion.p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        title="Build + Fund + Operate"
+        description="Our integrated platform delivers the complete lifecycle of freestanding ER and micro-hospital development—from initial market analysis to ongoing operational optimization."
+        backgroundImage={heroPlatform}
+        ctaText="Partner With Us"
+        ctaLink="/partners"
+      />
 
       {/* Platform Diagram */}
       <section className="section-padding bg-card relative overflow-hidden">

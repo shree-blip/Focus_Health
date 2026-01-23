@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
+import { PageHero } from '@/components/ui/PageHero';
+import heroMarket from '@/assets/hero-market.jpg';
 
 const marketDrivers = [
   {
@@ -32,35 +34,13 @@ const MarketPage = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding bg-hero-pattern">
-        <div className="container-focus">
-          <div className="max-w-3xl">
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
-            >
-              Market Opportunity
-            </motion.span>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6"
-            >
-              Why <span className="text-gradient-blue">Texas FSERs</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-muted-foreground leading-relaxed"
-            >
-              Texas's unique regulatory environment and explosive population growth create compelling opportunities for freestanding emergency room development.
-            </motion.p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        title="Why Texas FSERs"
+        description="Texas's unique regulatory environment and explosive population growth create compelling opportunities for freestanding emergency room development."
+        backgroundImage={heroMarket}
+        ctaText="Explore Opportunities"
+        ctaLink="/partners"
+      />
 
       {/* Market Drivers */}
       <section className="section-padding bg-card">
