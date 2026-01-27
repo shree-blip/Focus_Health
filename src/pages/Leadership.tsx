@@ -76,7 +76,7 @@ const LeadershipPage = () => {
       {/* Featured Leader - Jay */}
       <section className="section-padding bg-background">
         <div className="container-focus">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Photo */}
             <ScrollReveal>
               <motion.div
@@ -102,31 +102,31 @@ const LeadershipPage = () => {
                   {featuredLeader.category}
                 </span>
                 
-                <h2 className="text-4xl sm:text-5xl font-heading font-bold text-foreground mb-2">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
                   {featuredLeader.name}
                 </h2>
                 
-                <p className="text-xl text-primary font-medium mb-8">
+                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">
                   {featuredLeader.role}
                 </p>
 
                 {/* Quote */}
-                <div className="border-l-4 border-primary pl-6 mb-8">
-                  <p className="text-muted-foreground italic text-lg leading-relaxed">
+                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
                     "{featuredLeader.quote}"
                   </p>
                 </div>
 
-                <p className="text-muted-foreground leading-relaxed mb-8">
+                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
                   {featuredLeader.bio}
                 </p>
 
                 {/* Stats */}
-                <div className="flex flex-wrap gap-4 mb-8">
+                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
                   {featuredLeader.highlights.map((highlight, i) => (
                     <span
                       key={i}
-                      className="px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
                     >
                       {highlight}
                     </span>
@@ -153,7 +153,7 @@ const LeadershipPage = () => {
       {/* Featured Leader - Rick */}
       <section className="section-padding bg-card">
         <div className="container-focus">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Content - Left side for Rick */}
             <ScrollReveal>
               <div className="order-2 lg:order-1">
@@ -161,31 +161,31 @@ const LeadershipPage = () => {
                   {rickProfile.category}
                 </span>
                 
-                <h2 className="text-4xl sm:text-5xl font-heading font-bold text-foreground mb-2">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
                   {rickProfile.name}
                 </h2>
                 
-                <p className="text-xl text-accent font-medium mb-8">
+                <p className="text-lg sm:text-xl text-accent font-medium mb-6 sm:mb-8">
                   {rickProfile.role}
                 </p>
 
                 {/* Quote */}
-                <div className="border-l-4 border-accent pl-6 mb-8">
-                  <p className="text-muted-foreground italic text-lg leading-relaxed">
+                <div className="border-l-4 border-accent pl-4 sm:pl-6 mb-6 sm:mb-8">
+                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
                     "{rickProfile.quote}"
                   </p>
                 </div>
 
-                <p className="text-muted-foreground leading-relaxed mb-8">
+                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
                   {rickProfile.bio}
                 </p>
 
                 {/* Stats */}
-                <div className="flex flex-wrap gap-4 mb-8">
+                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
                   {rickProfile.highlights.map((highlight, i) => (
                     <span
                       key={i}
-                      className="px-4 py-2 bg-background border border-border rounded-lg text-sm font-medium"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-background border border-border rounded-lg text-xs sm:text-sm font-medium"
                     >
                       {highlight}
                     </span>
@@ -232,16 +232,16 @@ const LeadershipPage = () => {
         <div className="container-focus">
           <ScrollReveal>
             <div className="mb-12">
-              <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
-                Strategic Minds Behind Focus Health
-              </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl">
-                Our leadership team brings together financial expertise, operational rigor, and deep healthcare industry experience.
-              </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold mb-3 sm:mb-4">
+              Strategic Minds Behind Focus Health
+            </h2>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
+              Our leadership team brings together financial expertise, operational rigor, and deep healthcare industry experience.
+            </p>
             </div>
           </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {teamMembers.map((member, index) => (
               <ScrollReveal key={member.name} delay={index * 0.15}>
                 <motion.div
@@ -282,21 +282,21 @@ const LeadershipPage = () => {
       {/* CTA Section */}
       <section className="section-padding bg-card">
         <div className="container-focus">
-          <div className="bg-primary rounded-3xl p-8 md:p-12 lg:p-16">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
+          <div className="bg-primary rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 lg:p-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center">
               <ScrollReveal>
                 <div>
-                  <h2 className="text-3xl sm:text-4xl font-heading font-bold text-primary-foreground mb-4">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-primary-foreground mb-3 sm:mb-4">
                     Ready to partner with Focus Health?
                   </h2>
-                  <p className="text-primary-foreground/80 text-lg">
+                  <p className="text-primary-foreground/80 text-base sm:text-lg">
                     Connect with our executive team to explore investment opportunities and strategic partnerships in Texas healthcare infrastructure.
                   </p>
                 </div>
               </ScrollReveal>
 
               <ScrollReveal direction="left">
-                <div className="flex flex-wrap gap-4 lg:justify-end">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 lg:justify-end">
                   <Button variant="accent" size="lg" asChild className="gap-2">
                     <Link to="/contact">
                       Contact Our Team
