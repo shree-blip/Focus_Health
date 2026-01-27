@@ -11,6 +11,10 @@ import jamieHeadshot from "@/assets/jamie-alcantar-headshot.png";
 import anjilaHeadshot from "@/assets/anjila-shrestha-headshot.png";
 import julieHeadshot from "@/assets/julie-moreno-headshot.png";
 import heroLeadership from "@/assets/hero-leadership.jpg";
+import ganeshHeadshot from "@/assets/ganesh-dahal-headshot.png";
+import guinnessHeadshot from "@/assets/guinness-lakhe-headshot.png";
+import bhaskarHeadshot from "@/assets/bhaskar-rokka-headshot.png";
+import tikaHeadshot from "@/assets/tika-rai-headshot.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
@@ -53,21 +57,25 @@ const accountingTeam = [
     name: "Ganesh Dahal",
     role: "Tax",
     category: "Accounting & Billing",
+    photo: ganeshHeadshot,
   },
   {
     name: "Guinness Lakhe",
     role: "Sr. Accounting Officer",
     category: "Accounting & Billing",
+    photo: guinnessHeadshot,
   },
   {
     name: "Bhaskar Rokka",
     role: "Staff Accountant",
     category: "Accounting & Billing",
+    photo: bhaskarHeadshot,
   },
   {
     name: "Tika Rai",
     role: "Staff Accountant",
     category: "Accounting & Billing",
+    photo: tikaHeadshot,
   },
 ];
 const rickProfile = {
@@ -327,18 +335,27 @@ const LeadershipPage = () => {
               <ScrollReveal key={member.name} delay={index * 0.1}>
                 <motion.div
                   whileHover={{
-                    y: -4,
+                    y: -8,
                   }}
-                  className="bg-background border border-border rounded-xl p-6 text-center"
+                  className="group relative rounded-2xl overflow-hidden cursor-pointer"
                 >
-                  {/* Avatar Placeholder */}
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-accent">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </span>
+                  {/* Photo */}
+                  <div className="aspect-[4/5]">
+                    <img
+                      src={member.photo}
+                      alt={member.name}
+                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
                   </div>
-                  <h3 className="text-lg font-heading font-bold text-foreground">{member.name}</h3>
-                  <p className="text-primary text-sm font-medium">{member.role}</p>
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent" />
+
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-xl font-heading font-bold text-white mt-1">{member.name}</h3>
+                    <p className="text-white/70 text-sm">{member.role}</p>
+                  </div>
                 </motion.div>
               </ScrollReveal>
             ))}
