@@ -40,7 +40,7 @@ const ContactPage = () => {
       {/* Contact Section */}
       <section id="contact-form" className="section-padding bg-card">
         <div className="container-focus">
-          <div className="grid lg:grid-cols-2 gap-16 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 max-w-5xl mx-auto">
             {/* Contact Info */}
             <ScrollReveal>
               <div>
@@ -51,47 +51,51 @@ const ContactPage = () => {
                   Whether you're an investor, community leader, or healthcare professional, we're interested in exploring how we can work together to build better healthcare infrastructure.
                 </p>
 
-                <div className="space-y-6 mb-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Mail size={22} className="text-primary" />
+                <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-10">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Mail size={18} className="text-primary sm:hidden" />
+                      <Mail size={22} className="text-primary hidden sm:block" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <a href="mailto:info@getfocushealth.com" className="font-medium hover:text-primary transition-colors">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Email</p>
+                      <a href="mailto:info@getfocushealth.com" className="font-medium text-sm sm:text-base hover:text-primary transition-colors break-all sm:break-normal">
                         info@getfocushealth.com
                       </a>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <MapPin size={22} className="text-primary" />
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <MapPin size={18} className="text-primary sm:hidden" />
+                      <MapPin size={22} className="text-primary hidden sm:block" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Location</p>
-                      <p className="font-medium">Texas, USA</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Location</p>
+                      <p className="font-medium text-sm sm:text-base">Texas, USA</p>
                     </div>
                   </div>
 
                 </div>
 
                 {/* Google Calendar Scheduling */}
-                <div className="mt-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                      <Calendar size={20} className="text-accent" />
+                <div className="mt-6 sm:mt-8">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                      <Calendar size={16} className="text-accent sm:hidden" />
+                      <Calendar size={20} className="text-accent hidden sm:block" />
                     </div>
-                    <h3 className="font-heading font-semibold text-lg">Schedule a Call</h3>
+                    <h3 className="font-heading font-semibold text-base sm:text-lg">Schedule a Call</h3>
                   </div>
-                  <div className="rounded-xl overflow-hidden border border-border">
+                  <div className="rounded-lg sm:rounded-xl overflow-hidden border border-border">
                     <iframe 
                       src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0XACH-PNq5Nr3upP1QMqeWgEBihqud5N2lESMAMo8UCUxCP7wKAOxpBagtmKR8o3pERE3RwsTO?gv=true" 
                       style={{ border: 0 }} 
                       width="100%" 
-                      height="500" 
+                      height="400" 
                       frameBorder="0"
                       title="Schedule a meeting"
+                      className="sm:h-[500px]"
                     />
                   </div>
                 </div>
@@ -101,19 +105,20 @@ const ContactPage = () => {
             {/* Form */}
             <ScrollReveal direction="left">
               {isSubmitted ? (
-                <div className="bg-background rounded-2xl p-8 border border-border text-center h-full flex flex-col items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle size={40} className="text-green-600" />
+                <div className="bg-background rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-border text-center h-full flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <CheckCircle size={32} className="text-green-600 sm:hidden" />
+                    <CheckCircle size={40} className="text-green-600 hidden sm:block" />
                   </div>
-                  <h3 className="font-heading font-semibold text-2xl mb-3">Message Sent!</h3>
-                  <p className="text-muted-foreground max-w-sm">
+                  <h3 className="font-heading font-semibold text-xl sm:text-2xl mb-2 sm:mb-3">Message Sent!</h3>
+                  <p className="text-muted-foreground max-w-sm text-sm sm:text-base">
                     Thank you for reaching out. We'll review your message and get back to you soon.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="bg-background rounded-2xl p-8 border border-border shadow-lg">
-                  <h3 className="font-heading font-semibold text-xl mb-6">Send a Message</h3>
-                  <div className="space-y-5">
+                <form onSubmit={handleSubmit} className="bg-background rounded-xl sm:rounded-2xl p-5 sm:p-8 border border-border shadow-lg">
+                  <h3 className="font-heading font-semibold text-lg sm:text-xl mb-4 sm:mb-6">Send a Message</h3>
+                  <div className="space-y-4 sm:space-y-5">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-2">Full Name</label>
                       <Input

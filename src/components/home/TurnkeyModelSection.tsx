@@ -49,11 +49,11 @@ export const TurnkeyModelSection = () => {
     <section className="section-padding bg-background overflow-hidden">
       <div className="container-focus">
         <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-3 sm:mb-4">
               How the Turnkey Model Works
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
               End-to-end delivery from site selection to operational excellence
             </p>
           </div>
@@ -172,19 +172,19 @@ export const TurnkeyModelSection = () => {
         </div>
 
         {/* Mobile Stack View */}
-        <div className="lg:hidden space-y-4">
+        <div className="lg:hidden space-y-3 sm:space-y-4">
           {steps.map((step, index) => (
             <ScrollReveal key={step.id} delay={index * 0.1}>
               <motion.div
                 initial={false}
-                className="bg-card border border-border rounded-xl overflow-hidden"
+                className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden"
               >
                 <button
                   onClick={() => setActiveStep(activeStep === step.id ? null : step.id)}
-                  className="w-full p-6 flex items-center gap-4 text-left"
+                  className="w-full p-4 sm:p-6 flex items-center gap-3 sm:gap-4 text-left"
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-colors text-sm sm:text-base ${
                       activeStep === step.id
                         ? 'bg-accent text-accent-foreground'
                         : 'bg-primary text-primary-foreground'
@@ -192,9 +192,9 @@ export const TurnkeyModelSection = () => {
                   >
                     <span className="font-bold">{step.id}</span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-heading font-semibold">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">{step.shortDesc}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-heading font-semibold text-sm sm:text-base">{step.title}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate sm:whitespace-normal">{step.shortDesc}</p>
                   </div>
                   <ChevronRight
                     size={20}

@@ -43,7 +43,7 @@ export const MarketSection = ({ onOpenOpportunities }: MarketSectionProps) => {
       </div>
 
       <div className="container-focus relative">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Content */}
           <div>
             <ScrollReveal>
@@ -53,30 +53,31 @@ export const MarketSection = ({ onOpenOpportunities }: MarketSectionProps) => {
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4 sm:mb-6">
                 Expanding FSER Market
               </h2>
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
+              <p className="text-muted-foreground text-base sm:text-lg mb-8 sm:mb-10 leading-relaxed">
                 Texas's population growth creates compelling opportunities for strategically located freestanding emergency rooms and micro-hospitals.
               </p>
             </ScrollReveal>
 
-            <div className="space-y-6 mb-10">
+            <div className="space-y-4 sm:space-y-6 mb-8 sm:mb-10">
               {points.map((point, index) => (
                 <ScrollReveal key={point.title} delay={0.3 + index * 0.1}>
                   <motion.div
                     whileHover={{ x: 4 }}
-                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-card transition-colors"
+                    className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-card transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <point.icon size={20} className="text-primary" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md sm:rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <point.icon size={16} className="text-primary sm:hidden" />
+                      <point.icon size={20} className="text-primary hidden sm:block" />
                     </div>
                     <div>
-                      <h3 className="font-heading font-semibold mb-1">{point.title}</h3>
-                      <p className="text-muted-foreground text-sm">{point.description}</p>
+                      <h3 className="font-heading font-semibold mb-0.5 sm:mb-1 text-sm sm:text-base">{point.title}</h3>
+                      <p className="text-muted-foreground text-xs sm:text-sm">{point.description}</p>
                     </div>
                   </motion.div>
                 </ScrollReveal>
@@ -84,12 +85,12 @@ export const MarketSection = ({ onOpenOpportunities }: MarketSectionProps) => {
             </div>
 
             <ScrollReveal delay={0.6}>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="hero" size="lg" onClick={onOpenOpportunities}>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+                <Button variant="hero" size="lg" onClick={onOpenOpportunities} className="w-full sm:w-auto">
                   <MapPin size={18} className="mr-2" />
                   View Texas Markets
                 </Button>
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
                   Download Overview (Coming Soon)
                 </Button>
               </div>

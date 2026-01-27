@@ -32,11 +32,11 @@ export const EarlyAccessSection = () => {
       <div className="container-focus">
         <div className="max-w-2xl mx-auto">
           <ScrollReveal>
-            <div className="text-center mb-10">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
+            <div className="text-center mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-3 sm:mb-4">
                 Get Early Access
               </h2>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-muted-foreground text-base sm:text-lg">
                 Be the first to know when we launch. Join our exclusive waiting list.
               </p>
             </div>
@@ -58,8 +58,8 @@ export const EarlyAccessSection = () => {
                 </p>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-8 border border-border shadow-lg">
-                <div className="space-y-6">
+              <form onSubmit={handleSubmit} className="bg-card rounded-xl sm:rounded-2xl p-5 sm:p-8 border border-border shadow-lg">
+                <div className="space-y-4 sm:space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
                       Full Name
@@ -91,16 +91,16 @@ export const EarlyAccessSection = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-3">
+                    <label className="block text-sm font-medium mb-2 sm:mb-3">
                       I am a(n)...
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                       {roles.map((role) => (
                         <button
                           key={role}
                           type="button"
                           onClick={() => setFormData({ ...formData, role })}
-                          className={`py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          className={`py-2 sm:py-3 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                             formData.role === role
                               ? 'bg-primary text-primary-foreground shadow-md'
                               : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -130,7 +130,7 @@ export const EarlyAccessSection = () => {
                   </Button>
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-border text-center">
+                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border text-center">
                   <p className="text-sm text-muted-foreground mb-1">
                     Questions? Reach out to us directly.
                   </p>
@@ -146,9 +146,9 @@ export const EarlyAccessSection = () => {
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
-            <div className="text-center mt-8">
-              <span className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-accent/10 text-accent text-sm font-medium">
-                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <div className="text-center mt-6 sm:mt-8">
+              <span className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-accent/10 text-accent text-xs sm:text-sm font-medium">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent animate-pulse" />
                 Limited Partnership Spots Available
               </span>
             </div>

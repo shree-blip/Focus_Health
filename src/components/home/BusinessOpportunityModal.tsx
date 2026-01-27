@@ -59,7 +59,7 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -75,19 +75,20 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', duration: 0.4 }}
-            className="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-card shadow-2xl border border-border"
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-xl sm:rounded-2xl bg-card shadow-2xl border border-border"
           >
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 z-10 rounded-full bg-muted/80 p-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+              className="absolute right-2 top-2 sm:right-4 sm:top-4 z-10 rounded-full bg-muted/80 p-1.5 sm:p-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
             >
-              <X size={18} />
+              <X size={16} className="sm:hidden" />
+              <X size={18} className="hidden sm:block" />
             </button>
 
             <div className="flex flex-col md:flex-row">
-              {/* Left Image Section */}
-              <div className="relative w-full md:w-2/5 h-48 md:h-auto md:min-h-[480px] bg-gradient-to-br from-primary/20 to-accent/20">
+              {/* Left Image Section - Hidden on mobile for better UX */}
+              <div className="hidden md:block relative w-2/5 min-h-[480px] bg-gradient-to-br from-primary/20 to-accent/20">
                 <img 
                   src="https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=600&h=800&fit=crop&crop=bottom"
                   alt="Austin Texas Skyline"
@@ -103,11 +104,11 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
               </div>
 
               {/* Right Content Section */}
-              <div className="flex-1 p-6 md:p-8">
+              <div className="flex-1 p-4 sm:p-6 md:p-8">
                 <motion.h2
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-2xl font-bold text-foreground"
+                  className="text-xl sm:text-2xl font-bold text-foreground"
                 >
                   Texas <span className="text-primary">Business Opportunities</span>
                 </motion.h2>
@@ -121,7 +122,7 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                 </motion.p>
 
                 {/* Metro List */}
-                <div className="mt-6 space-y-4">
+                <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                   {metroAreas.map((metro, index) => {
                     const IconComponent = metro.icon;
                     return (
@@ -130,20 +131,22 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.15 + index * 0.08 }}
-                        className="flex items-start gap-4"
+                        className="flex items-start gap-3 sm:gap-4"
                       >
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-xl ${metro.iconBg} flex items-center justify-center`}>
-                          <IconComponent size={20} className={metro.iconColor} />
+                        <div className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl ${metro.iconBg} flex items-center justify-center`}>
+                          <IconComponent size={16} className={`${metro.iconColor} sm:hidden`} />
+                          <IconComponent size={20} className={`${metro.iconColor} hidden sm:block`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-foreground">{metro.name}</h4>
-                            <div className="flex items-center gap-1 ml-auto">
-                              <TrendingUp size={14} className="text-accent" />
-                              <span className="text-sm font-semibold text-accent">{metro.growth}</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold text-foreground text-sm sm:text-base">{metro.name}</h4>
+                            <div className="flex items-center gap-1">
+                              <TrendingUp size={12} className="text-accent sm:hidden" />
+                              <TrendingUp size={14} className="text-accent hidden sm:block" />
+                              <span className="text-xs sm:text-sm font-semibold text-accent">{metro.growth}</span>
                             </div>
                           </div>
-                          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                          <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-none">
                             {metro.description}
                           </p>
                         </div>
@@ -157,7 +160,7 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="mt-8 flex justify-end"
+                  className="mt-6 sm:mt-8 flex justify-center sm:justify-end"
                 >
                   <Button
                     variant="outline"

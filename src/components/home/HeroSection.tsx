@@ -264,7 +264,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold leading-[1.05] mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-heading font-bold leading-[1.05] mb-4 sm:mb-6"
             >
               <span className="block">Investing in</span>
               <motion.span 
@@ -282,7 +282,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-4"
+              className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed mb-4"
             >
               We're revolutionizing healthcare by partnering with communities and investors to build and operate high-performance medical facilities.
             </motion.p>
@@ -292,7 +292,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.35 }}
-              className="flex items-center gap-2 text-sm text-muted-foreground mb-8 font-mono"
+              className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground mb-8 font-mono"
             >
               <span className="text-primary">→</span>
               <span>site strategy → build-out → staffing → operations → optimization</span>
@@ -303,7 +303,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.45 }}
-              className="flex flex-col sm:flex-row gap-4 mb-10"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-10"
             >
               <Button variant="hero" size="lg" asChild className="group">
                 <Link to="/partners?tab=investors">
@@ -424,52 +424,57 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="mt-16"
+          className="mt-8 sm:mt-16"
         >
-          <div className="bg-card rounded-2xl border border-border shadow-lg p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-card rounded-xl sm:rounded-2xl border border-border shadow-lg p-3 sm:p-4 md:p-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
               {/* Solution Card */}
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Zap size={22} className="text-primary" />
+              <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 bg-background/50">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Zap size={16} className="text-primary sm:hidden" />
+                  <Zap size={22} className="text-primary hidden sm:block" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Solution</p>
-                  <p className="font-semibold text-foreground">Turnkey Solution</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">Solution</p>
+                  <p className="font-semibold text-foreground text-xs sm:text-base truncate">Turnkey Solution</p>
                 </div>
               </div>
 
               {/* Availability Card */}
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Clock size={22} className="text-primary" />
+              <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 bg-background/50">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Clock size={16} className="text-primary sm:hidden" />
+                  <Clock size={22} className="text-primary hidden sm:block" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Availability</p>
-                  <p className="font-semibold text-foreground">24/7 Operations</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">Availability</p>
+                  <p className="font-semibold text-foreground text-xs sm:text-base truncate">24/7 Operations</p>
                 </div>
               </div>
 
               {/* Region Card */}
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background/50">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin size={22} className="text-primary" />
+              <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 bg-background/50">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin size={16} className="text-primary sm:hidden" />
+                  <MapPin size={22} className="text-primary hidden sm:block" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Region</p>
-                  <p className="font-semibold text-foreground">Texas Growth Markets</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">Region</p>
+                  <p className="font-semibold text-foreground text-xs sm:text-base truncate">Texas Markets</p>
                 </div>
               </div>
 
               {/* View Markets Button */}
               <motion.button
                 onClick={onOpenOpportunities}
-                className="flex items-center justify-center gap-2 p-4 rounded-xl bg-accent text-accent-foreground font-semibold hover:bg-accent/90 transition-colors cursor-pointer"
+                className="flex items-center justify-center gap-2 p-2 sm:p-4 rounded-lg sm:rounded-xl bg-accent text-accent-foreground font-semibold text-xs sm:text-base hover:bg-accent/90 transition-colors cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                View Markets
-                <ArrowRight size={18} />
+                <span className="hidden sm:inline">View Markets</span>
+                <span className="sm:hidden">Markets</span>
+                <ArrowRight size={14} className="sm:hidden" />
+                <ArrowRight size={18} className="hidden sm:block" />
               </motion.button>
             </div>
           </div>
