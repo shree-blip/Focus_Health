@@ -40,6 +40,35 @@ const teamMembers = [
     category: "Healthcare Operations",
     photo: julieHeadshot,
   },
+  {
+    name: "Moa-A",
+    role: "Medical Records",
+    category: "Healthcare",
+    photo: null,
+  },
+];
+
+const accountingTeam = [
+  {
+    name: "Ganesh Dahal",
+    role: "Tax",
+    category: "Accounting & Billing",
+  },
+  {
+    name: "Guinness Lakhe",
+    role: "Sr. Accounting Officer",
+    category: "Accounting & Billing",
+  },
+  {
+    name: "Bhaskar Rokka",
+    role: "Staff Accountant",
+    category: "Accounting & Billing",
+  },
+  {
+    name: "Tika Rai",
+    role: "Staff Accountant",
+    category: "Accounting & Billing",
+  },
 ];
 const rickProfile = {
   name: "Rick Leonard",
@@ -238,7 +267,7 @@ const LeadershipPage = () => {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {teamMembers.map((member, index) => (
               <ScrollReveal key={member.name} delay={index * 0.15}>
                 <motion.div
@@ -249,11 +278,19 @@ const LeadershipPage = () => {
                 >
                   {/* Photo */}
                   <div className="aspect-[4/5]">
-                    <img
-                      src={member.photo}
-                      alt={member.name}
-                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                    />
+                    {member.photo ? (
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <span className="text-4xl font-bold text-primary/50">
+                          {member.name.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Gradient Overlay */}
@@ -264,6 +301,44 @@ const LeadershipPage = () => {
                     <h3 className="text-xl font-heading font-bold text-white mt-1">{member.name}</h3>
                     <p className="text-white/70 text-sm">{member.role}</p>
                   </div>
+                </motion.div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Accounting & Billing Team Section */}
+      <section className="section-padding bg-card">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="mb-12">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold mb-3 sm:mb-4">
+                Accounting & Billing Team
+              </h2>
+              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
+                Our dedicated finance professionals ensure operational excellence and financial accuracy across all facilities.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            {accountingTeam.map((member, index) => (
+              <ScrollReveal key={member.name} delay={index * 0.1}>
+                <motion.div
+                  whileHover={{
+                    y: -4,
+                  }}
+                  className="bg-background border border-border rounded-xl p-6 text-center"
+                >
+                  {/* Avatar Placeholder */}
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-accent">
+                      {member.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-heading font-bold text-foreground">{member.name}</h3>
+                  <p className="text-primary text-sm font-medium">{member.role}</p>
                 </motion.div>
               </ScrollReveal>
             ))}
