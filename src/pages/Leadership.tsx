@@ -6,7 +6,7 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
 import rickHeadshot from "@/assets/rick-leonard-headshot.png";
-import jayHeadshot from "@/assets/srcassetsjay-dahal-headsho.png";
+import jayHeadshot from "@/assets/jay-dahal-headshot.png";
 import jamieHeadshot from "@/assets/jamie-alcantar-headshot.png";
 import anjilaHeadshot from "@/assets/anjila-shrestha-headshot.png";
 import julieHeadshot from "@/assets/julie-moreno-headshot.png";
