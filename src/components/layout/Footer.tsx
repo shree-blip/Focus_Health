@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone } from 'lucide-react';
-import focusHealthIcon from '@/assets/focus-health-icon.png';
+import { Link } from "react-router-dom";
+import { Mail, MapPin, Phone } from "lucide-react";
+import focusHealthIcon from "@/assets/focus-health-icon.png";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -12,18 +12,15 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-3 sm:space-y-4 col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 sm:gap-3">
-              <img
-                src={focusHealthIcon}
-                alt="Focus Health Logo"
-                className="h-8 sm:h-10 w-auto brightness-0 invert"
-              />
+              <img src={focusHealthIcon} alt="Focus Health Logo" className="h-8 sm:h-10 w-auto brightness-0 invert" />
               <div className="flex items-baseline gap-1 sm:gap-1.5">
                 <span className="font-heading font-bold text-base sm:text-lg text-primary-foreground">Focus</span>
                 <span className="font-heading font-bold text-base sm:text-lg text-secondary">Health</span>
               </div>
             </Link>
             <p className="text-primary-foreground/70 text-xs sm:text-sm leading-relaxed">
-              Institutional-grade healthcare infrastructure, made simple. Building and operating high-performance freestanding ERs across Texas.
+              Institutional-grade healthcare infrastructure, made simple. Building and operating high-performance
+              freestanding ERs across Texas.
             </p>
           </div>
 
@@ -32,10 +29,10 @@ export const Footer = () => {
             <h4 className="font-heading font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Company</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { label: 'Platform', href: '/platform' },
-                { label: 'Market', href: '/market' },
-                { label: 'Track Record', href: '/track-record' },
-                { label: 'Leadership', href: '/leadership' },
+                { label: "Platform", href: "/platform" },
+                { label: "Market", href: "/market" },
+                { label: "Track Record", href: "/track-record" },
+                { label: "Leadership", href: "/leadership" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -54,9 +51,9 @@ export const Footer = () => {
             <h4 className="font-heading font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Partners</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { label: 'For Investors', href: '/partners?tab=investors' },
-                { label: 'For Communities', href: '/partners?tab=communities' },
-                { label: 'Early Access', href: '/contact' },
+                { label: "For Investors", href: "/partners?tab=investors" },
+                { label: "For Communities", href: "/partners?tab=communities" },
+                { label: "Early Access", href: "/contact" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -87,7 +84,7 @@ export const Footer = () => {
               <li className="flex items-center gap-1.5 sm:gap-2 text-primary-foreground/70 text-xs sm:text-sm">
                 <MapPin size={14} className="sm:hidden" />
                 <MapPin size={16} className="hidden sm:block" />
-                Texas, USA
+                350 Main St Suite H-7 Pleasanton CA 94566
               </li>
             </ul>
             <div className="mt-4 sm:mt-6">
@@ -105,10 +102,16 @@ export const Footer = () => {
             © {currentYear} Focus Healthcare LLC. All rights reserved.
           </p>
           <div className="flex items-center gap-4 sm:gap-6">
-            <Link to="/privacy" className="text-primary-foreground/60 hover:text-primary-foreground text-xs sm:text-sm transition-colors">
+            <Link
+              to="/privacy"
+              className="text-primary-foreground/60 hover:text-primary-foreground text-xs sm:text-sm transition-colors"
+            >
               Privacy Policy
             </Link>
-            <Link to="/terms" className="text-primary-foreground/60 hover:text-primary-foreground text-xs sm:text-sm transition-colors">
+            <Link
+              to="/terms"
+              className="text-primary-foreground/60 hover:text-primary-foreground text-xs sm:text-sm transition-colors"
+            >
               Terms of Service
             </Link>
           </div>
