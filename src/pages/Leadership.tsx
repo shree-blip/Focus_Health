@@ -90,7 +90,7 @@ const rickProfile = {
   category: "Operations & Facilities",
   photo: rickHeadshot,
   quote:
-    "Operational efficiency isn't just about cost savings—it's about creating environments where healthcare teams can deliver their best care.",
+    "Operational efficiency isn't just about cost savings, it's about creating environments where healthcare teams can deliver their best care.",
   bio: "Rick brings over 35 years of hospital operations and facility management experience. He has led multiple hospital and emergency center projects from concept to completion, with leadership roles at ServiceMaster, Texas Health Resources, and CHS. His equipment planning expertise spans Stanford, Sutter, and Marshfield Clinic.",
   highlights: ["35+ years experience", "50+ projects delivered", "4 major health systems"],
 };
@@ -301,7 +301,10 @@ const LeadershipPage = () => {
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                         <span className="text-4xl font-bold text-primary/50">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                          {member.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </span>
                       </div>
                     )}
@@ -331,7 +334,8 @@ const LeadershipPage = () => {
                 Accounting & Billing Team
               </h2>
               <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
-                Our dedicated finance professionals ensure operational excellence and financial accuracy across all facilities.
+                Our dedicated finance professionals ensure operational excellence and financial accuracy across all
+                facilities.
               </p>
             </div>
           </ScrollReveal>
@@ -356,7 +360,10 @@ const LeadershipPage = () => {
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                         <span className="text-4xl font-bold text-primary/50">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                          {member.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </span>
                       </div>
                     )}
