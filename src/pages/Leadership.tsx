@@ -79,7 +79,7 @@ const accountingTeam = [
   },
   {
     name: "Bipul Maharjan",
-    role: "Billing",
+    role: "Sr. Accounting Officer",
     category: "Accounting & Billing",
     photo: null,
   },
