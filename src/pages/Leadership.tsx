@@ -11,7 +11,6 @@ import jamieHeadshot from '@/assets/jamie-alcantar-headshot.png';
 import anjilaHeadshot from '@/assets/anjila-shrestha-headshot.png';
 import julieHeadshot from '@/assets/julie-moreno-headshot.png';
 import heroLeadership from '@/assets/hero-leadership.jpg';
-
 const featuredLeader = {
   name: 'Jay Dahal',
   role: 'Founder & CEO',
@@ -19,34 +18,24 @@ const featuredLeader = {
   photo: jayHeadshot,
   quote: 'Our vision is to build institutional-grade healthcare infrastructure that delivers operational excellence and meaningful returns for our partners, one facility at a time.',
   bio: 'With experience leading $100M+ in annual revenue across 24+ healthcare locations, Jay brings proven expertise in scaling multi-site operations. As Consulting CFO at Total Point Healthcare and current operator of ER of Irving and ER of Lufkin, he combines financial acumen with hands-on operational leadership.',
-  highlights: [
-    '$100M+ annual revenue led',
-    '24+ locations managed',
-    '600+ staff managed',
-  ],
+  highlights: ['$100M+ annual revenue led', '24+ locations managed', '600+ staff managed']
 };
-
-const teamMembers = [
-  {
-    name: 'Jamie Alcantar',
-    role: 'Healthcare',
-    category: 'Healthcare',
-    photo: jamieHeadshot,
-  },
-  {
-    name: 'Anjila Shrestha',
-    role: 'Operations Associate',
-    category: 'Operations',
-    photo: anjilaHeadshot,
-  },
-  {
-    name: 'Julie Moreno',
-    role: 'Healthcare Operations',
-    category: 'Healthcare Operations',
-    photo: julieHeadshot,
-  },
-];
-
+const teamMembers = [{
+  name: 'Jamie Alcantar',
+  role: 'Healthcare',
+  category: 'Healthcare',
+  photo: jamieHeadshot
+}, {
+  name: 'Anjila Shrestha',
+  role: 'Operations Associate',
+  category: 'Operations',
+  photo: anjilaHeadshot
+}, {
+  name: 'Julie Moreno',
+  role: 'Healthcare Operations',
+  category: 'Healthcare Operations',
+  photo: julieHeadshot
+}];
 const rickProfile = {
   name: 'Rick Leonard',
   role: 'Healthcare Operations Leader',
@@ -54,24 +43,18 @@ const rickProfile = {
   photo: rickHeadshot,
   quote: 'Operational efficiency isn\'t just about cost savings—it\'s about creating environments where healthcare teams can deliver their best care.',
   bio: 'Rick brings over 35 years of hospital operations and facility management experience. He has led multiple hospital and emergency center projects from concept to completion, with leadership roles at ServiceMaster, Texas Health Resources, and CHS. His equipment planning expertise spans Stanford, Sutter, and Marshfield Clinic.',
-  highlights: [
-    '35+ years experience',
-    '50+ projects delivered',
-    '4 major health systems',
-  ],
+  highlights: ['35+ years experience', '50+ projects delivered', '4 major health systems']
 };
-
 const LeadershipPage = () => {
-  return (
-    <Layout>
+  return <Layout>
       {/* Hero */}
-      <PageHero
-        title="Empowering Healthcare Through Visionary Leadership"
-        description="Our team is committed to excellence and innovation, driving better outcomes for healthcare providers and patients alike."
-        backgroundImage={heroLeadership}
-        primaryCta={{ text: "Get Started", link: "/partners" }}
-        secondaryCta={{ text: "Learn More", link: "/track-record" }}
-      />
+      <PageHero title="Empowering Healthcare Through Visionary Leadership" description="Our team is committed to excellence and innovation, driving better outcomes for healthcare providers and patients alike." backgroundImage={heroLeadership} primaryCta={{
+      text: "Get Started",
+      link: "/partners"
+    }} secondaryCta={{
+      text: "Learn More",
+      link: "/track-record"
+    }} />
 
       {/* Featured Leader - Jay */}
       <section className="section-padding bg-background">
@@ -79,16 +62,11 @@ const LeadershipPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Photo */}
             <ScrollReveal>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="relative"
-              >
+              <motion.div whileHover={{
+              scale: 1.02
+            }} className="relative">
                 <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
-                  <img
-                    src={featuredLeader.photo}
-                    alt={featuredLeader.name}
-                    className="w-full h-full object-cover object-top"
-                  />
+                  <img src={featuredLeader.photo} alt={featuredLeader.name} className="w-full h-full object-cover object-top" />
                 </div>
                 {/* Decorative element */}
                 <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
@@ -123,14 +101,9 @@ const LeadershipPage = () => {
 
                 {/* Stats */}
                 <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
-                  {featuredLeader.highlights.map((highlight, i) => (
-                    <span
-                      key={i}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
-                    >
+                  {featuredLeader.highlights.map((highlight, i) => <span key={i} className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium">
                       {highlight}
-                    </span>
-                  ))}
+                    </span>)}
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -182,14 +155,9 @@ const LeadershipPage = () => {
 
                 {/* Stats */}
                 <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
-                  {rickProfile.highlights.map((highlight, i) => (
-                    <span
-                      key={i}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-background border border-border rounded-lg text-xs sm:text-sm font-medium"
-                    >
+                  {rickProfile.highlights.map((highlight, i) => <span key={i} className="px-3 sm:px-4 py-1.5 sm:py-2 bg-background border border-border rounded-lg text-xs sm:text-sm font-medium">
                       {highlight}
-                    </span>
-                  ))}
+                    </span>)}
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -208,16 +176,11 @@ const LeadershipPage = () => {
 
             {/* Photo - Right side for Rick */}
             <ScrollReveal direction="left">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="relative order-1 lg:order-2"
-              >
+              <motion.div whileHover={{
+              scale: 1.02
+            }} className="relative order-1 lg:order-2">
                 <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/10 to-primary/10">
-                  <img
-                    src={rickProfile.photo}
-                    alt={rickProfile.name}
-                    className="w-full h-full object-cover object-top"
-                  />
+                  <img src={rickProfile.photo} alt={rickProfile.name} className="w-full h-full object-cover object-top" />
                 </div>
                 {/* Decorative element */}
                 <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/10 rounded-2xl -z-10" />
@@ -242,19 +205,13 @@ const LeadershipPage = () => {
           </ScrollReveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {teamMembers.map((member, index) => (
-              <ScrollReveal key={member.name} delay={index * 0.15}>
-                <motion.div
-                  whileHover={{ y: -8 }}
-                  className="group relative rounded-2xl overflow-hidden cursor-pointer"
-                >
+            {teamMembers.map((member, index) => <ScrollReveal key={member.name} delay={index * 0.15}>
+                <motion.div whileHover={{
+              y: -8
+            }} className="group relative rounded-2xl overflow-hidden cursor-pointer">
                   {/* Photo */}
                   <div className="aspect-[4/5]">
-                    <img
-                      src={member.photo}
-                      alt={member.name}
-                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                    />
+                    <img src={member.photo} alt={member.name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   
                   {/* Gradient Overlay */}
@@ -262,9 +219,7 @@ const LeadershipPage = () => {
                   
                   {/* Content */}
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <span className={`text-xs font-semibold uppercase tracking-wider ${index === 0 ? 'text-primary' : 'text-accent'}`}>
-                      {member.category}
-                    </span>
+                    
                     <h3 className="text-xl font-heading font-bold text-white mt-1">
                       {member.name}
                     </h3>
@@ -273,8 +228,7 @@ const LeadershipPage = () => {
                     </p>
                   </div>
                 </motion.div>
-              </ScrollReveal>
-            ))}
+              </ScrollReveal>)}
           </div>
         </div>
       </section>
@@ -303,12 +257,7 @@ const LeadershipPage = () => {
                       <ArrowRight size={18} />
                     </Link>
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    asChild
-                    className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                  >
+                  <Button variant="outline" size="lg" asChild className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                     <Link to="/track-record">
                       View Track Record
                     </Link>
@@ -319,8 +268,6 @@ const LeadershipPage = () => {
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default LeadershipPage;
