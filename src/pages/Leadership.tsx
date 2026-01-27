@@ -77,6 +77,12 @@ const accountingTeam = [
     category: "Accounting & Billing",
     photo: tikaHeadshot,
   },
+  {
+    name: "Bipul Maharjan",
+    role: "Billing",
+    category: "Accounting & Billing",
+    photo: null,
+  },
 ];
 const rickProfile = {
   name: "Rick Leonard",
@@ -341,11 +347,19 @@ const LeadershipPage = () => {
                 >
                   {/* Photo */}
                   <div className="aspect-[4/5]">
-                    <img
-                      src={member.photo}
-                      alt={member.name}
-                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                    />
+                    {member.photo ? (
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <span className="text-4xl font-bold text-primary/50">
+                          {member.name.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Gradient Overlay */}
