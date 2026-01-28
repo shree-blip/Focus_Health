@@ -86,7 +86,7 @@ const accountingTeam = [
 ];
 const rickProfile = {
   name: "Rick Leonard",
-  role: "Healthcare Operations Leader",
+  role: "Director of Operation",
   category: "Operations & Facilities",
   photo: rickHeadshot,
   quote:
