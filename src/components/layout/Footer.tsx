@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 import focusHealthIcon from "@/assets/focus-health-icon.png";
 
 export const Footer = () => {
@@ -87,7 +87,18 @@ export const Footer = () => {
                 350 Main St Suite H-7 Pleasanton CA 94566
               </li>
             </ul>
-            <div className="mt-4 sm:mt-6">
+            <div className="flex items-center gap-3 mt-4 sm:mt-6">
+              <a href="https://www.facebook.com/people/Focus-Health/61586849325711/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Facebook size={18} />
+              </a>
+              <a href="https://www.instagram.com/getfocushealth/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Instagram size={18} />
+              </a>
+              <a href="https://www.linkedin.com/company/getfocus-health/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Linkedin size={18} />
+              </a>
+            </div>
+            <div className="mt-3 sm:mt-4">
               <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-accent/20 rounded-full text-[10px] sm:text-xs font-medium text-accent">
                 <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-accent animate-pulse" />
                 Actively Partnering in Texas
