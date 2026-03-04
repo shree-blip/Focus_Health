@@ -127,6 +127,20 @@ export const Footer = () => {
             </Link>
           </div>
         </div>
+
+        <div className="mt-4 sm:mt-6 text-center">
+          <p className="text-primary-foreground/50 text-xs sm:text-sm">
+            Design and Developed by{" "}
+            <a
+              href="https://thenextgenhealth.com/"
+              target="_blank"
+              rel="noopener"
+              className="text-primary-foreground/70 hover:text-primary-foreground transition-colors underline"
+            >
+              NextGen
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );
