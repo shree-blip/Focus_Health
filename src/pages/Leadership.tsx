@@ -15,6 +15,7 @@ import ganeshHeadshot from "@/assets/ganesh-dahal-headshot.png";
 import guinnessHeadshot from "@/assets/guinness-lakhe-headshot.png";
 import bhaskarHeadshot from "@/assets/bhaskar-rokka-headshot.png";
 import tikaHeadshot from "@/assets/tika-rai-headshot.png";
+import arslanHeadshot from "@/assets/arslan-iftikhar-headshot.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
@@ -45,10 +46,10 @@ const teamMembers = [
     photo: julieHeadshot,
   },
   {
-    name: "Moa-A",
+    name: "Arslan Iftikhar",
     role: "Medical Records",
     category: "Healthcare",
-    photo: null,
+    photo: arslanHeadshot,
   },
 ];
 
