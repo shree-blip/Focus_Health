@@ -16,6 +16,7 @@ import guinnessHeadshot from "@/assets/guinness-lakhe-headshot.png";
 import bhaskarHeadshot from "@/assets/bhaskar-rokka-headshot.png";
 import tikaHeadshot from "@/assets/tika-rai-headshot.png";
 import arslanHeadshot from "@/assets/arslan-iftikhar-headshot.png";
+import bipulHeadshot from "@/assets/bipul-maharjan-headshot.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
@@ -82,7 +83,7 @@ const accountingTeam = [
     name: "Bipul Maharjan",
     role: "Sr. Accounting Officer",
     category: "Accounting & Billing",
-    photo: null,
+    photo: bipulHeadshot,
   },
 ];
 const rickProfile = {
