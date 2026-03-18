@@ -53,6 +53,12 @@ const teamMembers = [
     category: "Healthcare",
     photo: arslanHeadshot,
   },
+  {
+    name: "Mawewl",
+    role: "Construction Project Manager",
+    category: "Construction & Facilities",
+    photo: mawewlHeadshot,
+  },
 ];
 
 const accountingTeam = [
