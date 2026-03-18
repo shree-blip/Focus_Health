@@ -29,6 +29,17 @@ const featuredLeader = {
   bio: "With experience leading $100M+ in annual revenue across 24+ healthcare locations, Jay brings proven expertise in scaling multi-site operations. As Consulting CFO at Total Point Healthcare and current operator of ER of Irving and ER of Lufkin, he combines financial acumen with hands-on operational leadership.",
   highlights: ["$100M+ annual revenue led", "24+ locations managed", "600+ staff managed"],
 };
+const joelProfile = {
+  name: "Joel Lanehart",
+  role: "Construction Project Manager",
+  category: "Construction & Facilities",
+  photo: joelHeadshot,
+  quote:
+    "Success in facility management comes from passion, dependability, and a relentless focus on building strong teams that deliver results.",
+  bio: "Joel is a seasoned Maintenance Manager and Director with over 15 years of experience maintaining and managing large-scale assets. Known for his passion, dependability, and loyalty, Joel excels at motivating teams to perform at their best. He brings strong relationship-building skills, polished computer proficiency, and proven budget management expertise that drives company revenue. Organized with excellent written and oral communication skills, Joel is committed to achieving and surpassing every organizational goal.",
+  highlights: ["15+ years experience", "Large asset management", "Budget optimization"],
+};
+
 const teamMembers = [
   {
     name: "Jamie Alcantar",
@@ -38,13 +49,13 @@ const teamMembers = [
   },
   {
     name: "Anjila Shrestha",
-    role: "Operations",
+    role: "Healthcare Operations",
     category: "Operations",
     photo: anjilaHeadshot,
   },
   {
     name: "Julie Moreno",
-    role: "Executive Assistance",
+    role: "Medspa Operations",
     category: "Healthcare Operations",
     photo: julieHeadshot,
   },
@@ -55,10 +66,10 @@ const teamMembers = [
     photo: arslanHeadshot,
   },
   {
-    name: "Mawewl",
-    role: "Construction Project Manager",
-    category: "Construction & Facilities",
-    photo: mawewlHeadshot,
+    name: "Michael",
+    role: "People & Operations",
+    category: "Operations",
+    photo: michaelHeadshot,
   },
 ];
 
