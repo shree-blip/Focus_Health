@@ -17,6 +17,7 @@ import bhaskarHeadshot from "@/assets/bhaskar-rokka-headshot.png";
 import tikaHeadshot from "@/assets/tika-rai-headshot.png";
 import arslanHeadshot from "@/assets/arslan-iftikhar-headshot.png";
 import bipulHeadshot from "@/assets/bipul-maharjan-headshot.png";
+import mawewlHeadshot from "@/assets/mawewl-headshot.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
@@ -51,6 +52,12 @@ const teamMembers = [
     role: "Medical Records",
     category: "Healthcare",
     photo: arslanHeadshot,
+  },
+  {
+    name: "Mawewl",
+    role: "Construction Project Manager",
+    category: "Construction & Facilities",
+    photo: mawewlHeadshot,
   },
 ];
 
@@ -283,7 +290,7 @@ const LeadershipPage = () => {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
             {teamMembers.map((member, index) => (
               <ScrollReveal key={member.name} delay={index * 0.15}>
                 <motion.div
