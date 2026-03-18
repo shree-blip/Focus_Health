@@ -38,7 +38,7 @@ const healthcarePortfolio = [
     type: 'Health & Wellness Clinic',
     description: 'Premier wellness center in Irving offering physician-supervised medical weight loss, hormone therapy, aesthetic services, IV hydration therapy, and advanced body contouring.',
     url: 'https://irvingwellnessclinic.com',
-    image: null,
+    image: facilityIrvingWellness,
   },
   {
     name: 'Naperville Health & Wellness Clinic',
