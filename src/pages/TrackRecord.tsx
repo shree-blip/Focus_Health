@@ -188,6 +188,70 @@ const TrackRecordPage = () => {
         </div>
       </section>
 
+      {/* Healthcare Portfolio */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
+                Healthcare Management Portfolio
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Our full track record of healthcare facilities under active management and development
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {healthcarePortfolio.map((facility, index) => (
+              <ScrollReveal key={facility.name} delay={index * 0.1}>
+                <motion.a
+                  href={facility.url}
+                  target="_blank"
+                  rel="dofollow"
+                  whileHover={{ y: -6 }}
+                  className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full"
+                >
+                  {/* Image or Icon Header */}
+                  <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden">
+                    {facility.image ? (
+                      <img
+                        src={facility.image}
+                        alt={facility.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        {facility.type.includes('Emergency') ? (
+                          <Stethoscope size={48} className="text-primary/30" />
+                        ) : (
+                          <Heart size={48} className="text-accent/30" />
+                        )}
+                      </div>
+                    )}
+                    <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-background/90 backdrop-blur-sm text-xs font-medium text-foreground">
+                      {facility.type}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-heading font-bold text-lg">{facility.name}</h3>
+                      <ExternalLink size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                    </div>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{facility.description}</p>
+                    <span className="inline-block mt-4 text-sm font-medium text-primary group-hover:underline">
+                      Visit Website →
+                    </span>
+                  </div>
+                </motion.a>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Disclaimer */}
       <section className="py-8 bg-muted">
         <div className="container-focus">
