@@ -31,7 +31,7 @@ const healthcarePortfolio = [
     type: 'Freestanding Emergency Room',
     description: '24/7 emergency room in Dallas, TX with board-certified physicians and trauma-trained nurses. Advanced on-site imaging and lab services with minimal wait times.',
     url: 'https://erofwhiterock.com',
-    image: null,
+    image: facilityErWhiterock,
   },
   {
     name: 'Irving Health & Wellness Clinic',
