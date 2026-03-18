@@ -37,7 +37,7 @@ const joelProfile = {
   quote:
     "Success in facility management comes from passion, dependability, and a relentless focus on building strong teams that deliver results.",
   bio: "Joel is a seasoned Maintenance Manager and Director with over 15 years of experience maintaining and managing large-scale assets. Known for his passion, dependability, and loyalty, Joel excels at motivating teams to perform at their best. He brings strong relationship-building skills, polished computer proficiency, and proven budget management expertise that drives company revenue. Organized with excellent written and oral communication skills, Joel is committed to achieving and surpassing every organizational goal.",
-  highlights: ["15+ years experience", "Large asset management", "Budget optimization"],
+  highlights: ["15+ years experience", "Budget optimization", "Team leadership"],
 };
 
 const teamMembers = [
