@@ -17,103 +17,84 @@ import bhaskarHeadshot from "@/assets/bhaskar-rokka-headshot.png";
 import tikaHeadshot from "@/assets/tika-rai-headshot.png";
 import arslanHeadshot from "@/assets/arslan-iftikhar-headshot.png";
 import bipulHeadshot from "@/assets/bipul-maharjan-headshot.png";
-import joelHeadshot from "@/assets/joel-lanehart-headshot.png";
-import michaelHeadshot from "@/assets/michael-headshot.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
   category: "Executive Leadership",
   photo: jayHeadshot,
   quote:
-    "Our vision is to build institutional-grade healthcare infrastructure that delivers operational excellence and meaningful returns for our partners, one facility at a time.",
+  "Our vision is to build institutional-grade healthcare infrastructure that delivers operational excellence and meaningful returns for our partners, one facility at a time.",
   bio: "With experience leading $100M+ in annual revenue across 24+ healthcare locations, Jay brings proven expertise in scaling multi-site operations. As Consulting CFO at Total Point Healthcare and current operator of ER of Irving and ER of Lufkin, he combines financial acumen with hands-on operational leadership.",
-  highlights: ["$100M+ annual revenue led", "24+ locations managed", "600+ staff managed"],
+  highlights: ["$100M+ annual revenue led", "24+ locations managed", "600+ staff managed"]
 };
-const joelProfile = {
-  name: "Joel Lanehart",
-  role: "Construction Project Manager",
-  category: "Construction & Facilities",
-  photo: joelHeadshot,
-  quote:
-    "Success in facility management comes from passion, dependability, and a relentless focus on building strong teams that deliver results.",
-  bio: "Joel is a seasoned Maintenance Manager and Director with over 15 years of experience maintaining and managing large-scale assets. Known for his passion, dependability, and loyalty, Joel excels at motivating teams to perform at their best. He brings strong relationship-building skills, polished computer proficiency, and proven budget management expertise that drives company revenue. Organized with excellent written and oral communication skills, Joel is committed to achieving and surpassing every organizational goal.",
-  highlights: ["15+ years experience", "Large asset management", "Budget optimization"],
-};
-
 const teamMembers = [
-  {
-    name: "Jamie Alcantar",
-    role: "Chief Nurse",
-    category: "Healthcare",
-    photo: jamieHeadshot,
-  },
-  {
-    name: "Anjila Shrestha",
-    role: "Healthcare Operations",
-    category: "Operations",
-    photo: anjilaHeadshot,
-  },
-  {
-    name: "Julie Moreno",
-    role: "Medspa Operations",
-    category: "Healthcare Operations",
-    photo: julieHeadshot,
-  },
-  {
-    name: "Arslan Iftikhar",
-    role: "Medical Records",
-    category: "Healthcare",
-    photo: arslanHeadshot,
-  },
-  {
-    name: "Michael Gipson",
-    role: "People & Operations",
-    category: "Operations",
-    photo: michaelHeadshot,
-  },
-];
+{
+  name: "Jamie Alcantar",
+  role: "Chief Nurse",
+  category: "Healthcare",
+  photo: jamieHeadshot
+},
+{
+  name: "Anjila Shrestha",
+  role: "Operations",
+  category: "Operations",
+  photo: anjilaHeadshot
+},
+{
+  name: "Julie Moreno",
+  role: "Executive Assistance",
+  category: "Healthcare Operations",
+  photo: julieHeadshot
+},
+{
+  name: "Arslan Iftikhar",
+  role: "Medical Records",
+  category: "Healthcare",
+  photo: arslanHeadshot
+}];
+
 
 const accountingTeam = [
-  {
-    name: "Ganesh Dahal",
-    role: "Tax",
-    category: "Accounting & Billing",
-    photo: ganeshHeadshot,
-  },
-  {
-    name: "Guinness Lakhe",
-    role: "Sr. Accounting Officer",
-    category: "Accounting & Billing",
-    photo: guinnessHeadshot,
-  },
-  {
-    name: "Bhaskar Rokka",
-    role: "Staff Accountant",
-    category: "Accounting & Billing",
-    photo: bhaskarHeadshot,
-  },
-  {
-    name: "Tika Rai",
-    role: "Staff Accountant",
-    category: "Accounting & Billing",
-    photo: tikaHeadshot,
-  },
-  {
-    name: "Bipul Maharjan",
-    role: "Sr. Accounting Officer",
-    category: "Accounting & Billing",
-    photo: bipulHeadshot,
-  },
-];
+{
+  name: "Ganesh Dahal",
+  role: "Tax",
+  category: "Accounting & Billing",
+  photo: ganeshHeadshot
+},
+{
+  name: "Guinness Lakhe",
+  role: "Sr. Accounting Officer",
+  category: "Accounting & Billing",
+  photo: guinnessHeadshot
+},
+{
+  name: "Bhaskar Rokka",
+  role: "Staff Accountant",
+  category: "Accounting & Billing",
+  photo: bhaskarHeadshot
+},
+{
+  name: "Tika Rai",
+  role: "Staff Accountant",
+  category: "Accounting & Billing",
+  photo: tikaHeadshot
+},
+{
+  name: "Bipul Maharjan",
+  role: "Sr. Accounting Officer",
+  category: "Accounting & Billing",
+  photo: bipulHeadshot
+}];
+
 const rickProfile = {
   name: "Rick Leonard",
   role: "Director of Operation",
   category: "Operations & Facilities",
   photo: rickHeadshot,
   quote:
-    "Operational efficiency isn't just about cost savings, it's about creating environments where healthcare teams can deliver their best care.",
+  "Operational efficiency isn't just about cost savings, it's about creating environments where healthcare teams can deliver their best care.",
   bio: "Rick brings over 35 years of hospital operations and facility management experience. He has led multiple hospital and emergency center projects from concept to completion, with leadership roles at ServiceMaster, Texas Health Resources, and CHS. His equipment planning expertise spans Stanford, Sutter, and Marshfield Clinic.",
-  highlights: ["35+ years experience", "50+ projects delivered", "4 major health systems"],
+  highlights: ["35+ years experience", "50+ projects delivered", "4 major health systems"]
 };
 const LeadershipPage = () => {
   return (
@@ -125,13 +106,13 @@ const LeadershipPage = () => {
         backgroundImage={heroLeadership}
         primaryCta={{
           text: "Get Started",
-          link: "/partners",
+          link: "/partners"
         }}
         secondaryCta={{
           text: "Learn More",
-          link: "/track-record",
-        }}
-      />
+          link: "/track-record"
+        }} />
+      
 
       {/* Featured Leader - Jay */}
       <section className="section-padding bg-background">
@@ -141,16 +122,16 @@ const LeadershipPage = () => {
             <ScrollReveal>
               <motion.div
                 whileHover={{
-                  scale: 1.02,
+                  scale: 1.02
                 }}
-                className="relative"
-              >
+                className="relative">
+                
                 <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
                   <img
                     src={featuredLeader.photo}
                     alt={featuredLeader.name}
-                    className="w-full h-full object-cover object-top"
-                  />
+                    className="w-full h-full object-cover object-top" />
+                  
                 </div>
                 {/* Decorative element */}
                 <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
@@ -183,14 +164,14 @@ const LeadershipPage = () => {
 
                 {/* Stats */}
                 <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
-                  {featuredLeader.highlights.map((highlight, i) => (
-                    <span
-                      key={i}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
-                    >
+                  {featuredLeader.highlights.map((highlight, i) =>
+                  <span
+                    key={i}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium">
+                    
                       {highlight}
                     </span>
-                  ))}
+                  )}
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -240,14 +221,14 @@ const LeadershipPage = () => {
 
                 {/* Stats */}
                 <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
-                  {rickProfile.highlights.map((highlight, i) => (
-                    <span
-                      key={i}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-background border border-border rounded-lg text-xs sm:text-sm font-medium"
-                    >
+                  {rickProfile.highlights.map((highlight, i) =>
+                  <span
+                    key={i}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-background border border-border rounded-lg text-xs sm:text-sm font-medium">
+                    
                       {highlight}
                     </span>
-                  ))}
+                  )}
                 </div>
 
                 <div className="flex items-center gap-4">
@@ -268,94 +249,20 @@ const LeadershipPage = () => {
             <ScrollReveal direction="left">
               <motion.div
                 whileHover={{
-                  scale: 1.02,
+                  scale: 1.02
                 }}
-                className="relative order-1 lg:order-2"
-              >
+                className="relative order-1 lg:order-2">
+                
                 <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/10 to-primary/10">
                   <img
                     src={rickProfile.photo}
                     alt={rickProfile.name}
-                    className="w-full h-full object-cover object-top"
-                  />
+                    className="w-full h-full object-cover object-top" />
+                  
                 </div>
                 {/* Decorative element */}
                 <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/10 rounded-2xl -z-10" />
               </motion.div>
-            </ScrollReveal>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Leader - Joel */}
-      <section className="section-padding bg-background">
-        <div className="container-focus">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Photo */}
-            <ScrollReveal>
-              <motion.div
-                whileHover={{
-                  scale: 1.02,
-                }}
-                className="relative"
-              >
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
-                  <img
-                    src={joelProfile.photo}
-                    alt={joelProfile.name}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
-              </motion.div>
-            </ScrollReveal>
-
-            {/* Content */}
-            <ScrollReveal direction="left">
-              <div>
-                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
-                  {joelProfile.category}
-                </span>
-
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
-                  {joelProfile.name}
-                </h2>
-
-                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{joelProfile.role}</p>
-
-                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
-                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
-                    "{joelProfile.quote}"
-                  </p>
-                </div>
-
-                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
-                  {joelProfile.bio}
-                </p>
-
-                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
-                  {joelProfile.highlights.map((highlight, i) => (
-                    <span
-                      key={i}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
-                    >
-                      {highlight}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <Button asChild className="gap-2">
-                    <Link to="/contact">
-                      Connect With Joel
-                      <ArrowRight size={18} />
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    <Share2 size={18} />
-                  </Button>
-                </div>
-              </div>
             </ScrollReveal>
           </div>
         </div>
@@ -376,33 +283,33 @@ const LeadershipPage = () => {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-            {teamMembers.map((member, index) => (
-              <ScrollReveal key={member.name} delay={index * 0.15}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            {teamMembers.map((member, index) =>
+            <ScrollReveal key={member.name} delay={index * 0.15}>
                 <motion.div
-                  whileHover={{
-                    y: -8,
-                  }}
-                  className="group relative rounded-2xl overflow-hidden cursor-pointer"
-                >
+                whileHover={{
+                  y: -8
+                }}
+                className="group relative rounded-2xl overflow-hidden cursor-pointer">
+                
                   {/* Photo */}
                   <div className="aspect-[4/5]">
-                    {member.photo ? (
-                      <img
-                        src={member.photo}
-                        alt={member.name}
-                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    {member.photo ?
+                  <img
+                    src={member.photo}
+                    alt={member.name}
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" /> :
+
+
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                         <span className="text-4xl font-bold text-primary/50">
-                          {member.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                          {member.name.
+                      split(" ").
+                      map((n) => n[0]).
+                      join("")}
                         </span>
                       </div>
-                    )}
+                  }
                   </div>
 
                   {/* Gradient Overlay */}
@@ -415,7 +322,7 @@ const LeadershipPage = () => {
                   </div>
                 </motion.div>
               </ScrollReveal>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -428,40 +335,40 @@ const LeadershipPage = () => {
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold mb-3 sm:mb-4">
                 Accounting & Billing Team
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
-                Our dedicated finance professionals ensure operational excellence and financial accuracy across all
-                facilities.
-              </p>
+              
+
+
+              
             </div>
           </ScrollReveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-            {accountingTeam.map((member, index) => (
-              <ScrollReveal key={member.name} delay={index * 0.1}>
+            {accountingTeam.map((member, index) =>
+            <ScrollReveal key={member.name} delay={index * 0.1}>
                 <motion.div
-                  whileHover={{
-                    y: -8,
-                  }}
-                  className="group relative rounded-2xl overflow-hidden cursor-pointer"
-                >
+                whileHover={{
+                  y: -8
+                }}
+                className="group relative rounded-2xl overflow-hidden cursor-pointer">
+                
                   {/* Photo */}
                   <div className="aspect-[4/5]">
-                    {member.photo ? (
-                      <img
-                        src={member.photo}
-                        alt={member.name}
-                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    {member.photo ?
+                  <img
+                    src={member.photo}
+                    alt={member.name}
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" /> :
+
+
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                         <span className="text-4xl font-bold text-primary/50">
-                          {member.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                          {member.name.
+                      split(" ").
+                      map((n) => n[0]).
+                      join("")}
                         </span>
                       </div>
-                    )}
+                  }
                   </div>
 
                   {/* Gradient Overlay */}
@@ -474,7 +381,7 @@ const LeadershipPage = () => {
                   </div>
                 </motion.div>
               </ScrollReveal>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -508,8 +415,8 @@ const LeadershipPage = () => {
                     variant="outline"
                     size="lg"
                     asChild
-                    className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                  >
+                    className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                    
                     <Link to="/track-record">View Track Record</Link>
                   </Button>
                 </div>
@@ -518,7 +425,7 @@ const LeadershipPage = () => {
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>);
+
 };
 export default LeadershipPage;
