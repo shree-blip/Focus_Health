@@ -66,7 +66,7 @@ const teamMembers = [
     photo: arslanHeadshot,
   },
   {
-    name: "Michael Gipson",
+    name: "Michael",
     role: "People & Operations",
     category: "Operations",
     photo: michaelHeadshot,
