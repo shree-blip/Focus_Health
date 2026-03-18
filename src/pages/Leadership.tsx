@@ -17,7 +17,8 @@ import bhaskarHeadshot from "@/assets/bhaskar-rokka-headshot.png";
 import tikaHeadshot from "@/assets/tika-rai-headshot.png";
 import arslanHeadshot from "@/assets/arslan-iftikhar-headshot.png";
 import bipulHeadshot from "@/assets/bipul-maharjan-headshot.png";
-import mawewlHeadshot from "@/assets/mawewl-headshot.png";
+import joelHeadshot from "@/assets/joel-lanehart-headshot.png";
+import michaelHeadshot from "@/assets/michael-headshot.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
@@ -28,6 +29,17 @@ const featuredLeader = {
   bio: "With experience leading $100M+ in annual revenue across 24+ healthcare locations, Jay brings proven expertise in scaling multi-site operations. As Consulting CFO at Total Point Healthcare and current operator of ER of Irving and ER of Lufkin, he combines financial acumen with hands-on operational leadership.",
   highlights: ["$100M+ annual revenue led", "24+ locations managed", "600+ staff managed"],
 };
+const joelProfile = {
+  name: "Joel Lanehart",
+  role: "Construction Project Manager",
+  category: "Construction & Facilities",
+  photo: joelHeadshot,
+  quote:
+    "Success in facility management comes from passion, dependability, and a relentless focus on building strong teams that deliver results.",
+  bio: "Joel is a seasoned Maintenance Manager and Director with over 15 years of experience maintaining and managing large-scale assets. Known for his passion, dependability, and loyalty, Joel excels at motivating teams to perform at their best. He brings strong relationship-building skills, polished computer proficiency, and proven budget management expertise that drives company revenue. Organized with excellent written and oral communication skills, Joel is committed to achieving and surpassing every organizational goal.",
+  highlights: ["15+ years experience", "Large asset management", "Budget optimization"],
+};
+
 const teamMembers = [
   {
     name: "Jamie Alcantar",
@@ -37,13 +49,13 @@ const teamMembers = [
   },
   {
     name: "Anjila Shrestha",
-    role: "Operations",
+    role: "Healthcare Operations",
     category: "Operations",
     photo: anjilaHeadshot,
   },
   {
     name: "Julie Moreno",
-    role: "Executive Assistance",
+    role: "Medspa Operations",
     category: "Healthcare Operations",
     photo: julieHeadshot,
   },
@@ -54,10 +66,10 @@ const teamMembers = [
     photo: arslanHeadshot,
   },
   {
-    name: "Mawewl",
-    role: "Construction Project Manager",
-    category: "Construction & Facilities",
-    photo: mawewlHeadshot,
+    name: "Michael",
+    role: "People & Operations",
+    category: "Operations",
+    photo: michaelHeadshot,
   },
 ];
 
@@ -270,6 +282,80 @@ const LeadershipPage = () => {
                 {/* Decorative element */}
                 <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/10 rounded-2xl -z-10" />
               </motion.div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Leader - Joel */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Photo */}
+            <ScrollReveal>
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                }}
+                className="relative"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                  <img
+                    src={joelProfile.photo}
+                    alt={joelProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+              </motion.div>
+            </ScrollReveal>
+
+            {/* Content */}
+            <ScrollReveal direction="left">
+              <div>
+                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
+                  {joelProfile.category}
+                </span>
+
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
+                  {joelProfile.name}
+                </h2>
+
+                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{joelProfile.role}</p>
+
+                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
+                    "{joelProfile.quote}"
+                  </p>
+                </div>
+
+                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
+                  {joelProfile.bio}
+                </p>
+
+                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
+                  {joelProfile.highlights.map((highlight, i) => (
+                    <span
+                      key={i}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Button asChild className="gap-2">
+                    <Link to="/contact">
+                      Connect With Joel
+                      <ArrowRight size={18} />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Share2 size={18} />
+                  </Button>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
