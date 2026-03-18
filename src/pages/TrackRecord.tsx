@@ -45,7 +45,7 @@ const healthcarePortfolio = [
     type: 'Health & Wellness Clinic',
     description: 'Comprehensive wellness clinic in Naperville offering personalized medical weight loss, IV hydration therapy, aesthetic treatments, and holistic care solutions.',
     url: 'https://napervillehwclinic.com',
-    image: null,
+    image: facilityNapervilleWellness,
   },
 ];
 
