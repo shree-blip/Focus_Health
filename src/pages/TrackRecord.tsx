@@ -7,6 +7,9 @@ import { PageHero } from '@/components/ui/PageHero';
 import heroTrackRecord from '@/assets/hero-track-record.jpg';
 import facilityErIrving from '@/assets/facility-er-irving-real.webp';
 import facilityErLufkin from '@/assets/facility-er-lufkin-real.png';
+import facilityErWhiterock from '@/assets/facility-er-whiterock.png';
+import facilityIrvingWellness from '@/assets/facility-irving-wellness.png';
+import facilityNapervilleWellness from '@/assets/facility-naperville-wellness.png';
 
 const healthcarePortfolio = [
   {
@@ -28,21 +31,21 @@ const healthcarePortfolio = [
     type: 'Freestanding Emergency Room',
     description: '24/7 emergency room in Dallas, TX with board-certified physicians and trauma-trained nurses. Advanced on-site imaging and lab services with minimal wait times.',
     url: 'https://erofwhiterock.com',
-    image: null,
+    image: facilityErWhiterock,
   },
   {
     name: 'Irving Health & Wellness Clinic',
     type: 'Health & Wellness Clinic',
     description: 'Premier wellness center in Irving offering physician-supervised medical weight loss, hormone therapy, aesthetic services, IV hydration therapy, and advanced body contouring.',
     url: 'https://irvingwellnessclinic.com',
-    image: null,
+    image: facilityIrvingWellness,
   },
   {
     name: 'Naperville Health & Wellness Clinic',
     type: 'Health & Wellness Clinic',
     description: 'Comprehensive wellness clinic in Naperville offering personalized medical weight loss, IV hydration therapy, aesthetic treatments, and holistic care solutions.',
     url: 'https://napervillehwclinic.com',
-    image: null,
+    image: facilityNapervilleWellness,
   },
 ];
 
