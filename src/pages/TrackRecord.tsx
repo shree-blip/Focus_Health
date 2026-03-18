@@ -7,6 +7,9 @@ import { PageHero } from '@/components/ui/PageHero';
 import heroTrackRecord from '@/assets/hero-track-record.jpg';
 import facilityErIrving from '@/assets/facility-er-irving-real.webp';
 import facilityErLufkin from '@/assets/facility-er-lufkin-real.png';
+import facilityErWhiterock from '@/assets/facility-er-whiterock.png';
+import facilityIrvingWellness from '@/assets/facility-irving-wellness.png';
+import facilityNapervilleWellness from '@/assets/facility-naperville-wellness.png';
 
 const healthcarePortfolio = [
   {
