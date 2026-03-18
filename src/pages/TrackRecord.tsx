@@ -1,10 +1,50 @@
 import { motion } from 'framer-motion';
-import { Building2, Clock, Shield, TrendingUp } from 'lucide-react';
+import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { PageHero } from '@/components/ui/PageHero';
 import heroTrackRecord from '@/assets/hero-track-record.jpg';
+import facilityErIrving from '@/assets/facility-er-irving-real.webp';
+import facilityErLufkin from '@/assets/facility-er-lufkin-real.png';
+
+const healthcarePortfolio = [
+  {
+    name: 'ER of Irving',
+    type: 'Freestanding Emergency Room',
+    description: '24/7 freestanding emergency room in Irving, TX with board-certified physicians, on-site CT, X-ray, and lab services. Pediatric and adult emergency care with minimal wait times.',
+    url: 'https://erofirving.com',
+    image: facilityErIrving,
+  },
+  {
+    name: 'ER of Lufkin',
+    type: 'Freestanding Emergency Room',
+    description: '24/7 emergency room in Lufkin, TX with board-certified ER physicians, on-site imaging, pharmacy, and lab testing. Comprehensive emergency care for all ages.',
+    url: 'https://eroflufkin.com',
+    image: facilityErLufkin,
+  },
+  {
+    name: 'ER of White Rock',
+    type: 'Freestanding Emergency Room',
+    description: '24/7 emergency room in Dallas, TX with board-certified physicians and trauma-trained nurses. Advanced on-site imaging and lab services with minimal wait times.',
+    url: 'https://erofwhiterock.com',
+    image: null,
+  },
+  {
+    name: 'Irving Health & Wellness Clinic',
+    type: 'Health & Wellness Clinic',
+    description: 'Premier wellness center in Irving offering physician-supervised medical weight loss, hormone therapy, aesthetic services, IV hydration therapy, and advanced body contouring.',
+    url: 'https://irvingwellnessclinic.com',
+    image: null,
+  },
+  {
+    name: 'Naperville Health & Wellness Clinic',
+    type: 'Health & Wellness Clinic',
+    description: 'Comprehensive wellness clinic in Naperville offering personalized medical weight loss, IV hydration therapy, aesthetic treatments, and holistic care solutions.',
+    url: 'https://napervillehwclinic.com',
+    image: null,
+  },
+];
 
 const processSteps = [
   {
