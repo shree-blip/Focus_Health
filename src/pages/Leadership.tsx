@@ -17,7 +17,8 @@ import bhaskarHeadshot from "@/assets/bhaskar-rokka-headshot.png";
 import tikaHeadshot from "@/assets/tika-rai-headshot.png";
 import arslanHeadshot from "@/assets/arslan-iftikhar-headshot.png";
 import bipulHeadshot from "@/assets/bipul-maharjan-headshot.png";
-import mawewlHeadshot from "@/assets/mawewl-headshot.png";
+import joelHeadshot from "@/assets/joel-lanehart-headshot.png";
+import michaelHeadshot from "@/assets/michael-headshot.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
