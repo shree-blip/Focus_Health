@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { motion } from 'framer-motion';
-import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart } from 'lucide-react';
+import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart, ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
+import { Link } from 'react-router-dom';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { PageHero } from '@/components/ui/PageHero';
@@ -71,9 +72,10 @@ const healthcarePortfolio = [
     type: 'Freestanding Emergency Room',
     location: 'Lufkin, TX',
     description: 'ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas staffed by board-certified ER physicians with on-site imaging, in-house pharmacy, and comprehensive lab testing. Serving Angelina County, Nacogdoches, and East Texas with full-service emergency care for all ages.',
-    url: 'https://eroflufkin.com',
+    url: '/facilities/er-of-lufkin',
     image: facilityErLufkin,
     address: '4633 S Medford Dr, Lufkin, TX 75901',
+    internal: true,
   },
   {
     name: 'ER of White Rock',
@@ -138,6 +140,7 @@ const operatingSystem = [
   { icon: Building2, title: 'Facility Standards', description: 'Modern, well-maintained facilities that exceed patient expectations.' },
 ];
 
+const TrackRecordPage = () => {
   const trackRecordSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -313,68 +316,94 @@ const operatingSystem = [
           </ScrollReveal>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" itemScope itemType="https://schema.org/ItemList">
-            {healthcarePortfolio.map((facility, index) => (
-              <ScrollReveal key={facility.name} delay={index * 0.1}>
-                <motion.a
-                  href={facility.url}
-                  target="_blank"
-                  rel="dofollow"
-                  whileHover={{ y: -6 }}
-                  className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full"
-                  itemScope
-                  itemType="https://schema.org/MedicalClinic"
-                  itemProp="itemListElement"
-                  title={`${facility.name} – ${facility.type} in ${facility.location}`}
-                >
-                  <meta itemProp="url" content={facility.url} />
-                  <meta itemProp="name" content={facility.name} />
-                  {facility.address && (
-                    <span itemProp="address" itemScope itemType="https://schema.org/PostalAddress" className="hidden">
-                      <meta itemProp="streetAddress" content={facility.address} />
-                    </span>
-                  )}
+            {healthcarePortfolio.map((facility, index) => {
+              const isInternal = 'internal' in facility && facility.internal;
+              const CardWrapper = ({ children }: { children: React.ReactNode }) =>
+                isInternal ? (
+                  <Link
+                    to={facility.url}
+                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full"
+                    itemScope
+                    itemType="https://schema.org/MedicalClinic"
+                    itemProp="itemListElement"
+                    title={`${facility.name} – ${facility.type} in ${facility.location}`}
+                  >
+                    {children}
+                  </Link>
+                ) : (
+                  <a
+                    href={facility.url}
+                    target="_blank"
+                    rel="dofollow"
+                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full"
+                    itemScope
+                    itemType="https://schema.org/MedicalClinic"
+                    itemProp="itemListElement"
+                    title={`${facility.name} – ${facility.type} in ${facility.location}`}
+                  >
+                    {children}
+                  </a>
+                );
 
-                  {/* Image or Icon Header */}
-                  <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden">
-                    {'images' in facility && facility.images ? (
-                      <AutoCarousel images={facility.images} alt={`${facility.name} – ${facility.type} in ${facility.location}`} />
-                    ) : 'image' in facility && facility.image ? (
-                      <img
-                        src={facility.image}
-                        alt={`${facility.name} – ${facility.type} in ${facility.location}`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        itemProp="image"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        {facility.type.includes('Emergency') ? (
-                          <Stethoscope size={48} className="text-primary/30" />
+              return (
+                <ScrollReveal key={facility.name} delay={index * 0.1}>
+                  <motion.div whileHover={{ y: -6 }}>
+                    <CardWrapper>
+                      <meta itemProp="url" content={facility.url.startsWith('/') ? `https://getfocushealth.com${facility.url}` : facility.url} />
+                      <meta itemProp="name" content={facility.name} />
+                      {facility.address && (
+                        <span itemProp="address" itemScope itemType="https://schema.org/PostalAddress" className="hidden">
+                          <meta itemProp="streetAddress" content={facility.address} />
+                        </span>
+                      )}
+
+                      {/* Image or Icon Header */}
+                      <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden">
+                        {'images' in facility && facility.images ? (
+                          <AutoCarousel images={facility.images} alt={`${facility.name} – ${facility.type} in ${facility.location}`} />
+                        ) : 'image' in facility && facility.image ? (
+                          <img
+                            src={facility.image}
+                            alt={`${facility.name} – ${facility.type} in ${facility.location}`}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            itemProp="image"
+                            loading="lazy"
+                          />
                         ) : (
-                          <Heart size={48} className="text-accent/30" />
+                          <div className="w-full h-full flex items-center justify-center">
+                            {facility.type.includes('Emergency') ? (
+                              <Stethoscope size={48} className="text-primary/30" />
+                            ) : (
+                              <Heart size={48} className="text-accent/30" />
+                            )}
+                          </div>
                         )}
+                        <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-background/90 backdrop-blur-sm text-xs font-medium text-foreground">
+                          {facility.type}
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-background/90 backdrop-blur-sm text-xs font-medium text-foreground">
-                      {facility.type}
-                    </div>
-                  </div>
 
-                  {/* Content */}
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-heading font-bold text-lg" itemProp="name">{facility.name}</h3>
-                      <ExternalLink size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                    </div>
-                    <p className="text-xs text-primary/70 font-medium mb-2">{facility.location}</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed" itemProp="description">{facility.description}</p>
-                    <span className="inline-block mt-4 text-sm font-medium text-primary group-hover:underline">
-                      Visit {facility.name} →
-                    </span>
-                  </div>
-                </motion.a>
-              </ScrollReveal>
-            ))}
+                      {/* Content */}
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="font-heading font-bold text-lg" itemProp="name">{facility.name}</h3>
+                          {isInternal ? (
+                            <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                          ) : (
+                            <ExternalLink size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-xs text-primary/70 font-medium mb-2">{facility.location}</p>
+                        <p className="text-muted-foreground text-sm leading-relaxed" itemProp="description">{facility.description}</p>
+                        <span className="inline-block mt-4 text-sm font-medium text-primary group-hover:underline">
+                          {isInternal ? `Learn More About ${facility.name}` : `Visit ${facility.name}`} →
+                        </span>
+                      </div>
+                    </CardWrapper>
+                  </motion.div>
+                </ScrollReveal>
+              );
+            })}
           </div>
         </div>
       </section>
