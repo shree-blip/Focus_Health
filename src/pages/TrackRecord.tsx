@@ -260,7 +260,9 @@ const TrackRecordPage = () => {
                 >
                   {/* Image or Icon Header */}
                   <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden">
-                    {facility.image ? (
+                    {'images' in facility && facility.images ? (
+                      <AutoCarousel images={facility.images} alt={facility.name} />
+                    ) : 'image' in facility && facility.image ? (
                       <img
                         src={facility.image}
                         alt={facility.name}
