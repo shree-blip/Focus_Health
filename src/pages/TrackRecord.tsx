@@ -83,9 +83,10 @@ const healthcarePortfolio = [
     type: 'Freestanding Emergency Room',
     location: 'Dallas, TX',
     description: 'ER of White Rock is a 24/7 freestanding emergency room in Dallas, Texas with board-certified emergency physicians and trauma-trained nurses. Advanced on-site CT, X-ray, and lab services with minimal wait times near White Rock Lake, Lakewood, and East Dallas.',
-    url: 'https://erofwhiterock.com',
+    url: '/facilities/er-of-white-rock',
     image: facilityErWhiterock,
     address: '9150 Garland Rd, Dallas, TX 75218',
+    internal: true,
   },
   {
     name: 'Irving Health & Wellness Clinic',
