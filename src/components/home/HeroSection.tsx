@@ -90,25 +90,26 @@ const HeartbeatLine = () => {
   );
 };
 
+const liveStats = [
+  { value: "24+", label: "Facilities Managed" },
+  { value: "24/7", label: "Operations Model" },
+  { value: "Texas", label: "Growth Markets" },
+];
+
 // Live stats ticker
 const LiveStatsTicker = () => {
   const [currentStat, setCurrentStat] = useState(0);
-  const stats = [
-    { value: "24+", label: "Facilities Managed" },
-    { value: "24/7", label: "Operations Model" },
-    { value: "Texas", label: "Growth Markets" },
-  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentStat(prev => (prev + 1) % stats.length);
+      setCurrentStat(prev => (prev + 1) % liveStats.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="relative h-8 overflow-hidden">
-      {stats.map((stat, index) => (
+      {liveStats.map((stat, index) => (
         <motion.div
           key={stat.label}
           className="absolute inset-0 flex items-center gap-2"

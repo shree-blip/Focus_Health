@@ -96,7 +96,7 @@ const PartnersPage = () => {
         title: "Request Submitted",
         description: "We'll be in touch shortly to discuss investment opportunities."
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting request:', error);
       toast({
         title: "Error",
