@@ -3,9 +3,11 @@
 
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 2
 
 User-agent: Twitterbot
 Allow: /
@@ -17,6 +19,15 @@ User-agent: LinkedInBot
 Allow: /
 
 User-agent: Slackbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: YandexBot
 Allow: /
 
 # AI/LLM Crawlers
@@ -35,8 +46,22 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bytespider
+Disallow: /
+
 User-agent: *
 Allow: /
 
+# Disallow non-content paths
+User-agent: *
+Disallow: /api/
+Disallow: /assets/
+
 # Sitemap location
 Sitemap: https://getfocushealth.com/sitemap.xml
+
+# LLMs.txt
+LLMs-Txt: https://getfocushealth.com/llms.txt
