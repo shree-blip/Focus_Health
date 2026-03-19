@@ -93,9 +93,10 @@ const healthcarePortfolio = [
     type: 'Health & Wellness Clinic',
     location: 'Irving, TX',
     description: 'Irving Health & Wellness Clinic is a premier wellness center in Irving, Texas offering physician-supervised medical weight loss, hormone replacement therapy, aesthetic services, IV hydration therapy, and advanced body contouring. Serving Las Colinas, Valley Ranch, and DFW metroplex.',
-    url: 'https://irvingwellnessclinic.com',
+    url: '/facilities/irving-wellness-clinic',
     images: [irvingWellness1, irvingWellness2, irvingWellness3],
     address: 'Irving, TX',
+    internal: true,
   },
   {
     name: 'Naperville Health & Wellness Clinic',
