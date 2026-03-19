@@ -439,11 +439,17 @@ const NapervilleWellnessClinic = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 mt-12">
-            <Link to="/track-record" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
-              View Full Portfolio <ArrowRight size={16} />
+            <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
+              Focus Health Home <ArrowRight size={16} />
             </Link>
             <Link to="/platform" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Our Platform
+            </Link>
+            <Link to="/investors" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
+              Investment Opportunities
+            </Link>
+            <Link to="/track-record" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
+              View Full Portfolio
             </Link>
             <Link to="/our-process" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Our Process
@@ -451,6 +457,9 @@ const NapervilleWellnessClinic = () => {
             <Link to="/contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Contact Us
             </Link>
+            <a href="https://napervillehealthandwellness.com" target="_blank" rel="dofollow" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors">
+              Visit Naperville Wellness Website <ArrowRight size={16} />
+            </a>
           </div>
         </div>
       </section>
