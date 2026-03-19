@@ -63,9 +63,10 @@ const healthcarePortfolio = [
     type: 'Freestanding Emergency Room',
     location: 'Irving, TX',
     description: 'ER of Irving is a 24/7 freestanding emergency room in Irving, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, and full laboratory services. Offering pediatric and adult emergency care with minimal wait times near Las Colinas, Valley Ranch, and greater Dallas-Fort Worth.',
-    url: 'https://erofirving.com',
+    url: '/facilities/er-of-irving',
     image: facilityErIrving,
     address: '7600 N MacArthur Blvd, Irving, TX 75063',
+    internal: true,
   },
   {
     name: 'ER of Lufkin',
