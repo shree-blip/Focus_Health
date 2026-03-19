@@ -103,9 +103,10 @@ const healthcarePortfolio = [
     type: 'Health & Wellness Clinic',
     location: 'Naperville, IL',
     description: 'Naperville Health & Wellness Clinic is a comprehensive wellness clinic in Naperville, Illinois offering personalized medical weight loss programs, IV hydration therapy, aesthetic treatments, and holistic care solutions. Serving Naperville, Aurora, Wheaton, and the greater Chicago suburbs.',
-    url: 'https://napervillehwclinic.com',
+    url: '/facilities/naperville-wellness-clinic',
     images: [napervilleWellness1, napervilleWellness2, napervilleWellness3, napervilleWellness4],
     address: 'Naperville, IL',
+    internal: true,
   },
 ];
 

@@ -47,6 +47,10 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/facilities/er-of-lufkin" element={<ERofLufkin />} />
+            <Route path="/facilities/er-of-irving" element={<ERofIrving />} />
+            <Route path="/facilities/er-of-white-rock" element={<ERofWhiteRock />} />
+            <Route path="/facilities/irving-wellness-clinic" element={<IrvingWellnessClinic />} />
+            <Route path="/facilities/naperville-wellness-clinic" element={<NapervilleWellnessClinic />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -439,10 +439,10 @@ const ERofLufkin = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
             {[
-              { name: 'ER of Irving', path: '/track-record', location: 'Irving, TX' },
-              { name: 'ER of White Rock', path: '/track-record', location: 'Dallas, TX' },
-              { name: 'Irving Wellness Clinic', path: '/track-record', location: 'Irving, TX' },
-              { name: 'Naperville Wellness', path: '/track-record', location: 'Naperville, IL' },
+              { name: 'ER of Irving', path: '/facilities/er-of-irving', location: 'Irving, TX' },
+              { name: 'ER of White Rock', path: '/facilities/er-of-white-rock', location: 'Dallas, TX' },
+              { name: 'Irving Wellness Clinic', path: '/facilities/irving-wellness-clinic', location: 'Irving, TX' },
+              { name: 'Naperville Wellness', path: '/facilities/naperville-wellness-clinic', location: 'Naperville, IL' },
             ].map((facility, index) => (
               <ScrollReveal key={facility.name} delay={index * 0.1}>
                 <Link
