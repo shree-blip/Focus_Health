@@ -11,7 +11,7 @@ import {
   Users, MapPin, Phone, ArrowRight, CheckCircle2, Building2,
   HeartPulse, Pill, Microscope, Zap
 } from 'lucide-react';
-import facilityImage from '@/assets/facility-er-lufkin-real.png';
+import facilityImage from '@/assets/facility-er-irving-real.webp';
 
 const BASE_URL = 'https://getfocushealth.com';
 
@@ -19,38 +19,38 @@ const emergencyServices = [
   {
     icon: HeartPulse,
     title: 'Cardiac Emergency Care',
-    description: 'Immediate evaluation and stabilization of chest pain, heart attacks, arrhythmias, and other cardiovascular emergencies with on-site EKG monitoring and cardiac enzyme testing.',
-    keywords: ['chest pain treatment Lufkin', 'heart attack emergency East Texas', 'cardiac care Angelina County'],
+    description: 'Immediate evaluation and stabilization of chest pain, heart attacks, arrhythmias, and cardiovascular emergencies with on-site EKG monitoring and cardiac enzyme testing in Irving, TX.',
+    keywords: ['chest pain treatment Irving', 'heart attack emergency DFW', 'cardiac care Dallas-Fort Worth'],
   },
   {
     icon: Brain,
     title: 'Neurological Emergencies',
-    description: 'Rapid assessment of stroke symptoms, seizures, severe headaches, and traumatic brain injuries. Time-critical stroke protocols with advanced CT imaging for fast diagnosis.',
-    keywords: ['stroke treatment Lufkin TX', 'neurological emergency care', 'seizure treatment East Texas'],
+    description: 'Rapid assessment of stroke symptoms, seizures, severe headaches, and traumatic brain injuries. Time-critical stroke protocols with advanced CT imaging for fast diagnosis near Las Colinas.',
+    keywords: ['stroke treatment Irving TX', 'neurological emergency care DFW', 'seizure treatment Dallas'],
   },
   {
     icon: Bone,
     title: 'Orthopedic & Trauma Care',
-    description: 'Treatment for fractures, dislocations, sprains, and musculoskeletal injuries. On-site X-ray and splinting with referral coordination for surgical cases.',
-    keywords: ['broken bone treatment Lufkin', 'fracture care East Texas', 'orthopedic emergency Angelina County'],
+    description: 'Treatment for fractures, dislocations, sprains, and musculoskeletal injuries. On-site X-ray and splinting with referral coordination for surgical cases in the Irving area.',
+    keywords: ['broken bone treatment Irving', 'fracture care DFW', 'orthopedic emergency Dallas-Fort Worth'],
   },
   {
     icon: Baby,
     title: 'Pediatric Emergency Care',
     description: 'Child-friendly emergency treatment for infants, children, and adolescents. Board-certified physicians experienced in pediatric emergencies including fevers, respiratory distress, and injuries.',
-    keywords: ['pediatric ER Lufkin', 'children emergency room East Texas', 'kids urgent care Angelina County'],
+    keywords: ['pediatric ER Irving', 'children emergency room DFW', 'kids urgent care Las Colinas'],
   },
   {
     icon: Droplets,
     title: 'Wound Care & Laceration Repair',
     description: 'Expert wound management including deep lacerations, animal bites, burns, and abscess drainage. Suturing, wound closure, and infection prevention with follow-up guidance.',
-    keywords: ['laceration repair Lufkin TX', 'wound care East Texas', 'stitches emergency room'],
+    keywords: ['laceration repair Irving TX', 'wound care DFW', 'stitches emergency room Irving'],
   },
   {
     icon: Thermometer,
     title: 'Infectious Disease & Fever Management',
     description: 'Diagnosis and treatment of acute infections, high fevers, flu, pneumonia, UTIs, and sepsis. Rapid lab testing with IV antibiotics and fluid therapy when needed.',
-    keywords: ['fever treatment Lufkin', 'infection emergency care East Texas', 'flu treatment Angelina County'],
+    keywords: ['fever treatment Irving', 'infection emergency care DFW', 'flu treatment Dallas-Fort Worth'],
   },
 ];
 
@@ -89,73 +89,73 @@ const diagnosticServices = [
 
 const communityBenefits = [
   {
-    title: 'Reducing ER Wait Times in East Texas',
-    description: 'Traditional hospital emergency departments in rural East Texas often have wait times exceeding 2–4 hours. ER of Lufkin provides a dedicated freestanding alternative where patients are seen by a board-certified physician within minutes, not hours.',
+    title: 'Reducing ER Wait Times in DFW',
+    description: 'Traditional hospital emergency departments in the Dallas-Fort Worth metroplex often have wait times exceeding 3–5 hours. ER of Irving provides a dedicated freestanding alternative where patients are seen by a board-certified physician within minutes, not hours.',
   },
   {
-    title: 'Serving Underserved Rural Communities',
-    description: 'Angelina County and surrounding areas like Nacogdoches, Livingston, Jasper, and Crockett face significant healthcare access gaps. ER of Lufkin bridges this gap by providing hospital-level emergency care closer to home for thousands of East Texas residents.',
+    title: 'Serving Irving & Surrounding Communities',
+    description: 'Irving, Las Colinas, Valley Ranch, Coppell, and the greater DFW area benefit from a conveniently located 24/7 emergency facility. ER of Irving bridges the gap between overcrowded hospital ERs and limited urgent care centers.',
   },
   {
-    title: 'Economic Contribution to Lufkin',
-    description: 'ER of Lufkin creates local healthcare jobs for physicians, nurses, technicians, and administrative staff. The facility contributes to the local economy while raising the standard of accessible emergency medicine in the region.',
+    title: 'Economic Contribution to Irving',
+    description: 'ER of Irving creates local healthcare jobs for physicians, nurses, technicians, and administrative staff. The facility contributes to the local economy while raising the standard of accessible emergency medicine in the region.',
   },
   {
     title: '24/7 Availability for All Ages',
-    description: "Whether it's a child's high fever at 2 AM or a senior's chest pain on a holiday, ER of Lufkin is open 24 hours a day, 7 days a week, 365 days a year — including weekends and holidays — ensuring the community always has a place to turn.",
+    description: "Whether it's a child's high fever at 2 AM or a senior's chest pain on a holiday, ER of Irving is open 24 hours a day, 7 days a week, 365 days a year — including weekends and holidays — ensuring the community always has a place to turn.",
   },
 ];
 
 const nearbyAreas = [
-  'Nacogdoches', 'Livingston', 'Jasper', 'Crockett', 'Center',
-  'San Augustine', 'Diboll', 'Hudson', 'Huntington', 'Zavalla',
-  'Corrigan', 'Woodville', 'Angelina County', 'Nacogdoches County',
+  'Las Colinas', 'Valley Ranch', 'Coppell', 'Grapevine', 'Euless',
+  'Bedford', 'Hurst', 'Grand Prairie', 'Arlington', 'Farmers Branch',
+  'Carrollton', 'Addison', 'Dallas', 'Fort Worth',
 ];
 
 const faqs = [
   {
     q: 'What is a freestanding emergency room?',
-    a: 'A freestanding emergency room (FSER) is a fully licensed emergency department that operates independently from a hospital. ER of Lufkin offers the same level of care as a hospital ER — including board-certified emergency physicians, CT scans, X-rays, labs, and IV medications — but with significantly shorter wait times and a more comfortable patient experience.',
+    a: 'A freestanding emergency room (FSER) is a fully licensed emergency department that operates independently from a hospital. ER of Irving offers the same level of care as a hospital ER — including board-certified emergency physicians, CT scans, X-rays, labs, and IV medications — but with significantly shorter wait times and a more comfortable patient experience.',
   },
   {
-    q: 'Does ER of Lufkin accept insurance?',
-    a: 'Yes, ER of Lufkin accepts most major insurance plans including Medicare, Medicaid, Blue Cross Blue Shield, Aetna, Cigna, UnitedHealthcare, and many others. Self-pay options are also available with transparent pricing.',
+    q: 'Does ER of Irving accept insurance?',
+    a: 'Yes, ER of Irving accepts most major insurance plans including Medicare, Medicaid, Blue Cross Blue Shield, Aetna, Cigna, UnitedHealthcare, and many others. Self-pay options are also available with transparent pricing.',
   },
   {
-    q: 'What are the wait times at ER of Lufkin?',
-    a: 'Patients at ER of Lufkin are typically seen by a board-certified emergency physician within minutes of arrival. Unlike crowded hospital ERs, our freestanding model is designed for rapid triage and treatment.',
+    q: 'What are the wait times at ER of Irving?',
+    a: 'Patients at ER of Irving are typically seen by a board-certified emergency physician within minutes of arrival. Unlike crowded hospital ERs, our freestanding model is designed for rapid triage and treatment.',
   },
   {
-    q: 'Can ER of Lufkin treat children?',
-    a: 'Yes, ER of Lufkin provides emergency care for patients of all ages, including infants, children, and adolescents. Our physicians are experienced in pediatric emergency medicine and equipped to handle childhood emergencies.',
+    q: 'Can ER of Irving treat children?',
+    a: 'Yes, ER of Irving provides emergency care for patients of all ages, including infants, children, and adolescents. Our physicians are experienced in pediatric emergency medicine and equipped to handle childhood emergencies.',
   },
   {
-    q: 'What should I do in a life-threatening emergency?',
-    a: 'Call 911 immediately for life-threatening emergencies such as difficulty breathing, chest pain, severe bleeding, or loss of consciousness. For emergencies that require urgent but non-life-threatening care, you can come directly to ER of Lufkin at 4633 S Medford Dr, Lufkin, TX 75901.',
+    q: 'Where is ER of Irving located?',
+    a: 'ER of Irving is located at 7600 N MacArthur Blvd, Irving, TX 75063 — conveniently accessible from Las Colinas, Valley Ranch, Coppell, and the greater Dallas-Fort Worth area. We are open 24/7/365.',
   },
 ];
 
-const erOfLufkinSchema = {
+const erOfIrvingSchema = {
   "@context": "https://schema.org",
   "@type": "EmergencyService",
-  "name": "ER of Lufkin",
-  "alternateName": "ER of Lufkin – Freestanding Emergency Room",
-  "description": "ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care for all ages. Serving Angelina County, Nacogdoches, and East Texas.",
-  "url": "https://getfocushealth.com/facilities/er-of-lufkin",
-  "telephone": "+1-936-000-0000",
-  "image": `${BASE_URL}/assets/facility-er-lufkin-real.png`,
+  "name": "ER of Irving",
+  "alternateName": "ER of Irving – Freestanding Emergency Room",
+  "description": "ER of Irving is a 24/7 freestanding emergency room in Irving, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care for all ages. Serving Las Colinas, Valley Ranch, Coppell, and greater Dallas-Fort Worth.",
+  "url": `${BASE_URL}/facilities/er-of-irving`,
+  "telephone": "+1-972-000-0000",
+  "image": `${BASE_URL}/assets/facility-er-irving-real.webp`,
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "4633 S Medford Dr",
-    "addressLocality": "Lufkin",
+    "streetAddress": "7600 N MacArthur Blvd",
+    "addressLocality": "Irving",
     "addressRegion": "TX",
-    "postalCode": "75901",
+    "postalCode": "75063",
     "addressCountry": "US"
   },
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": "31.3168",
-    "longitude": "-94.7291"
+    "latitude": "32.9137",
+    "longitude": "-96.9584"
   },
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
@@ -180,12 +180,7 @@ const erOfLufkinSchema = {
   "parentOrganization": {
     "@type": "Organization",
     "name": "Focus Health",
-    "url": "https://getfocushealth.com"
-  },
-  "isPartOf": {
-    "@type": "WebSite",
-    "name": "Focus Health",
-    "url": "https://getfocushealth.com"
+    "url": BASE_URL
   }
 };
 
@@ -202,24 +197,24 @@ const faqSchema = {
   }))
 };
 
-const ERofLufkin = () => {
+const ERofIrving = () => {
   return (
     <Layout>
       <SEOHead
-        title="ER of Lufkin | 24/7 Freestanding Emergency Room in Lufkin, TX"
-        description="ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas. Board-certified ER physicians, on-site CT, X-ray, lab, and pediatric care. Serving Angelina County, Nacogdoches & East Texas with minimal wait times."
-        canonicalUrl="/facilities/er-of-lufkin"
-        keywords="ER of Lufkin, freestanding emergency room Lufkin TX, 24/7 emergency room Lufkin, emergency room near me Lufkin Texas, Angelina County ER, Nacogdoches emergency room, East Texas emergency care, pediatric ER Lufkin, CT scan Lufkin TX, urgent care Lufkin Texas, board certified emergency physician Lufkin, Focus Health"
+        title="ER of Irving | 24/7 Freestanding Emergency Room in Irving, TX"
+        description="ER of Irving is a 24/7 freestanding emergency room in Irving, Texas. Board-certified ER physicians, on-site CT, X-ray, lab, and pediatric care. Serving Las Colinas, Valley Ranch, Coppell & DFW with minimal wait times."
+        canonicalUrl="/facilities/er-of-irving"
+        keywords="ER of Irving, freestanding emergency room Irving TX, 24/7 emergency room Irving, emergency room near me Irving Texas, Las Colinas ER, Valley Ranch emergency room, DFW emergency care, pediatric ER Irving, CT scan Irving TX, urgent care Irving Texas, board certified emergency physician Irving, Focus Health"
       />
       <Helmet>
-        <script type="application/ld+json">{JSON.stringify(erOfLufkinSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(erOfIrvingSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       </Helmet>
 
       {/* Hero */}
       <PageHero
-        title="ER of Lufkin"
-        description="24/7 freestanding emergency room in Lufkin, Texas — board-certified physicians, on-site imaging, and minimal wait times serving Angelina County and East Texas."
+        title="ER of Irving"
+        description="24/7 freestanding emergency room in Irving, Texas — board-certified physicians, on-site imaging, and minimal wait times serving Las Colinas, Valley Ranch & DFW."
         backgroundImage={facilityImage}
         primaryCta={{ text: "View All Facilities", link: "/track-record" }}
         secondaryCta={{ text: "Contact Us", link: "/contact" }}
@@ -233,17 +228,17 @@ const ERofLufkin = () => {
               <div>
                 <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Focus Health Facility</p>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6">
-                  Full-Service Emergency Care in <span className="text-primary">Lufkin, Texas</span>
+                  Full-Service Emergency Care in <span className="text-primary">Irving, Texas</span>
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    <strong>ER of Lufkin</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>4633 S Medford Dr, Lufkin, TX 75901</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility.
+                    <strong>ER of Irving</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>7600 N MacArthur Blvd, Irving, TX 75063</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility.
                   </p>
                   <p>
                     Our team of <strong>board-certified emergency physicians</strong> and trauma-trained nursing staff delivers comprehensive emergency medical services for patients of all ages — from infants to seniors. With <strong>on-site CT scan, digital X-ray, ultrasound, in-house laboratory, and pharmacy capabilities</strong>, we diagnose and treat emergencies without the long wait times of traditional hospital ERs.
                   </p>
                   <p>
-                    Proudly serving <strong>Lufkin, Angelina County, Nacogdoches, Livingston, Jasper, Crockett</strong>, and communities throughout <strong>East Texas</strong>, ER of Lufkin is operated by <Link to="/" className="text-primary hover:underline font-medium">Focus Health</Link> — a healthcare infrastructure company with a proven track record of building and managing high-performance emergency facilities.
+                    Proudly serving <strong>Irving, Las Colinas, Valley Ranch, Coppell, Grapevine</strong>, and communities throughout the <strong>Dallas-Fort Worth metroplex</strong>, ER of Irving is operated by <Link to="/" className="text-primary hover:underline font-medium">Focus Health</Link> — a healthcare infrastructure company with a proven track record of building and managing high-performance emergency facilities.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 mt-6">
@@ -258,13 +253,13 @@ const ERofLufkin = () => {
               <div className="rounded-2xl overflow-hidden border border-border shadow-lg">
                 <img
                   src={facilityImage}
-                  alt="ER of Lufkin – Freestanding Emergency Room in Lufkin, Texas"
+                  alt="ER of Irving – Freestanding Emergency Room in Irving, Texas"
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
                 <div className="p-4 bg-background flex items-center gap-3 text-sm text-muted-foreground">
                   <MapPin size={16} className="text-primary flex-shrink-0" />
-                  <span>4633 S Medford Dr, Lufkin, TX 75901</span>
+                  <span>7600 N MacArthur Blvd, Irving, TX 75063</span>
                 </div>
               </div>
             </ScrollReveal>
@@ -282,7 +277,7 @@ const ERofLufkin = () => {
                 Comprehensive Emergency Medical Services
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                ER of Lufkin treats a wide range of medical emergencies with the same capabilities as a hospital emergency department — faster, closer, and with personalized attention.
+                ER of Irving treats a wide range of medical emergencies with the same capabilities as a hospital emergency department — faster, closer, and with personalized attention.
               </p>
             </div>
           </ScrollReveal>
@@ -316,7 +311,7 @@ const ERofLufkin = () => {
                 Advanced Diagnostic & Imaging Services
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                Every diagnostic tool you'd find in a hospital ER — available on-site at ER of Lufkin for rapid, accurate diagnosis and treatment.
+                Every diagnostic tool you'd find in a hospital ER — available on-site at ER of Irving for rapid, accurate diagnosis and treatment.
               </p>
             </div>
           </ScrollReveal>
@@ -346,10 +341,10 @@ const ERofLufkin = () => {
             <div className="text-center mb-16">
               <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Community Impact</p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
-                Why Lufkin Needs ER of Lufkin
+                Why Irving Needs ER of Irving
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                East Texas communities deserve fast, high-quality emergency care without driving hours to reach a hospital. ER of Lufkin fills a critical healthcare gap.
+                The Dallas-Fort Worth metroplex deserves fast, high-quality emergency care without overcrowded hospital waiting rooms. ER of Irving fills a critical healthcare gap.
               </p>
             </div>
           </ScrollReveal>
@@ -377,10 +372,10 @@ const ERofLufkin = () => {
             <div className="text-center mb-12">
               <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Service Area</p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
-                Serving Lufkin & Surrounding East Texas Communities
+                Serving Irving & the Greater DFW Metroplex
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                ER of Lufkin proudly provides 24/7 emergency care to residents throughout Angelina County and the greater East Texas region.
+                ER of Irving proudly provides 24/7 emergency care to residents throughout Irving, Las Colinas, Valley Ranch, and the Dallas-Fort Worth area.
               </p>
             </div>
           </ScrollReveal>
@@ -432,14 +427,14 @@ const ERofLufkin = () => {
                 Explore More Focus Health Facilities
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                ER of Lufkin is part of the Focus Health portfolio of healthcare facilities across Texas and Illinois.
+                ER of Irving is part of the Focus Health portfolio of healthcare facilities across Texas and Illinois.
               </p>
             </div>
           </ScrollReveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
             {[
-              { name: 'ER of Irving', path: '/facilities/er-of-irving', location: 'Irving, TX' },
+              { name: 'ER of Lufkin', path: '/facilities/er-of-lufkin', location: 'Lufkin, TX' },
               { name: 'ER of White Rock', path: '/facilities/er-of-white-rock', location: 'Dallas, TX' },
               { name: 'Irving Wellness Clinic', path: '/facilities/irving-wellness-clinic', location: 'Irving, TX' },
               { name: 'Naperville Wellness', path: '/facilities/naperville-wellness-clinic', location: 'Naperville, IL' },
@@ -461,28 +456,16 @@ const ERofLufkin = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 mt-12">
-            <Link
-              to="/track-record"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-            >
+            <Link to="/track-record" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
               View Full Portfolio <ArrowRight size={16} />
             </Link>
-            <Link
-              to="/platform"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors"
-            >
+            <Link to="/platform" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Our Platform
             </Link>
-            <Link
-              to="/our-process"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors"
-            >
+            <Link to="/our-process" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Our Process
             </Link>
-            <Link
-              to="/contact"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors"
-            >
+            <Link to="/contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Contact Us
             </Link>
           </div>
@@ -492,4 +475,4 @@ const ERofLufkin = () => {
   );
 };
 
-export default ERofLufkin;
+export default ERofIrving;
