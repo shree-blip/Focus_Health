@@ -1,4 +1,6 @@
-import grandOpeningVideo from '@/assets/ERofIrving-GrandOpening.mp4';
+"use client";
+
+const grandOpeningVideo = '/ERofIrving-GrandOpening.mp4';
 
 export const VideoShowcaseSection = () => {
   return (

@@ -1,5 +1,7 @@
+"use client";
+
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, ArrowRight, Music, Building2, Stethoscope, Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -168,7 +170,7 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                     asChild
                     className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
-                    <Link to="/partners" onClick={onClose}>
+                    <Link href="/partners" onClick={onClose}>
                       Partner With Us
                       <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
                     </Link>

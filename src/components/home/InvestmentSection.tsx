@@ -1,9 +1,11 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { DollarSign, Users, TrendingUp, Target, Building2 } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 const investmentHighlights = [
   {
@@ -124,7 +126,7 @@ export const InvestmentSection = () => {
         {/* CTA */}
         <ScrollReveal>
           <div className="text-center">
-            <Link to="/partners?tab=investors">
+            <Link href="/partners?tab=investors">
               <Button variant="hero" size="lg" className="group">
                 Request Investor Deck
                 <motion.span

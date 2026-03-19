@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, MapPin, Building, Users2, Rocket, LineChart } from 'lucide-react';

@@ -1,6 +1,9 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
 interface PageHeroProps {
@@ -24,7 +27,7 @@ export const PageHero = ({
   primaryCta,
   secondaryCta,
 }: PageHeroProps) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleCtaClick = (link: string) => {
     if (link.startsWith('#')) {
@@ -34,7 +37,7 @@ export const PageHero = ({
         element.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      navigate(link);
+      router.push(link);
     }
   };
 
@@ -95,7 +98,7 @@ export const PageHero = ({
                 </Button>
               ) : (
                 <Button asChild size="lg" variant="accent" className="gap-2 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto">
-                  <Link to={primaryCta.link}>
+                  <Link href={primaryCta.link}>
                     {primaryCta.text}
                     <ArrowRight size={16} className="sm:hidden" />
                     <ArrowRight size={18} className="hidden sm:block" />
@@ -120,7 +123,7 @@ export const PageHero = ({
                   variant="outline"
                   className="gap-2 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/60"
                 >
-                  <Link to={secondaryCta.link}>
+                  <Link href={secondaryCta.link}>
                     {secondaryCta.text}
                   </Link>
                 </Button>

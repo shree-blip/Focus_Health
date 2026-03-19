@@ -1,10 +1,12 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import focusHealthIcon from '@/assets/focus-health-icon.png';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -19,7 +21,7 @@ const navLinks = [
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,7 +33,7 @@ export const Navbar = () => {
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [location]);
+  }, [pathname]);
 
   return (
     <motion.header
@@ -47,9 +49,9 @@ export const Navbar = () => {
       <div className="container-focus">
         <nav className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo with Video */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <img
-              src={focusHealthIcon}
+              src="/focus-health-icon.png"
               alt="Focus Health Logo"
               className="h-12 sm:h-16 w-auto group-hover:scale-105 transition-transform"
             />
@@ -64,10 +66,10 @@ export const Navbar = () => {
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                to={link.href}
+                href={link.href}
                 className={cn(
                   'nav-link font-medium text-sm',
-                  location.pathname === link.href && 'active text-foreground'
+                  pathname === link.href && 'active text-foreground'
                 )}
               >
                 {link.label}
@@ -78,7 +80,7 @@ export const Navbar = () => {
           {/* CTA Button */}
           <div className="hidden lg:flex items-center gap-4">
             <Button variant="hero" size="default" asChild>
-              <Link to="/partners?tab=investors">Partner With Us</Link>
+              <Link href="/partners?tab=investors">Partner With Us</Link>
             </Button>
           </div>
 
@@ -106,10 +108,10 @@ export const Navbar = () => {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  to={link.href}
+                  href={link.href}
                   className={cn(
                     'py-3 px-4 rounded-lg font-medium transition-colors',
-                    location.pathname === link.href
+                    pathname === link.href
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   )}
@@ -118,7 +120,7 @@ export const Navbar = () => {
                 </Link>
               ))}
               <Button variant="hero" className="mt-4" asChild>
-                <Link to="/partners?tab=investors">Partner With Us</Link>
+                <Link href="/partners?tab=investors">Partner With Us</Link>
               </Button>
             </div>
           </motion.div>

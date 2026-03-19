@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+"use client";
+
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Building2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,7 +62,7 @@ export const SplitCTASection = () => {
                   </p>
 
                   <Button variant="outline" className="w-full group/btn" asChild>
-                    <Link to={path.href}>
+                    <Link href={path.href}>
                       {path.cta}
                       <ArrowRight
                         size={16}

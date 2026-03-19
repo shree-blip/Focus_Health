@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { Building2, Users, TrendingUp } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';

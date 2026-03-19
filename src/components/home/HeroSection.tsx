@@ -1,9 +1,10 @@
-import { Link } from 'react-router-dom';
+"use client";
+
+import Link from 'next/link';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import focusHealthVideo from '@/assets/FocusHealth.mp4';
 
 // Floating particle component
 const FloatingParticle = ({ delay, duration, x, y, size }: { delay: number; duration: number; x: number; y: number; size: number }) => (
@@ -149,10 +150,12 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   const { mouseX, mouseY } = useMousePosition();
+  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 1080;
   
   const springConfig = { stiffness: 100, damping: 30 };
-  const orbX = useSpring(useTransform(mouseX, [0, window.innerWidth], [-30, 30]), springConfig);
-  const orbY = useSpring(useTransform(mouseY, [0, window.innerHeight], [-30, 30]), springConfig);
+  const orbX = useSpring(useTransform(mouseX, [0, viewportWidth], [-30, 30]), springConfig);
+  const orbY = useSpring(useTransform(mouseY, [0, viewportHeight], [-30, 30]), springConfig);
 
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
@@ -306,7 +309,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-10"
             >
               <Button variant="hero" size="lg" asChild className="group">
-                <Link to="/partners?tab=investors">
+                <Link href="/partners?tab=investors">
                   Partner With Us
                   <motion.span
                     className="ml-2"
@@ -318,7 +321,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
                 </Link>
               </Button>
               <Button variant="hero-outline" size="lg" asChild>
-                <Link to="/contact">Get Early Access</Link>
+                <Link href="/contact">Get Early Access</Link>
               </Button>
             </motion.div>
 
@@ -351,7 +354,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
                 transition={{ duration: 3, repeat: Infinity }}
               >
                 <video
-                  src={focusHealthVideo}
+                  src="/FocusHealth.mp4"
                   autoPlay
                   loop
                   muted

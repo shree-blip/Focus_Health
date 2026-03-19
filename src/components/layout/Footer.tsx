@@ -1,6 +1,5 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Mail, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
-import focusHealthIcon from "@/assets/focus-health-icon.png";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -11,8 +10,8 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
           {/* Brand */}
           <div className="space-y-3 sm:space-y-4 col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 sm:gap-3">
-              <img src={focusHealthIcon} alt="Focus Health Logo" className="h-8 sm:h-10 w-auto brightness-0 invert" />
+            <Link href="/" className="flex items-center gap-2 sm:gap-3">
+              <img src="/focus-health-icon.png" alt="Focus Health Logo" className="h-8 sm:h-10 w-auto brightness-0 invert" />
               <div className="flex items-baseline gap-1 sm:gap-1.5">
                 <span className="font-heading font-bold text-base sm:text-lg text-primary-foreground">Focus</span>
                 <span className="font-heading font-bold text-base sm:text-lg text-secondary">Health</span>
@@ -36,7 +35,7 @@ export const Footer = () => {
               ].map((link) => (
                 <li key={link.href}>
                   <Link
-                    to={link.href}
+                    href={link.href}
                     className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-xs sm:text-sm"
                   >
                     {link.label}
@@ -57,7 +56,7 @@ export const Footer = () => {
               ].map((link) => (
                 <li key={link.href}>
                   <Link
-                    to={link.href}
+                    href={link.href}
                     className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-xs sm:text-sm"
                   >
                     {link.label}
@@ -114,13 +113,13 @@ export const Footer = () => {
           </p>
           <div className="flex items-center gap-4 sm:gap-6">
             <Link
-              to="/privacy"
+              href="/privacy"
               className="text-primary-foreground/60 hover:text-primary-foreground text-xs sm:text-sm transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
-              to="/terms"
+              href="/terms"
               className="text-primary-foreground/60 hover:text-primary-foreground text-xs sm:text-sm transition-colors"
             >
               Terms of Service
