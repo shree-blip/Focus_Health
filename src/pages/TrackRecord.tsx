@@ -101,6 +101,8 @@ const healthcarePortfolio = [
     address: 'Naperville, IL',
   },
 ];
+
+const processSteps = [
   {
     title: 'Market Analysis',
     description: 'Comprehensive demographic and competitive analysis to identify optimal sites.',
