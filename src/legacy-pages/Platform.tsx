@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { RefreshCw, Building, Zap, Users, LineChart, FileText } from 'lucide-react';
+import { RefreshCw, Building, Zap, Users, LineChart, FileText, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { PageHero } from '@/components/ui/PageHero';
+import { Button } from '@/components/ui/button';
 const platformBackground = "/platform-background.mp4";
 const heroPlatform = "/hero-platform.jpg";
 
@@ -37,6 +39,7 @@ const PlatformPage = () => {
             loop
             muted
             playsInline
+            preload="none"
             className="w-full h-full object-cover"
           >
             <source src={platformBackground} type="video/mp4" />
@@ -174,6 +177,44 @@ const PlatformPage = () => {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* See Our Results CTA */}
+      <section className="section-padding bg-primary/5 border-t border-b border-border">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
+                  See Our Platform in Action
+                </h2>
+                <p className="text-muted-foreground text-lg mb-6">
+                  Review our operational track record across 24+ healthcare locations in Texas. From facility development to ongoing optimization, see the results our integrated platform delivers.
+                </p>
+                <Button variant="hero" size="lg" asChild className="group">
+                  <Link href="/track-record" className="flex items-center">
+                    View Our Track Record
+                    <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="grid gap-4">
+                <div className="p-6 rounded-lg bg-card border border-border">
+                  <div className="text-3xl font-bold text-primary mb-2">24+</div>
+                  <p className="text-muted-foreground">Healthcare locations successfully managed</p>
+                </div>
+                <div className="p-6 rounded-lg bg-card border border-border">
+                  <div className="text-3xl font-bold text-primary mb-2">$100M+</div>
+                  <p className="text-muted-foreground">Annual revenue scaled across portfolio</p>
+                </div>
+                <div className="p-6 rounded-lg bg-card border border-border">
+                  <div className="text-3xl font-bold text-primary mb-2">Proven</div>
+                  <p className="text-muted-foreground">Operational excellence and financial performance</p>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
     </>

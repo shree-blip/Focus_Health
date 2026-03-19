@@ -28,6 +28,8 @@ export const PageHero = ({
   secondaryCta,
 }: PageHeroProps) => {
   const router = useRouter();
+  const sharedHeroBackground = "/recent-event-hero.png";
+  const heroBackground = backgroundImage ? sharedHeroBackground : backgroundImage;
 
   const handleCtaClick = (link: string) => {
     if (link.startsWith('#')) {
@@ -49,7 +51,7 @@ export const PageHero = ({
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
         style={{ 
-          backgroundImage: `url(${backgroundImage})`,
+          backgroundImage: `url(${heroBackground})`,
           filter: 'blur(2px)',
         }}
       />

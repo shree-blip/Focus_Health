@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart, ArrowRight } from 'lucide-react';
+import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart, ArrowRight, Users } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { PageHero } from '@/components/ui/PageHero';
+import { Button } from '@/components/ui/button';
 const heroTrackRecord = "/hero-track-record.jpg";
 const facilityErIrving = "/facility-er-irving-real.webp";
 const facilityErLufkin = "/facility-er-lufkin-real.png";
@@ -397,6 +398,68 @@ const TrackRecordPage = () => {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* Next Steps / Partnership CTA */}
+      <section className="section-padding bg-primary/5 border-t border-primary/10">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div className="order-2 lg:order-1">
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Building2 className="text-primary" size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Proven Development</h3>
+                      <p className="text-sm text-muted-foreground">Learn how we build, fund, and operate facilities</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <TrendingUp className="text-primary" size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Investment Opportunities</h3>
+                      <p className="text-sm text-muted-foreground">Explore partnership and ownership options</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Users className="text-primary" size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Meet Our Team</h3>
+                      <p className="text-sm text-muted-foreground">Learn about the operators behind our success</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="order-1 lg:order-2">
+                <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
+                  Ready to Partner?
+                </h2>
+                <p className="text-muted-foreground text-lg mb-8">
+                  Our track record speaks for itself. Partner with us to build healthcare infrastructure and generate strong returns through our proven platform and experienced team.
+                </p>
+                <div className="flex gap-4 flex-wrap">
+                  <Button variant="hero" size="lg" asChild>
+                    <Link href="/partners" className="flex items-center">
+                      Explore Partnership
+                      <ArrowRight size={18} className="ml-2" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild>
+                    <Link href="/leadership">
+                      Meet Our Team
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

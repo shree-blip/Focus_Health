@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { PillarsSection } from '@/components/home/PillarsSection';
 import { TurnkeyModelSection } from '@/components/home/TurnkeyModelSection';
@@ -12,24 +12,8 @@ import { SplitCTASection } from '@/components/home/SplitCTASection';
 import { EarlyAccessSection } from '@/components/home/EarlyAccessSection';
 import { BusinessOpportunityModal } from '@/components/home/BusinessOpportunityModal';
 
-const MODAL_SHOWN_KEY = 'focus_health_opportunity_modal_shown';
-
 const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Auto-open modal on first visit after a short delay
-  useEffect(() => {
-    const hasSeenModal = sessionStorage.getItem(MODAL_SHOWN_KEY);
-    
-    if (!hasSeenModal) {
-      const timer = setTimeout(() => {
-        setIsModalOpen(true);
-        sessionStorage.setItem(MODAL_SHOWN_KEY, 'true');
-      }, 2000); // 2 second delay for better UX
-
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);

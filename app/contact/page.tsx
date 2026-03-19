@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { generateSEOMetadata } from "@/lib/metadata";
 import Contact from "@/legacy-pages/Contact";
+import { WebPageStructuredData } from "@/components/seo/WebPageStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Contact",
@@ -10,5 +11,14 @@ export const metadata: Metadata = generateSEOMetadata({
 });
 
 export default function ContactPage() {
-  return <Contact />;
+  return (
+    <>
+      <WebPageStructuredData
+        path="/contact"
+        title="Contact | Focus Health"
+        description="Connect with Focus Health about partnership opportunities, market expansion, and healthcare infrastructure development."
+      />
+      <Contact />
+    </>
+  );
 }

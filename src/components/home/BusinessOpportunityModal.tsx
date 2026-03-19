@@ -82,6 +82,7 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
             {/* Close button */}
             <button
               onClick={onClose}
+              aria-label="Close business opportunities modal"
               className="absolute right-2 top-2 sm:right-4 sm:top-4 z-10 rounded-full bg-muted/80 p-1.5 sm:p-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
             >
               <X size={16} className="sm:hidden" />
@@ -94,6 +95,10 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                 <img 
                   src="https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=600&h=800&fit=crop&crop=bottom"
                   alt="Austin Texas Skyline"
+                  width={600}
+                  height={800}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />

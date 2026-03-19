@@ -7,6 +7,7 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
 const rickHeadshot = "/rick-leonard-headshot.png";
+const stevenHeadshot = "/steven-thompson-headshot.png";
 const jayHeadshot = "/jay-dahal-headshot.png";
 const jamieHeadshot = "/jamie-alcantar-headshot.png";
 const anjilaHeadshot = "/anjila-shrestha-headshot.png";
@@ -115,6 +116,16 @@ const rickProfile = {
     "Operational efficiency isn't just about cost savings, it's about creating environments where healthcare teams can deliver their best care.",
   bio: "Rick brings over 35 years of hospital operations and facility management experience. He has led multiple hospital and emergency center projects from concept to completion, with leadership roles at ServiceMaster, Texas Health Resources, and CHS. His equipment planning expertise spans Stanford, Sutter, and Marshfield Clinic.",
   highlights: ["35+ years experience", "50+ projects delivered", "4 major health systems"],
+};
+const stevenProfile = {
+  name: "Dr. Steven H. Thompson, MD",
+  role: "Chief Medical Officer",
+  category: "Clinical Leadership",
+  photo: stevenHeadshot,
+  credentials:
+    "Emergency medicine-focused physician leader with 31+ years of clinical experience, a medical degree from New York Medical College (1994), and extensive ER practice leadership in Dallas.",
+  bio: "Dr. Thompson brings decades of emergency care experience to Focus Health's leadership team. As Chief Medical Officer, he leads ER physician alignment, clinical quality, and rapid-response care standards across Focus Health's freestanding emergency room platform.",
+  highlights: ["31+ years in medicine", "Emergency care leadership", "New York Medical College, 1994", "Dallas ER practice experience"],
 };
 const LeadershipPage = () => {
   return (
@@ -288,8 +299,82 @@ const LeadershipPage = () => {
         </div>
       </section>
 
-      {/* Featured Leader - Joel */}
+      {/* Featured Leader - Dr. Steven Thompson */}
       <section className="section-padding bg-background">
+        <div className="container-focus">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Photo */}
+            <ScrollReveal>
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                }}
+                className="relative"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                  <img
+                    src={stevenProfile.photo}
+                    alt={stevenProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+              </motion.div>
+            </ScrollReveal>
+
+            {/* Content */}
+            <ScrollReveal direction="left">
+              <div>
+                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
+                  {stevenProfile.category}
+                </span>
+
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
+                  {stevenProfile.name}
+                </h2>
+
+                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{stevenProfile.role}</p>
+
+                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
+                    {stevenProfile.credentials}
+                  </p>
+                </div>
+
+                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
+                  {stevenProfile.bio}
+                </p>
+
+                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
+                  {stevenProfile.highlights.map((highlight, i) => (
+                    <span
+                      key={i}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Button asChild className="gap-2">
+                    <Link href="/contact">
+                      Connect With Dr. Thompson
+                      <ArrowRight size={18} />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Share2 size={18} />
+                  </Button>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Leader - Joel */}
+      <section className="section-padding bg-card">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Photo */}

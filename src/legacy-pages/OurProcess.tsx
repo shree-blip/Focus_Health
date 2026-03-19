@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Building, Users2, Rocket, LineChart, Clock, Shield, TrendingUp, Building2, ExternalLink, Play } from 'lucide-react';
+import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { PageHero } from '@/components/ui/PageHero';
@@ -11,6 +13,112 @@ const facilityIrving = "/facility-er-irving-real.webp";
 const facilityLufkin = "/facility-er-lufkin-real.png";
 const facilityWellness = "/facility-wellness-clinic.jpg";
 const grandOpeningVideo = "/ERofIrving-GrandOpening.mp4";
+const facilityErWhiterock = "/facility-er-whiterock.png";
+const irvingWellness1 = "/irving-wellness-1.jpg";
+const irvingWellness2 = "/irving-wellness-2.jpg";
+const irvingWellness3 = "/irving-wellness-3.jpg";
+const napervilleWellness1 = "/naperville-wellness-1.jpg";
+const napervilleWellness2 = "/naperville-wellness-2.jpg";
+const napervilleWellness3 = "/naperville-wellness-3.jpg";
+const napervilleWellness4 = "/naperville-wellness-4.jpg";
+
+const AutoCarousel = ({ images, alt }: { images: string[]; alt: string }) => {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <div className="relative w-full h-full">
+      {images.map((img, i) => (
+        <img
+          key={i}
+          src={img}
+          alt={`${alt} ${i + 1}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            i === current ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      ))}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrent(i);
+            }}
+            className={`w-1.5 h-1.5 rounded-full transition-all ${
+              i === current ? 'bg-white w-3' : 'bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const healthcarePortfolio = [
+  {
+    name: 'ER of Irving',
+    type: 'Freestanding Emergency Room',
+    location: 'Irving, TX',
+    description:
+      'ER of Irving is a 24/7 freestanding emergency room in Irving, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, and full laboratory services. Offering pediatric and adult emergency care with minimal wait times near Las Colinas, Valley Ranch, and greater Dallas-Fort Worth.',
+    url: '/facilities/er-of-irving',
+    image: facilityIrving,
+    address: '7600 N MacArthur Blvd, Irving, TX 75063',
+    internal: true,
+  },
+  {
+    name: 'ER of Lufkin',
+    type: 'Freestanding Emergency Room',
+    location: 'Lufkin, TX',
+    description:
+      'ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas staffed by board-certified ER physicians with on-site imaging, in-house pharmacy, and comprehensive lab testing. Serving Angelina County, Nacogdoches, and East Texas with full-service emergency care for all ages.',
+    url: '/facilities/er-of-lufkin',
+    image: facilityLufkin,
+    address: '4633 S Medford Dr, Lufkin, TX 75901',
+    internal: true,
+  },
+  {
+    name: 'ER of White Rock',
+    type: 'Freestanding Emergency Room',
+    location: 'Dallas, TX',
+    description:
+      'ER of White Rock is a 24/7 freestanding emergency room in Dallas, Texas with board-certified emergency physicians and trauma-trained nurses. Advanced on-site CT, X-ray, and lab services with minimal wait times near White Rock Lake, Lakewood, and East Dallas.',
+    url: '/facilities/er-of-white-rock',
+    image: facilityErWhiterock,
+    address: '9150 Garland Rd, Dallas, TX 75218',
+    internal: true,
+  },
+  {
+    name: 'Irving Health & Wellness Clinic',
+    type: 'Health & Wellness Clinic',
+    location: 'Irving, TX',
+    description:
+      'Irving Health & Wellness Clinic is a premier wellness center in Irving, Texas offering physician-supervised medical weight loss, hormone replacement therapy, aesthetic services, IV hydration therapy, and advanced body contouring. Serving Las Colinas, Valley Ranch, and DFW metroplex.',
+    url: '/facilities/irving-wellness-clinic',
+    images: [irvingWellness1, irvingWellness2, irvingWellness3],
+    address: 'Irving, TX',
+    internal: true,
+  },
+  {
+    name: 'Naperville Health & Wellness Clinic',
+    type: 'Health & Wellness Clinic',
+    location: 'Naperville, IL',
+    description:
+      'Naperville Health & Wellness Clinic is a comprehensive wellness clinic in Naperville, Illinois offering personalized medical weight loss programs, IV hydration therapy, aesthetic treatments, and holistic care solutions. Serving Naperville, Aurora, Wheaton, and the greater Chicago suburbs.',
+    url: '/facilities/naperville-wellness-clinic',
+    images: [napervilleWellness1, napervilleWellness2, napervilleWellness3, napervilleWellness4],
+    address: 'Naperville, IL',
+    internal: true,
+  },
+];
 
 const processSteps = [
   {
@@ -47,45 +155,6 @@ const processSteps = [
     title: 'Performance Optimization',
     shortDesc: 'Continuous improvement',
     fullDesc: 'Ongoing operational refinement drives efficiency and quality. We monitor key metrics, implement best practices, and continuously optimize staffing, throughput, and patient satisfaction.',
-  },
-];
-
-const facilities = [
-  {
-    name: 'ER of Irving',
-    location: 'Irving, TX',
-    type: 'Freestanding Emergency Room',
-    image: facilityIrving,
-    website: 'https://erofirving.com/',
-    status: 'Operational',
-    services: ['24/7 Emergency Care', 'On-site Lab', 'CT & X-Ray', 'Pediatric Care'],
-  },
-  {
-    name: 'ER of Lufkin',
-    location: 'Lufkin, TX',
-    type: 'Freestanding Emergency Room',
-    image: facilityLufkin,
-    website: 'http://eroflufkin.com/',
-    status: 'Operational',
-    services: ['24/7 Emergency Care', 'On-site Lab', 'Imaging Services', 'Adult & Pediatric'],
-  },
-  {
-    name: 'Irving Wellness Clinic',
-    location: 'Irving, TX',
-    type: 'Wellness Clinic',
-    image: facilityWellness,
-    website: 'https://irvingwellnessclinic.com/',
-    status: 'Operational',
-    services: ['Primary Care', 'Preventive Medicine', 'Health Screenings', 'Chronic Care'],
-  },
-  {
-    name: 'Naperville Health & Wellness',
-    location: 'Naperville, IL',
-    type: 'Health & Wellness Center',
-    image: facilityWellness,
-    website: 'https://www.napervillehwclinic.com/',
-    status: 'Operational',
-    services: ['Integrative Medicine', 'Wellness Programs', 'Preventive Care', 'Health Coaching'],
   },
 ];
 
@@ -185,77 +254,93 @@ const OurProcessPage = () => {
                 Our Healthcare Facilities
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Explore our network of operational healthcare facilities delivering exceptional patient care
+                Our full track record of healthcare facilities under active management and development
               </p>
             </div>
           </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {facilities.map((facility, index) => (
-              <ScrollReveal key={facility.name} delay={index * 0.1}>
-                <motion.div
-                  whileHover={{ y: -5 }}
-                  className="bg-background rounded-2xl overflow-hidden border border-border shadow-lg"
-                >
-                  {/* Facility Image */}
-                  <div className="relative h-56 overflow-hidden">
-                    <img 
-                      src={facility.image} 
-                      alt={facility.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 rounded-full bg-accent/90 text-accent-foreground text-xs font-medium">
-                        {facility.status}
-                      </span>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/60 to-transparent p-4">
-                      <p className="text-white/80 text-sm">{facility.type}</p>
-                    </div>
-                  </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" itemScope itemType="https://schema.org/ItemList">
+            {healthcarePortfolio.map((facility, index) => {
+              const isInternal = 'internal' in facility && facility.internal;
+              const CardWrapper = ({ children }: { children: React.ReactNode }) =>
+                isInternal ? (
+                  <Link
+                    href={facility.url}
+                    className="group block rounded-2xl overflow-hidden bg-background border border-border hover:border-primary/30 transition-all h-full"
+                    itemScope
+                    itemType="https://schema.org/MedicalClinic"
+                    itemProp="itemListElement"
+                    title={`${facility.name} – ${facility.type} in ${facility.location}`}
+                  >
+                    {children}
+                  </Link>
+                ) : (
+                  <a
+                    href={facility.url}
+                    target="_blank"
+                    rel="dofollow"
+                    className="group block rounded-2xl overflow-hidden bg-background border border-border hover:border-primary/30 transition-all h-full"
+                    itemScope
+                    itemType="https://schema.org/MedicalClinic"
+                    itemProp="itemListElement"
+                    title={`${facility.name} – ${facility.type} in ${facility.location}`}
+                  >
+                    {children}
+                  </a>
+                );
 
-                  {/* Facility Info */}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="font-heading font-bold text-xl mb-1">{facility.name}</h3>
-                        <p className="text-muted-foreground text-sm flex items-center gap-1">
-                          <MapPin size={14} />
-                          {facility.location}
-                        </p>
-                      </div>
-                      <a 
-                        href={facility.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:text-primary/80 transition-colors"
-                      >
-                        <ExternalLink size={20} />
-                      </a>
-                    </div>
-
-                    {/* Services */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {facility.services.map((service) => (
-                        <span 
-                          key={service}
-                          className="px-2 py-1 rounded-md bg-muted text-muted-foreground text-xs"
-                        >
-                          {service}
+              return (
+                <ScrollReveal key={facility.name} delay={index * 0.1}>
+                  <motion.div whileHover={{ y: -6 }}>
+                    <CardWrapper>
+                      <meta itemProp="url" content={facility.url.startsWith('/') ? `https://getfocushealth.com${facility.url}` : facility.url} />
+                      <meta itemProp="name" content={facility.name} />
+                      {facility.address && (
+                        <span itemProp="address" itemScope itemType="https://schema.org/PostalAddress" className="hidden">
+                          <meta itemProp="streetAddress" content={facility.address} />
                         </span>
-                      ))}
-                    </div>
+                      )}
 
-                    <Button asChild variant="outline" className="w-full">
-                      <a href={facility.website} target="_blank" rel="noopener noreferrer">
-                        Visit Website
-                        <ExternalLink size={16} className="ml-2" />
-                      </a>
-                    </Button>
-                  </div>
-                </motion.div>
-              </ScrollReveal>
-            ))}
+                      <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden">
+                        {'images' in facility && facility.images ? (
+                          <AutoCarousel images={facility.images} alt={`${facility.name} – ${facility.type} in ${facility.location}`} />
+                        ) : 'image' in facility && facility.image ? (
+                          <img
+                            src={facility.image}
+                            alt={`${facility.name} – ${facility.type} in ${facility.location}`}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            itemProp="image"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Building size={48} className="text-primary/30" />
+                          </div>
+                        )}
+                        <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-background/90 backdrop-blur-sm text-xs font-medium text-foreground">
+                          {facility.type}
+                        </div>
+                      </div>
+
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="font-heading font-bold text-lg" itemProp="name">{facility.name}</h3>
+                          {isInternal ? (
+                            <span className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0">
+                              <ExternalLink size={16} />
+                            </span>
+                          ) : (
+                            <ExternalLink size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-xs text-primary/70 font-medium mb-2">{facility.location}</p>
+                        <p className="text-muted-foreground text-sm leading-relaxed" itemProp="description">{facility.description}</p>
+                      </div>
+                    </CardWrapper>
+                  </motion.div>
+                </ScrollReveal>
+              );
+            })}
           </div>
         </div>
       </section>

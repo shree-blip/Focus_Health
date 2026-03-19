@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 
-const BASE_URL = "https://getfocushealth.com";
+export const siteConfig = {
+  name: "Focus Health",
+  legalName: "Focus Healthcare LLC",
+  description:
+    "Institutional-grade healthcare infrastructure made simple. Focus Health builds and operates high-performance freestanding emergency rooms across Texas.",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://getfocushealth.com",
+  ogImage: "/recent-event-hero.png",
+  contact: {
+    email: "info@getfocushealth.com",
+  },
+};
 
 interface SEOMetadataOptions {
   title?: string;
@@ -14,32 +24,64 @@ interface SEOMetadataOptions {
 
 export function generateSEOMetadata({
   title,
-  description = "Institutional-grade healthcare infrastructure made simple. Focus Health builds and operates high-performance freestanding emergency rooms across Texas.",
+  description = siteConfig.description,
   canonicalUrl,
-  ogImage = "/favicon.png",
+  ogImage = siteConfig.ogImage,
   ogType = "website",
   keywords,
   noIndex = false,
 }: SEOMetadataOptions = {}): Metadata {
   const fullCanonicalUrl = canonicalUrl
-    ? `${BASE_URL}${canonicalUrl}`
-    : BASE_URL;
+    ? `${siteConfig.url}${canonicalUrl}`
+    : siteConfig.url;
   const fullOgImage = ogImage.startsWith("http")
     ? ogImage
-    : `${BASE_URL}${ogImage}`;
+    : `${siteConfig.url}${ogImage}`;
 
   return {
     ...(title ? { title } : {}),
     description,
-    ...(keywords ? { keywords } : {}),
+    keywords: [
+      "freestanding emergency room",
+      "healthcare investment",
+      "Texas ER",
+      "healthcare infrastructure",
+      "emergency room development",
+      "healthcare operations",
+      "Focus Health",
+      ...(keywords || []),
+    ],
+    authors: [{ name: siteConfig.name }],
+    creator: siteConfig.legalName,
+    publisher: siteConfig.legalName,
+    metadataBase: new URL(siteConfig.url),
+    formatDetection: {
+      telephone: true,
+      email: true,
+      address: true,
+    },
     alternates: {
       canonical: fullCanonicalUrl,
     },
     robots: noIndex
-      ? { index: false, follow: false }
+      ? {
+          index: false,
+          follow: false,
+          googleBot: {
+            index: false,
+            follow: false,
+          },
+        }
       : {
           index: true,
           follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large" as const,
+            "max-snippet": -1,
+          },
           "max-image-preview": "large" as const,
           "max-snippet": -1,
           "max-video-preview": -1,
@@ -49,8 +91,15 @@ export function generateSEOMetadata({
       url: fullCanonicalUrl,
       ...(title ? { title } : {}),
       description,
-      images: [{ url: fullOgImage }],
-      siteName: "Focus Health",
+      images: [
+        {
+          url: fullOgImage,
+          width: 1200,
+          height: 630,
+          alt: title || siteConfig.name,
+        },
+      ],
+      siteName: siteConfig.name,
       locale: "en_US",
     },
     twitter: {
@@ -60,12 +109,40 @@ export function generateSEOMetadata({
       images: [fullOgImage],
     },
     other: {
-      author: "Focus Health",
-      publisher: "Focus Healthcare LLC",
+      author: siteConfig.name,
+      publisher: siteConfig.legalName,
       "geo.region": "US-TX",
       "geo.placename": "Texas",
       "ai-content-declaration": "human-created",
       generator: "Focus Health Platform",
     },
   };
+}
+
+export function createMetadata({
+  title,
+  description,
+  path,
+  keywords,
+  type,
+  images,
+  noIndex,
+}: {
+  title: string;
+  description: string;
+  path?: string;
+  keywords?: string[];
+  type?: "website" | "article";
+  images?: string[];
+  noIndex?: boolean;
+}): Metadata {
+  return generateSEOMetadata({
+    title,
+    description,
+    canonicalUrl: path,
+    ogType: type,
+    ogImage: images?.[0],
+    keywords,
+    noIndex,
+  });
 }

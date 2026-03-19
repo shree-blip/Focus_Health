@@ -15,6 +15,7 @@ const navLinks = [
   { href: '/track-record', label: 'Track Record' },
   { href: '/leadership', label: 'Leadership' },
   { href: '/partners', label: 'Partners' },
+  { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
 ];
 
@@ -49,10 +50,12 @@ export const Navbar = () => {
       <div className="container-focus">
         <nav className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo with Video */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" aria-label="Focus Health home" className="flex items-center gap-3 group">
             <img
               src="/focus-health-icon.png"
               alt="Focus Health Logo"
+              width={128}
+              height={128}
               className="h-12 sm:h-16 w-auto group-hover:scale-105 transition-transform"
             />
             <div className="hidden sm:flex items-baseline gap-1.5">

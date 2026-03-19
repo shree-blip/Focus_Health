@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
-const heroInvestors = "/hero-investors.jpg";
+const heroInvestors = "/recent-event-hero.png";
 const ribbonCutting = "/ERofIrving-GrandOpening.mp4";
 
 const valueProps = [
@@ -691,6 +691,75 @@ const Investors = () => {
                 </form>
               </ScrollReveal>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Additional Resources */}
+      <section className="section-padding bg-primary/5 border-t border-primary/10">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
+                Due Diligence Resources
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Learn more about our proven platform, market opportunity, and the team behind Focus Health
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <ScrollReveal delay={0}>
+              <motion.a 
+                href="/market"
+                whileHover={{ y: -4 }}
+                className="p-8 rounded-lg bg-card border border-border hover:border-primary/30 transition-all cursor-pointer block"
+              >
+                <MapPin className="w-10 h-10 text-primary mb-4" />
+                <h3 className="font-heading font-bold text-lg mb-3">Market Opportunity</h3>
+                <p className="text-muted-foreground mb-6">
+                  Understand the Texas freestanding emergency room market dynamics and growth drivers.
+                </p>
+                <span className="text-sm font-medium text-primary group-hover:underline flex items-center">
+                  Explore Market <ArrowRight size={16} className="ml-2" />
+                </span>
+              </motion.a>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.1}>
+              <motion.a 
+                href="/track-record"
+                whileHover={{ y: -4 }}
+                className="p-8 rounded-lg bg-card border border-border hover:border-primary/30 transition-all cursor-pointer block"
+              >
+                <BarChart3 className="w-10 h-10 text-primary mb-4" />
+                <h3 className="font-heading font-bold text-lg mb-3">Track Record</h3>
+                <p className="text-muted-foreground mb-6">
+                  Review our operational outcomes across 24+ facilities and transparent performance metrics.
+                </p>
+                <span className="text-sm font-medium text-primary group-hover:underline flex items-center">
+                  View Results <ArrowRight size={16} className="ml-2" />
+                </span>
+              </motion.a>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.2}>
+              <motion.a 
+                href="/leadership"
+                whileHover={{ y: -4 }}
+                className="p-8 rounded-lg bg-card border border-border hover:border-primary/30 transition-all cursor-pointer block"
+              >
+                <Users className="w-10 h-10 text-primary mb-4" />
+                <h3 className="font-heading font-bold text-lg mb-3">Leadership</h3>
+                <p className="text-muted-foreground mb-6">
+                  Meet the experienced team managing $100M+ in healthcare revenue and 24+ locations.
+                </p>
+                <span className="text-sm font-medium text-primary group-hover:underline flex items-center">
+                  Meet the Team <ArrowRight size={16} className="ml-2" />
+                </span>
+              </motion.a>
+            </ScrollReveal>
           </div>
         </div>
       </section>

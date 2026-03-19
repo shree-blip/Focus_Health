@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, Users, Zap, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const points = [
   {
@@ -21,6 +22,14 @@ const points = [
     title: 'Operational Efficiency',
     description: 'Standardized delivery model enabling consistent, high-quality care across all locations.',
   },
+];
+
+const marketData = [
+  { year: '2022', demand: 42 },
+  { year: '2023', demand: 54 },
+  { year: '2024', demand: 68 },
+  { year: '2025', demand: 79 },
+  { year: '2026', demand: 91 },
 ];
 
 interface MarketSectionProps {
@@ -102,73 +111,31 @@ export const MarketSection = ({ onOpenOpportunities }: MarketSectionProps) => {
           {/* Visual */}
           <ScrollReveal direction="left">
             <div className="relative">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 flex items-center justify-center">
-                {/* Abstract Growth Chart */}
-                <svg viewBox="0 0 300 300" className="w-full h-full">
-                  {/* Grid Lines */}
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <motion.line
-                      key={`h-${i}`}
-                      x1="50"
-                      y1={50 + i * 50}
-                      x2="280"
-                      y2={50 + i * 50}
-                      stroke="hsl(var(--border))"
-                      strokeWidth="1"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
-                    />
-                  ))}
-
-                  {/* Upward Trend Line */}
-                  <motion.path
-                    d="M60 230 Q 100 200 140 180 T 200 120 T 260 60"
-                    fill="none"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, ease: 'easeOut' }}
-                  />
-
-                  {/* Data Points */}
-                  {[
-                    { cx: 60, cy: 230 },
-                    { cx: 120, cy: 190 },
-                    { cx: 180, cy: 140 },
-                    { cx: 240, cy: 80 },
-                  ].map((point, i) => (
-                    <motion.circle
-                      key={i}
-                      cx={point.cx}
-                      cy={point.cy}
-                      r="8"
-                      fill="hsl(var(--primary))"
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.3 + i * 0.15 }}
-                    />
-                  ))}
-
-                  {/* Accent Highlight */}
-                  <motion.circle
-                    cx="240"
-                    cy="80"
-                    r="16"
-                    fill="none"
-                    stroke="hsl(var(--accent))"
-                    strokeWidth="3"
-                    initial={{ scale: 0, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 1 }}
-                  />
-                </svg>
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-6">
+                <div className="w-full h-full rounded-xl bg-card/80 border border-border p-3 sm:p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={marketData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} domain={[0, 100]} />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '12px',
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="demand"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={3}
+                        dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                        activeDot={{ r: 6, fill: 'hsl(var(--accent))' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Floating Badge */}

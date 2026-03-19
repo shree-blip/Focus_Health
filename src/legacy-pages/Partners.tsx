@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Users, CheckCircle, Send, TrendingUp, Shield, Stethoscope, MapPin, DollarSign, Briefcase } from 'lucide-react';
+import Link from 'next/link';
+import { Building2, Users, CheckCircle, Send, TrendingUp, Shield, Stethoscope, MapPin, DollarSign, Briefcase, ArrowRight } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -366,6 +367,81 @@ const PartnersPage = () => {
                     </Button>
                   </div>
                 </form>}
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Due Diligence Resources */}
+      <section className="section-padding bg-card border-t border-border">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">
+                Learn More About Focus Health
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Explore our platform, review our operational track record, or connect with our experienced leadership team
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <ScrollReveal delay={0}>
+              <motion.div 
+                whileHover={{ y: -4 }}
+                className="p-8 rounded-lg bg-background border border-border hover:border-primary/30 transition-all"
+              >
+                <Building2 className="w-10 h-10 text-primary mb-4" />
+                <h3 className="font-heading font-bold text-lg mb-3">Our Platform</h3>
+                <p className="text-muted-foreground mb-6">
+                  Discover how our integrated build, fund, and operate platform delivers end-to-end healthcare infrastructure solutions.
+                </p>
+                <Button variant="ghost" size="sm" asChild className="group">
+                  <Link href="/platform" className="flex items-center">
+                    Learn More
+                    <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              </motion.div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.1}>
+              <motion.div 
+                whileHover={{ y: -4 }}
+                className="p-8 rounded-lg bg-background border border-border hover:border-primary/30 transition-all"
+              >
+                <TrendingUp className="w-10 h-10 text-primary mb-4" />
+                <h3 className="font-heading font-bold text-lg mb-3">Track Record</h3>
+                <p className="text-muted-foreground mb-6">
+                  Review our operational outcomes across 24+ successfully managed healthcare locations with proven financial performance.
+                </p>
+                <Button variant="ghost" size="sm" asChild className="group">
+                  <Link href="/track-record" className="flex items-center">
+                    View Results
+                    <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              </motion.div>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.2}>
+              <motion.div 
+                whileHover={{ y: -4 }}
+                className="p-8 rounded-lg bg-background border border-border hover:border-primary/30 transition-all"
+              >
+                <Users className="w-10 h-10 text-primary mb-4" />
+                <h3 className="font-heading font-bold text-lg mb-3">Leadership Team</h3>
+                <p className="text-muted-foreground mb-6">
+                  Meet the experienced operators and healthcare professionals driving Focus Health's growth and success.
+                </p>
+                <Button variant="ghost" size="sm" asChild className="group">
+                  <Link href="/leadership" className="flex items-center">
+                    Meet the Team
+                    <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              </motion.div>
             </ScrollReveal>
           </div>
         </div>

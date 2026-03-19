@@ -10,6 +10,14 @@ import {
   Dumbbell, Sun, Smile, FlaskConical, Pill, Activity
 } from 'lucide-react';
 const facilityImage = "/irving-wellness-1.jpg";
+const ribbonCuttingVideo = "/Irving_Wellness/IHW-Event-Horizontal.mp4";
+const ribbonCuttingPhotos = [
+  "/Irving_Wellness/IHW-FraceMedia-03.jpg",
+  "/Irving_Wellness/IHW-FraceMedia-07.jpg",
+  "/Irving_Wellness/IHW-FraceMedia-14.jpg",
+  "/Irving_Wellness/IHW-FraceMedia-33.jpg",
+  "/Irving_Wellness/IHW-FraceMedia-43.jpg",
+];
 
 const BASE_URL = 'https://getfocushealth.com';
 
@@ -225,6 +233,8 @@ const IrvingWellnessClinic = () => {
                 <img
                   src={facilityImage}
                   alt="Irving Health & Wellness Clinic – Wellness Center in Irving, Texas"
+                  width={1600}
+                  height={900}
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
@@ -234,6 +244,52 @@ const IrvingWellnessClinic = () => {
                 </div>
               </div>
             </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Ribbon Cutting Event Highlights */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Community Milestone</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
+                Irving Wellness Ribbon-Cutting Highlights
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
+                Moments from our ribbon-cutting day in Irving, featuring community partners, local leaders, and the opening celebration.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal>
+            <div className="rounded-2xl overflow-hidden border border-border shadow-lg mb-8">
+              <video
+                src={ribbonCuttingVideo}
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full h-auto object-contain"
+              />
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {ribbonCuttingPhotos.map((photo, index) => (
+              <ScrollReveal key={photo} delay={index * 0.05}>
+                <div className="rounded-xl overflow-hidden border border-border shadow-sm">
+                  <img
+                    src={photo}
+                    alt={`Irving Health & Wellness ribbon-cutting event photo ${index + 1}`}
+                    width={1600}
+                    height={1200}
+                    className="w-full h-full object-contain bg-muted/20 aspect-[4/3]"
+                    loading="lazy"
+                  />
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>

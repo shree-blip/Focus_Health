@@ -158,7 +158,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   const orbX = useSpring(useTransform(mouseX, [0, viewportWidth], [-30, 30]), springConfig);
   const orbY = useSpring(useTransform(mouseY, [0, viewportHeight], [-30, 30]), springConfig);
 
-  const particles = Array.from({ length: 20 }, (_, i) => ({
+  const particles = Array.from({ length: 10 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
@@ -177,7 +177,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       </motion.div>
 
       {/* Floating particles */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none hidden md:block">
         {particles.map((p) => (
           <FloatingParticle key={p.id} {...p} />
         ))}
@@ -195,17 +195,19 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       </div>
 
       {/* Pulse rings from center */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
         <PulseRing delay={0} size={300} color="hsl(var(--primary) / 0.3)" />
         <PulseRing delay={1} size={500} color="hsl(var(--primary) / 0.2)" />
         <PulseRing delay={2} size={700} color="hsl(var(--accent) / 0.15)" />
       </div>
 
       {/* Heartbeat line */}
-      <HeartbeatLine />
+      <div className="hidden md:block">
+        <HeartbeatLine />
+      </div>
 
       {/* Network connections SVG */}
-      <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none hidden md:block" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
         {/* Animated connection paths */}
         <motion.path
           d="M100 300 Q 300 200 500 300 T 900 250 T 1100 350"
@@ -360,8 +362,12 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
                   loop
                   muted
                   playsInline
+                  preload="none"
+                  aria-hidden="true"
                   className="w-full h-full object-cover"
-                />
+                >
+                  <track kind="captions" srcLang="en" label="English" src="/captions/empty.vtt" default />
+                </video>
                 {/* Glow overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent pointer-events-none" />
               </motion.div>
