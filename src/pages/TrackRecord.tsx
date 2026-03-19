@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { SEOHead } from '@/components/seo/SEOHead';
 import { motion } from 'framer-motion';
 import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
@@ -136,9 +138,61 @@ const operatingSystem = [
   { icon: Building2, title: 'Facility Standards', description: 'Modern, well-maintained facilities that exceed patient expectations.' },
 ];
 
-const TrackRecordPage = () => {
+  const trackRecordSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Healthcare Management Portfolio – Focus Health Track Record",
+    "description": "Focus Health's proven track record managing 24+ healthcare locations including freestanding emergency rooms in Irving, Lufkin, and Dallas TX, and wellness clinics in Irving TX and Naperville IL.",
+    "url": "https://getfocushealth.com/track-record",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Focus Health",
+      "url": "https://getfocushealth.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Focus Health",
+      "url": "https://getfocushealth.com"
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": healthcarePortfolio.map((facility, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "MedicalClinic",
+          "name": facility.name,
+          "description": facility.description,
+          "url": facility.url,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": facility.location.split(', ')[0],
+            "addressRegion": facility.location.split(', ')[1],
+            "addressCountry": "US"
+          },
+          "medicalSpecialty": facility.type.includes('Emergency') ? "Emergency Medicine" : "Preventive Medicine",
+          "availableService": {
+            "@type": "MedicalProcedure",
+            "name": facility.type
+          }
+        }
+      }))
+    }
+  };
+
   return (
     <Layout>
+      <SEOHead
+        title="Track Record | Focus Health – 24+ Healthcare Locations Managed"
+        description="Focus Health's proven track record: 24+ healthcare facilities managed including freestanding emergency rooms in Irving, Lufkin & Dallas TX, and wellness clinics in Irving TX & Naperville IL."
+        canonicalUrl="/track-record"
+        keywords="freestanding emergency room Texas, ER of Irving, ER of Lufkin, ER of White Rock Dallas, Irving Health Wellness Clinic, Naperville Health Wellness Clinic, 24/7 emergency room near me, healthcare management company Texas, emergency room Irving TX, urgent care Lufkin TX, wellness clinic Naperville IL, Focus Health track record"
+      />
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(trackRecordSchema)}
+        </script>
+      </Helmet>
       {/* Hero */}
       <PageHero
         title="Proven Track Record"
