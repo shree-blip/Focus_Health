@@ -310,7 +310,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-10"
             >
               <Button variant="hero" size="lg" asChild className="group">
-                <Link href="/partners?tab=investors">
+                <Link href="/partners#opportunity-form">
                   Partner With Us
                   <motion.span
                     className="ml-2"

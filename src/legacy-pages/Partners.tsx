@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, Users, CheckCircle, Send, TrendingUp, Shield, Stethoscope, MapPin, DollarSign, Briefcase } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
@@ -56,6 +56,23 @@ const PartnersPage = () => {
   const {
     toast
   } = useToast();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    const shouldScroll = tab === 'investors' || tab === 'communities' || window.location.hash === '#opportunity-form';
+
+    if (!shouldScroll) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const element = document.getElementById('opportunity-form');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }, []);
   const handlePartnerTypeChange = (type: string, checked: boolean) => {
     if (checked) {
       setFormData({
@@ -202,7 +219,7 @@ const PartnersPage = () => {
       </section>
 
       {/* Contact Form */}
-      <section id="opportunity-form" className="section-padding bg-background">
+      <section id="opportunity-form" className="section-padding bg-background scroll-mt-28">
         <div className="container-focus">
           <div className="grid lg:grid-cols-2 gap-12 items-start max-w-6xl mx-auto">
             {/* Left Content */}

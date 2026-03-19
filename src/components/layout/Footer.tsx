@@ -50,8 +50,8 @@ export const Footer = () => {
             <h4 className="font-heading font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Partners</h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
-                { label: "For Investors", href: "/partners?tab=investors" },
-                { label: "For Communities", href: "/partners?tab=communities" },
+                { label: "For Investors", href: "/partners#opportunity-form" },
+                { label: "For Communities", href: "/partners#opportunity-form" },
                 { label: "Early Access", href: "/contact" },
               ].map((link) => (
                 <li key={link.href}>

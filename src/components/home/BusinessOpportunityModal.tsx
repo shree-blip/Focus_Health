@@ -170,7 +170,7 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
                     asChild
                     className="group border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
-                    <Link href="/partners" onClick={onClose}>
+                    <Link href="/partners#opportunity-form" onClick={onClose}>
                       Partner With Us
                       <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
                     </Link>

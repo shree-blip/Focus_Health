@@ -80,7 +80,7 @@ export const Navbar = () => {
           {/* CTA Button */}
           <div className="hidden lg:flex items-center gap-4">
             <Button variant="hero" size="default" asChild>
-              <Link href="/partners?tab=investors">Partner With Us</Link>
+              <Link href="/partners#opportunity-form">Partner With Us</Link>
             </Button>
           </div>
 
@@ -120,7 +120,7 @@ export const Navbar = () => {
                 </Link>
               ))}
               <Button variant="hero" className="mt-4" asChild>
-                <Link href="/partners?tab=investors">Partner With Us</Link>
+                <Link href="/partners#opportunity-form">Partner With Us</Link>
               </Button>
             </div>
           </motion.div>

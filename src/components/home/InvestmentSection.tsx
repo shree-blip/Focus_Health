@@ -126,7 +126,7 @@ export const InvestmentSection = () => {
         {/* CTA */}
         <ScrollReveal>
           <div className="text-center">
-            <Link href="/partners?tab=investors">
+            <Link href="/partners#opportunity-form">
               <Button variant="hero" size="lg" className="group">
                 Request Investor Deck
                 <motion.span

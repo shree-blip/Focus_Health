@@ -12,7 +12,7 @@ const paths = [
     title: 'For Investors',
     description: 'Disciplined operations, standardized build + launch playbook, and transparent reporting cadence.',
     cta: 'Explore Partnership',
-    href: '/partners?tab=investors',
+    href: '/partners#opportunity-form',
     gradient: 'from-primary/10 to-secondary/10',
   },
   {
@@ -20,7 +20,7 @@ const paths = [
     title: 'For Communities',
     description: 'Partnership-first approach, strategic site planning, and comprehensive operational management.',
     cta: 'Start Conversation',
-    href: '/partners?tab=communities',
+    href: '/partners#opportunity-form',
     gradient: 'from-accent/10 to-accent/5',
   },
 ];
