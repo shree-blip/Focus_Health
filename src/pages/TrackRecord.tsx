@@ -322,6 +322,17 @@ const TrackRecordPage = () => {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Disclaimer */}
+      <section className="py-8 bg-muted">
+        <div className="container-focus">
+          <p className="text-center text-muted-foreground text-sm">
+            Operational figures are directional; specific details shared during partner discussions.
+          </p>
+        </div>
+      </section>
     </Layout>
   );
 };
