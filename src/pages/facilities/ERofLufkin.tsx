@@ -102,7 +102,7 @@ const communityBenefits = [
   },
   {
     title: '24/7 Availability for All Ages',
-    description: 'Whether it's a child's high fever at 2 AM or a senior's chest pain on a holiday, ER of Lufkin is open 24 hours a day, 7 days a week, 365 days a year — including weekends and holidays — ensuring the community always has a place to turn.',
+    description: "Whether it's a child's high fever at 2 AM or a senior's chest pain on a holiday, ER of Lufkin is open 24 hours a day, 7 days a week, 365 days a year — including weekends and holidays — ensuring the community always has a place to turn.",
   },
 ];
 
