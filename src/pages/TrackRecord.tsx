@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
@@ -8,8 +9,50 @@ import heroTrackRecord from '@/assets/hero-track-record.jpg';
 import facilityErIrving from '@/assets/facility-er-irving-real.webp';
 import facilityErLufkin from '@/assets/facility-er-lufkin-real.png';
 import facilityErWhiterock from '@/assets/facility-er-whiterock.png';
-import facilityIrvingWellness from '@/assets/facility-irving-wellness.png';
-import facilityNapervilleWellness from '@/assets/facility-naperville-wellness.png';
+import irvingWellness1 from '@/assets/irving-wellness-1.jpg';
+import irvingWellness2 from '@/assets/irving-wellness-2.jpg';
+import irvingWellness3 from '@/assets/irving-wellness-3.jpg';
+import napervilleWellness1 from '@/assets/naperville-wellness-1.jpg';
+import napervilleWellness2 from '@/assets/naperville-wellness-2.jpg';
+import napervilleWellness3 from '@/assets/naperville-wellness-3.jpg';
+import napervilleWellness4 from '@/assets/naperville-wellness-4.jpg';
+
+const AutoCarousel = ({ images, alt }: { images: string[]; alt: string }) => {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <div className="relative w-full h-full">
+      {images.map((img, i) => (
+        <img
+          key={i}
+          src={img}
+          alt={`${alt} ${i + 1}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            i === current ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      ))}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={(e) => { e.preventDefault(); setCurrent(i); }}
+            className={`w-1.5 h-1.5 rounded-full transition-all ${
+              i === current ? 'bg-white w-3' : 'bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const healthcarePortfolio = [
   {
@@ -38,14 +81,14 @@ const healthcarePortfolio = [
     type: 'Health & Wellness Clinic',
     description: 'Premier wellness center in Irving offering physician-supervised medical weight loss, hormone therapy, aesthetic services, IV hydration therapy, and advanced body contouring.',
     url: 'https://irvingwellnessclinic.com',
-    image: facilityIrvingWellness,
+    images: [irvingWellness1, irvingWellness2, irvingWellness3],
   },
   {
     name: 'Naperville Health & Wellness Clinic',
     type: 'Health & Wellness Clinic',
     description: 'Comprehensive wellness clinic in Naperville offering personalized medical weight loss, IV hydration therapy, aesthetic treatments, and holistic care solutions.',
     url: 'https://napervillehwclinic.com',
-    image: facilityNapervilleWellness,
+    images: [napervilleWellness1, napervilleWellness2, napervilleWellness3, napervilleWellness4],
   },
 ];
 
