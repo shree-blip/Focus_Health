@@ -138,6 +138,7 @@ const operatingSystem = [
   { icon: Building2, title: 'Facility Standards', description: 'Modern, well-maintained facilities that exceed patient expectations.' },
 ];
 
+const TrackRecordPage = () => {
   const trackRecordSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
