@@ -71,9 +71,10 @@ const healthcarePortfolio = [
     type: 'Freestanding Emergency Room',
     location: 'Lufkin, TX',
     description: 'ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas staffed by board-certified ER physicians with on-site imaging, in-house pharmacy, and comprehensive lab testing. Serving Angelina County, Nacogdoches, and East Texas with full-service emergency care for all ages.',
-    url: 'https://eroflufkin.com',
+    url: '/facilities/er-of-lufkin',
     image: facilityErLufkin,
     address: '4633 S Medford Dr, Lufkin, TX 75901',
+    internal: true,
   },
   {
     name: 'ER of White Rock',
