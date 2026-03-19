@@ -58,37 +58,47 @@ const healthcarePortfolio = [
   {
     name: 'ER of Irving',
     type: 'Freestanding Emergency Room',
-    description: '24/7 freestanding emergency room in Irving, TX with board-certified physicians, on-site CT, X-ray, and lab services. Pediatric and adult emergency care with minimal wait times.',
+    location: 'Irving, TX',
+    description: 'ER of Irving is a 24/7 freestanding emergency room in Irving, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, and full laboratory services. Offering pediatric and adult emergency care with minimal wait times near Las Colinas, Valley Ranch, and greater Dallas-Fort Worth.',
     url: 'https://erofirving.com',
     image: facilityErIrving,
+    address: '7600 N MacArthur Blvd, Irving, TX 75063',
   },
   {
     name: 'ER of Lufkin',
     type: 'Freestanding Emergency Room',
-    description: '24/7 emergency room in Lufkin, TX with board-certified ER physicians, on-site imaging, pharmacy, and lab testing. Comprehensive emergency care for all ages.',
+    location: 'Lufkin, TX',
+    description: 'ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas staffed by board-certified ER physicians with on-site imaging, in-house pharmacy, and comprehensive lab testing. Serving Angelina County, Nacogdoches, and East Texas with full-service emergency care for all ages.',
     url: 'https://eroflufkin.com',
     image: facilityErLufkin,
+    address: '4633 S Medford Dr, Lufkin, TX 75901',
   },
   {
     name: 'ER of White Rock',
     type: 'Freestanding Emergency Room',
-    description: '24/7 emergency room in Dallas, TX with board-certified physicians and trauma-trained nurses. Advanced on-site imaging and lab services with minimal wait times.',
+    location: 'Dallas, TX',
+    description: 'ER of White Rock is a 24/7 freestanding emergency room in Dallas, Texas with board-certified emergency physicians and trauma-trained nurses. Advanced on-site CT, X-ray, and lab services with minimal wait times near White Rock Lake, Lakewood, and East Dallas.',
     url: 'https://erofwhiterock.com',
     image: facilityErWhiterock,
+    address: '9150 Garland Rd, Dallas, TX 75218',
   },
   {
     name: 'Irving Health & Wellness Clinic',
     type: 'Health & Wellness Clinic',
-    description: 'Premier wellness center in Irving offering physician-supervised medical weight loss, hormone therapy, aesthetic services, IV hydration therapy, and advanced body contouring.',
+    location: 'Irving, TX',
+    description: 'Irving Health & Wellness Clinic is a premier wellness center in Irving, Texas offering physician-supervised medical weight loss, hormone replacement therapy, aesthetic services, IV hydration therapy, and advanced body contouring. Serving Las Colinas, Valley Ranch, and DFW metroplex.',
     url: 'https://irvingwellnessclinic.com',
     images: [irvingWellness1, irvingWellness2, irvingWellness3],
+    address: 'Irving, TX',
   },
   {
     name: 'Naperville Health & Wellness Clinic',
     type: 'Health & Wellness Clinic',
-    description: 'Comprehensive wellness clinic in Naperville offering personalized medical weight loss, IV hydration therapy, aesthetic treatments, and holistic care solutions.',
+    location: 'Naperville, IL',
+    description: 'Naperville Health & Wellness Clinic is a comprehensive wellness clinic in Naperville, Illinois offering personalized medical weight loss programs, IV hydration therapy, aesthetic treatments, and holistic care solutions. Serving Naperville, Aurora, Wheaton, and the greater Chicago suburbs.',
     url: 'https://napervillehwclinic.com',
     images: [napervilleWellness1, napervilleWellness2, napervilleWellness3, napervilleWellness4],
+    address: 'Naperville, IL',
   },
 ];
 
@@ -248,7 +258,7 @@ const TrackRecordPage = () => {
             </div>
           </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" itemScope itemType="https://schema.org/ItemList">
             {healthcarePortfolio.map((facility, index) => (
               <ScrollReveal key={facility.name} delay={index * 0.1}>
                 <motion.a
@@ -257,16 +267,30 @@ const TrackRecordPage = () => {
                   rel="dofollow"
                   whileHover={{ y: -6 }}
                   className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full"
+                  itemScope
+                  itemType="https://schema.org/MedicalClinic"
+                  itemProp="itemListElement"
+                  title={`${facility.name} – ${facility.type} in ${facility.location}`}
                 >
+                  <meta itemProp="url" content={facility.url} />
+                  <meta itemProp="name" content={facility.name} />
+                  {facility.address && (
+                    <span itemProp="address" itemScope itemType="https://schema.org/PostalAddress" className="hidden">
+                      <meta itemProp="streetAddress" content={facility.address} />
+                    </span>
+                  )}
+
                   {/* Image or Icon Header */}
                   <div className="aspect-[16/9] bg-gradient-to-br from-primary/10 to-accent/10 relative overflow-hidden">
                     {'images' in facility && facility.images ? (
-                      <AutoCarousel images={facility.images} alt={facility.name} />
+                      <AutoCarousel images={facility.images} alt={`${facility.name} – ${facility.type} in ${facility.location}`} />
                     ) : 'image' in facility && facility.image ? (
                       <img
                         src={facility.image}
-                        alt={facility.name}
+                        alt={`${facility.name} – ${facility.type} in ${facility.location}`}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        itemProp="image"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -284,13 +308,14 @@ const TrackRecordPage = () => {
 
                   {/* Content */}
                   <div className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-heading font-bold text-lg">{facility.name}</h3>
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-heading font-bold text-lg" itemProp="name">{facility.name}</h3>
                       <ExternalLink size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                     </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{facility.description}</p>
+                    <p className="text-xs text-primary/70 font-medium mb-2">{facility.location}</p>
+                    <p className="text-muted-foreground text-sm leading-relaxed" itemProp="description">{facility.description}</p>
                     <span className="inline-block mt-4 text-sm font-medium text-primary group-hover:underline">
-                      Visit Website →
+                      Visit {facility.name} →
                     </span>
                   </div>
                 </motion.a>
