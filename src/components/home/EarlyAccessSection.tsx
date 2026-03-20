@@ -6,6 +6,7 @@ import { Send, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { saveSubmission } from '@/lib/submissions-store';
 
 const roles = ['Investor', 'Community', 'Operator', 'Other'];
 
@@ -21,12 +22,34 @@ export const EarlyAccessSection = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+
+    try {
+      const response = await fetch('/api/submissions/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          role: formData.role,
+          message: `Homepage early access signup (${formData.role})`,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || 'Submission failed');
+      }
+
+      if (payload.submission) {
+        saveSubmission(payload.submission);
+      }
+
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Error submitting early access form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

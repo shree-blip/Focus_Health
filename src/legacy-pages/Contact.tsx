@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PageHero } from '@/components/ui/PageHero';
 import { useToast } from '@/hooks/use-toast';
+import { saveSubmission } from '@/lib/submissions-store';
 const heroContact = "/hero-contact.jpg";
 
 const roles = ['Investor', 'Community', 'Operator', 'Media', 'Other'];
@@ -38,11 +39,8 @@ const ContactPage = () => {
         throw new Error(payload.error || 'Submission failed');
       }
 
-      // Save to localStorage for admin panel
-      if (payload.submission && typeof window !== 'undefined') {
-        const existing = JSON.parse(localStorage.getItem('focus_admin_submissions') || '[]');
-        existing.unshift(payload.submission);
-        localStorage.setItem('focus_admin_submissions', JSON.stringify(existing));
+      if (payload.submission) {
+        saveSubmission(payload.submission);
       }
 
       setIsSubmitted(true);
