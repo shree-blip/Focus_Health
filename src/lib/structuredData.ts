@@ -102,6 +102,98 @@ export function getArticleSchema({
   };
 }
 
+// Medical facility schema for ER / clinic pages (local SEO)
+export function getMedicalFacilitySchema({
+  path,
+  name,
+  description,
+  facilityType,
+  streetAddress,
+  city,
+  state,
+  zip,
+  phone,
+  latitude,
+  longitude,
+  openingHours,
+  serviceArea,
+  image,
+}: {
+  path: string;
+  name: string;
+  description: string;
+  facilityType: "EmergencyService" | "MedicalClinic";
+  streetAddress?: string;
+  city: string;
+  state: string;
+  zip?: string;
+  phone?: string;
+  latitude?: number;
+  longitude?: number;
+  openingHours?: string;
+  serviceArea?: string[];
+  image?: string;
+}) {
+  const facilityUrl = `${siteConfig.url}${path}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      getOrganizationSchema(),
+      getWebsiteSchema(),
+      {
+        "@type": "WebPage",
+        "@id": `${facilityUrl}#webpage`,
+        url: facilityUrl,
+        name,
+        description,
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+        about: { "@id": `${facilityUrl}#facility` },
+      },
+      {
+        "@type": facilityType,
+        "@id": `${facilityUrl}#facility`,
+        name,
+        description,
+        url: facilityUrl,
+        image: image || `${siteConfig.url}${siteConfig.ogImage}`,
+        ...(phone ? { telephone: phone } : {}),
+        ...(openingHours ? { openingHours } : {}),
+        address: {
+          "@type": "PostalAddress",
+          ...(streetAddress ? { streetAddress } : {}),
+          addressLocality: city,
+          addressRegion: state,
+          ...(zip ? { postalCode: zip } : {}),
+          addressCountry: "US",
+        },
+        ...(latitude && longitude
+          ? {
+              geo: {
+                "@type": "GeoCoordinates",
+                latitude,
+                longitude,
+              },
+            }
+          : {}),
+        ...(serviceArea && serviceArea.length > 0
+          ? {
+              areaServed: serviceArea.map((area) => ({
+                "@type": "City",
+                name: area,
+              })),
+            }
+          : {}),
+        parentOrganization: {
+          "@id": `${siteConfig.url}/#organization`,
+        },
+        isAcceptingNewPatients: true,
+        medicalSpecialty: facilityType === "EmergencyService" ? "Emergency Medicine" : "Primary Care",
+      },
+    ],
+  };
+}
+
 export function jsonLdScriptProps(data: unknown) {
   return {
     type: "application/ld+json",

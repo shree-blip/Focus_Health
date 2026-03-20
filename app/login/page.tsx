@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Admin Login",
-  description: "Admin login for Focus Health blog and content management",
+  description: "Admin login for Focus Health blog and content management.",
+  canonicalUrl: "/login",
   noIndex: true,
 });
 

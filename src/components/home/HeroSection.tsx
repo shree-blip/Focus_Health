@@ -169,12 +169,44 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Force autoplay — browsers may block the declarative attribute
+  // Robust autoplay: retry on canplay/loadeddata + visibility change
   useEffect(() => {
     const v = heroVideoRef.current;
     if (!v) return;
-    v.muted = true;
-    v.play().catch(() => {});
+
+    const tryPlay = () => {
+      if (v.paused) {
+        v.muted = true;
+        v.play().catch(() => {});
+      }
+    };
+
+    // Attempt immediately
+    tryPlay();
+
+    // Retry when enough data is buffered
+    v.addEventListener('canplay', tryPlay);
+    v.addEventListener('loadeddata', tryPlay);
+
+    // Also handle tab coming back into focus
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') tryPlay();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Safety-net: retry a few times in the first seconds
+    const t1 = setTimeout(tryPlay, 500);
+    const t2 = setTimeout(tryPlay, 1500);
+    const t3 = setTimeout(tryPlay, 3000);
+
+    return () => {
+      v.removeEventListener('canplay', tryPlay);
+      v.removeEventListener('loadeddata', tryPlay);
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, []);
 
   return (
@@ -191,6 +223,8 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
           preload="auto"
           aria-hidden="true"
           className="w-full h-full object-cover"
+          /* Extra attributes for iOS/Safari autoplay */
+          {...{ 'webkit-playsinline': 'true' } as React.VideoHTMLAttributes<HTMLVideoElement>}
         >
           <track kind="captions" srcLang="en" label="English" src="/captions/empty.vtt" default />
         </video>
