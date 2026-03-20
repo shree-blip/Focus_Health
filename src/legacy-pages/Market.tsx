@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, MapPin, Building, Users, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -7,6 +8,33 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { PageHero } from '@/components/ui/PageHero';
 const heroMarket = "/hero-market.jpg";
+
+const strategicMarkets = [
+  {
+    id: 'dfw',
+    title: 'Dallas-Fort Worth Metro',
+    popup: 'DFW Metro: Irving, Dallas, Fort Worth, and surrounding high-growth suburbs.',
+    x: 210,
+    y: 70,
+    shortLabel: 'DFW',
+  },
+  {
+    id: 'houston',
+    title: 'Houston Suburbs',
+    popup: 'Houston Suburbs: Rapid expansion areas with increasing emergency care demand.',
+    x: 255,
+    y: 172,
+    shortLabel: 'HOU',
+  },
+  {
+    id: 'austin-sa',
+    title: 'Austin-San Antonio Corridor',
+    popup: 'Austin-San Antonio Corridor: Strong migration and healthcare infrastructure needs.',
+    x: 165,
+    y: 170,
+    shortLabel: 'ATX-SA',
+  },
+];
 
 const marketDrivers = [
   {
@@ -32,6 +60,11 @@ const marketDrivers = [
 ];
 
 const MarketPage = () => {
+  const [activeMarket, setActiveMarket] = useState<string | null>(null);
+  const toggleActiveMarket = (id: string) => {
+    setActiveMarket((current) => (current === id ? null : id));
+  };
+
   return (
     <>
       {/* Hero */}
@@ -91,17 +124,20 @@ const MarketPage = () => {
                   We focus on high-growth corridors in the DFW metroplex, Houston suburbs, Austin-San Antonio corridor, and other emerging Texas markets with demonstrated population influx and healthcare access gaps.
                 </p>
                 <div className="space-y-4">
-                  {['Dallas-Fort Worth Metro', 'Houston Suburbs', 'Austin-San Antonio Corridor'].map((market, i) => (
+                  {strategicMarkets.map((market, i) => (
                     <motion.div
-                      key={market}
+                      key={market.id}
                       initial={{ opacity: 0, x: -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-3 text-foreground"
+                      className="flex items-center gap-3 text-foreground cursor-pointer"
+                      onMouseEnter={() => setActiveMarket(market.id)}
+                      onMouseLeave={() => setActiveMarket((current) => (current === market.id ? null : current))}
+                      onClick={() => toggleActiveMarket(market.id)}
                     >
-                      <div className="w-2 h-2 rounded-full bg-accent" />
-                      <span className="font-medium">{market}</span>
+                      <div className={`w-2 h-2 rounded-full ${activeMarket === market.id ? 'bg-primary' : 'bg-accent'}`} />
+                      <span className="font-medium">{market.title}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -110,35 +146,39 @@ const MarketPage = () => {
 
             <ScrollReveal direction="left">
               <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/5 p-8 flex items-center justify-center relative">
-                {/* Texas Shape Map */}
-                <svg viewBox="0 0 300 280" className="w-full h-full max-w-md" style={{ minHeight: 200 }}>
-                  {/* Texas outline — visible immediately */}
+                {/* Texas Shape Map (detailed SVG) */}
+                <svg viewBox="0 0 320 280" className="w-full h-full max-w-md" style={{ minHeight: 200 }}>
                   <path
-                    d="M100 20 L200 20 L250 60 L260 120 L240 160 L200 200 L180 260 L140 240 L100 260 L80 200 L40 160 L60 100 L100 20"
+                    d="M105 28 L135 33 L170 24 L198 32 L222 32 L243 47 L247 70 L273 93 L286 126 L267 143 L243 143 L238 160 L229 173 L221 194 L205 208 L200 234 L178 226 L154 248 L138 237 L126 245 L110 236 L96 215 L92 192 L73 191 L53 174 L49 149 L30 131 L40 102 L63 86 L61 64 L76 54 L90 59 L97 43 Z"
                     fill="hsl(var(--primary) / 0.1)"
                     stroke="hsl(var(--primary))"
                     strokeWidth="2"
                   />
-                  
+
                   {/* Market Points */}
-                  {[
-                    { x: 170, y: 60, label: 'DFW' },
-                    { x: 200, y: 130, label: 'Houston' },
-                    { x: 130, y: 130, label: 'Austin' },
-                  ].map((point, i) => (
-                    <g key={point.label}>
+                  {strategicMarkets.map((point, i) => {
+                    const isActive = activeMarket === point.id;
+                    return (
+                      <g
+                        key={point.id}
+                        onMouseEnter={() => setActiveMarket(point.id)}
+                        onMouseLeave={() => setActiveMarket((current) => (current === point.id ? null : current))}
+                        onClick={() => toggleActiveMarket(point.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
                       <circle
                         cx={point.x}
                         cy={point.y}
-                        r="12"
-                        fill="hsl(var(--accent))"
+                        r={isActive ? 12 : 10}
+                        fill={isActive ? 'hsl(var(--primary))' : 'hsl(var(--accent))'}
+                        style={{ transition: 'all 0.2s ease' }}
                       />
                       <circle
                         cx={point.x}
                         cy={point.y}
-                        r="20"
+                        r={isActive ? 24 : 20}
                         fill="none"
-                        stroke="hsl(var(--accent))"
+                        stroke={isActive ? 'hsl(var(--primary))' : 'hsl(var(--accent))'}
                         strokeWidth="2"
                         opacity="0.4"
                         className="animate-ping"
@@ -152,11 +192,23 @@ const MarketPage = () => {
                         fontSize="12"
                         fontWeight="600"
                       >
-                        {point.label}
+                        {point.shortLabel}
                       </text>
                     </g>
-                  ))}
+                    );
+                  })}
                 </svg>
+
+                {activeMarket && (
+                  <div className="absolute left-1/2 bottom-4 -translate-x-1/2 w-[88%] rounded-lg border border-border bg-background/95 backdrop-blur px-4 py-3 shadow-lg">
+                    <p className="text-sm font-semibold text-foreground">
+                      {strategicMarkets.find((market) => market.id === activeMarket)?.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                      {strategicMarkets.find((market) => market.id === activeMarket)?.popup}
+                    </p>
+                  </div>
+                )}
               </div>
             </ScrollReveal>
           </div>
