@@ -17,10 +17,6 @@ const OperatorDNASection = dynamic(
   () => import('@/components/home/OperatorDNASection').then(mod => ({ default: mod.OperatorDNASection })),
   { ssr: true }
 );
-const VideoShowcaseSection = dynamic(
-  () => import('@/components/home/VideoShowcaseSection').then(mod => ({ default: mod.VideoShowcaseSection })),
-  { ssr: true }
-);
 const MarketSection = dynamic(
   () => import('@/components/home/MarketSection').then(mod => ({ default: mod.MarketSection })),
   { ssr: true }
@@ -174,7 +170,6 @@ const Index = () => {
       <PillarsSection />
       <TurnkeyModelSection />
       <OperatorDNASection />
-      <VideoShowcaseSection />
       <MarketSection onOpenOpportunities={handleOpenModal} />
       <InvestmentSection />
       <SplitCTASection />

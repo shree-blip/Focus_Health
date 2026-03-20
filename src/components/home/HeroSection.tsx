@@ -168,6 +168,8 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   }));
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const heroVideos = ['/Irving_Wellness/IHW-Event-Horizontal.mp4', '/ERofIrving-GrandOpening.mp4'];
+  const [heroVideoIndex, setHeroVideoIndex] = useState(0);
 
   // Robust autoplay: handles first load, tab focus, back-nav (bfcache), retries
   useEffect(() => {
@@ -212,18 +214,26 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
     };
   }, []);
 
+  const handleHeroVideoEnded = () => {
+    setHeroVideoIndex((current) => {
+      if (current < heroVideos.length - 1) return current + 1;
+      return current;
+    });
+  };
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
           ref={heroVideoRef}
-          src="/Irving_Wellness/IHW-Event-Horizontal.mp4"
+          src={heroVideos[heroVideoIndex]}
           autoPlay
-          loop
+          loop={heroVideoIndex === heroVideos.length - 1}
           muted
           playsInline
           preload="auto"
+          onEnded={handleHeroVideoEnded}
           aria-hidden="true"
           className="w-full h-full object-cover"
           /* Extra attributes for iOS/Safari autoplay */
