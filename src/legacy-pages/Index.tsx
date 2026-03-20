@@ -133,6 +133,16 @@ const GrandOpeningVideoCard = ({
 const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const seenKey = 'focus_home_business_modal_seen';
+    const hasSeenModal = window.sessionStorage.getItem(seenKey);
+    if (!hasSeenModal) {
+      setIsModalOpen(true);
+      window.sessionStorage.setItem(seenKey, '1');
+    }
+  }, []);
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
