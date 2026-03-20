@@ -139,32 +139,12 @@ const stevenProfile = {
   highlights: ["31+ years in medicine", "Emergency care leadership", "New York Medical College, 1994", "Dallas ER practice experience"],
 };
 const LeadershipPage = () => {
-  const handleShare = async (name: string, url: string) => {
-    const shareTitle = `Connect with ${name}`;
-    const shareText = `Learn more about ${name} from the Focus Health leadership team.`;
-
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({ title: shareTitle, text: shareText, url });
-        return;
-      } catch {
-        void 0;
-      }
-    }
-
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch {
-        void 0;
-      }
-    }
-
+  const handleShare = (url: string) => {
     if (typeof window !== "undefined") {
       window.open(
         `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-        "_blank",
-        "noopener"
+        "linkedin-share",
+        "noopener,width=640,height=720"
       );
     }
   };
@@ -256,7 +236,7 @@ const LeadershipPage = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleShare(featuredLeader.name, featuredLeader.profileUrl)}
+                    onClick={() => handleShare(featuredLeader.profileUrl)}
                     aria-label="Share Jay Dahal profile"
                   >
                     <Share2 size={18} />
@@ -318,7 +298,7 @@ const LeadershipPage = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleShare(rickProfile.name, rickProfile.profileUrl)}
+                    onClick={() => handleShare(rickProfile.profileUrl)}
                     aria-label="Share Rick Leonard profile"
                   >
                     <Share2 size={18} />
@@ -417,7 +397,7 @@ const LeadershipPage = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleShare(stevenProfile.name, stevenProfile.profileUrl)}
+                    onClick={() => handleShare(stevenProfile.profileUrl)}
                     aria-label="Share Dr. Steven Thompson profile"
                   >
                     <Share2 size={18} />
@@ -496,7 +476,7 @@ const LeadershipPage = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleShare(joelProfile.name, joelProfile.profileUrl)}
+                    onClick={() => handleShare(joelProfile.profileUrl)}
                     aria-label="Share Joel Lanehart profile"
                   >
                     <Share2 size={18} />
