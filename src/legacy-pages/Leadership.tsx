@@ -26,6 +26,7 @@ const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
   category: "Executive Leadership",
+  profileUrl: "https://www.linkedin.com/in/jaydahal/",
   photo: jayHeadshot,
   quote:
     "Our vision is to build institutional-grade healthcare infrastructure that delivers operational excellence and meaningful returns for our partners, one facility at a time.",
@@ -36,6 +37,7 @@ const joelProfile = {
   name: "Joel Lanehart",
   role: "Construction Project Manager",
   category: "Construction & Facilities",
+  profileUrl: "https://www.linkedin.com/in/joel-lanehart-492802349/",
   photo: joelHeadshot,
   quote:
     "Success in facility management comes from passion, dependability, and a relentless focus on building strong teams that deliver results.",
@@ -118,6 +120,7 @@ const rickProfile = {
   name: "Rick Leonard",
   role: "Director of Operation",
   category: "Operations & Facilities",
+  profileUrl: "https://www.linkedin.com/in/rick-leonard-79309714/",
   photo: rickHeadshot,
   quote:
     "Operational efficiency isn't just about cost savings, it's about creating environments where healthcare teams can deliver their best care.",
@@ -128,6 +131,7 @@ const stevenProfile = {
   name: "Dr. Steven H. Thompson, MD",
   role: "Chief Medical Officer",
   category: "Clinical Leadership",
+  profileUrl: "https://www.md.com/doctor/steven-h-thompson-md",
   photo: stevenHeadshot,
   credentials:
     "Emergency medicine-focused physician leader with 31+ years of clinical experience, a medical degree from New York Medical College (1994), and extensive ER practice leadership in Dallas.",
@@ -135,6 +139,34 @@ const stevenProfile = {
   highlights: ["31+ years in medicine", "Emergency care leadership", "New York Medical College, 1994", "Dallas ER practice experience"],
 };
 const LeadershipPage = () => {
+  const handleShare = async (name: string, url: string) => {
+    const shareTitle = `Connect with ${name}`;
+    const shareText = `Learn more about ${name} from the Focus Health leadership team.`;
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url });
+        return;
+      } catch {
+      }
+    }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.open(
+        `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+        "_blank",
+        "noopener"
+      );
+    }
+  };
+
   return (
     <>
       {/* Hero */}
@@ -214,12 +246,17 @@ const LeadershipPage = () => {
 
                 <div className="flex items-center gap-4">
                   <Button asChild className="gap-2">
-                    <Link href="/contact">
+                    <a href={featuredLeader.profileUrl} target="_blank" rel="noopener">
                       Connect With Jay
                       <ArrowRight size={18} />
-                    </Link>
+                    </a>
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare(featuredLeader.name, featuredLeader.profileUrl)}
+                    aria-label="Share Jay Dahal profile"
+                  >
                     <Share2 size={18} />
                   </Button>
                 </div>
@@ -271,12 +308,17 @@ const LeadershipPage = () => {
 
                 <div className="flex items-center gap-4">
                   <Button variant="accent" asChild className="gap-2">
-                    <Link href="/contact">
+                    <a href={rickProfile.profileUrl} target="_blank" rel="noopener">
                       Connect With Rick
                       <ArrowRight size={18} />
-                    </Link>
+                    </a>
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare(rickProfile.name, rickProfile.profileUrl)}
+                    aria-label="Share Rick Leonard profile"
+                  >
                     <Share2 size={18} />
                   </Button>
                 </div>
@@ -365,12 +407,17 @@ const LeadershipPage = () => {
 
                 <div className="flex items-center gap-4">
                   <Button asChild className="gap-2">
-                    <Link href="/contact">
+                    <a href={stevenProfile.profileUrl} target="_blank" rel="noopener">
                       Connect With Dr. Thompson
                       <ArrowRight size={18} />
-                    </Link>
+                    </a>
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare(stevenProfile.name, stevenProfile.profileUrl)}
+                    aria-label="Share Dr. Steven Thompson profile"
+                  >
                     <Share2 size={18} />
                   </Button>
                 </div>
@@ -439,12 +486,17 @@ const LeadershipPage = () => {
 
                 <div className="flex items-center gap-4">
                   <Button asChild className="gap-2">
-                    <Link href="/contact">
+                    <a href={joelProfile.profileUrl} target="_blank" rel="noopener">
                       Connect With Joel
                       <ArrowRight size={18} />
-                    </Link>
+                    </a>
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare(joelProfile.name, joelProfile.profileUrl)}
+                    aria-label="Share Joel Lanehart profile"
+                  >
                     <Share2 size={18} />
                   </Button>
                 </div>
