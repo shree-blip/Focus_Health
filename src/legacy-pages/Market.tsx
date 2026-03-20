@@ -110,17 +110,14 @@ const MarketPage = () => {
 
             <ScrollReveal direction="left">
               <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/5 p-8 flex items-center justify-center relative">
-                {/* Simplified Texas Shape */}
-                <svg viewBox="0 0 300 280" className="w-full h-full max-w-md">
-                  <motion.path
+                {/* Texas Shape Map */}
+                <svg viewBox="0 0 300 280" className="w-full h-full max-w-md" style={{ minHeight: 200 }}>
+                  {/* Texas outline — visible immediately */}
+                  <path
                     d="M100 20 L200 20 L250 60 L260 120 L240 160 L200 200 L180 260 L140 240 L100 260 L80 200 L40 160 L60 100 L100 20"
                     fill="hsl(var(--primary) / 0.1)"
                     stroke="hsl(var(--primary))"
                     strokeWidth="2"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 2 }}
                   />
                   
                   {/* Market Points */}
@@ -130,28 +127,33 @@ const MarketPage = () => {
                     { x: 130, y: 130, label: 'Austin' },
                   ].map((point, i) => (
                     <g key={point.label}>
-                      <motion.circle
+                      <circle
                         cx={point.x}
                         cy={point.y}
                         r="12"
                         fill="hsl(var(--accent))"
-                        initial={{ scale: 0 }}
-                        whileInView={{ scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 1 + i * 0.2 }}
                       />
-                      <motion.circle
+                      <circle
                         cx={point.x}
                         cy={point.y}
                         r="20"
                         fill="none"
                         stroke="hsl(var(--accent))"
                         strokeWidth="2"
-                        initial={{ scale: 0, opacity: 0 }}
-                        whileInView={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 1.5 + i * 0.2, duration: 2, repeat: Infinity }}
+                        opacity="0.4"
+                        className="animate-ping"
+                        style={{ transformOrigin: `${point.x}px ${point.y}px`, animationDelay: `${i * 0.3}s` }}
                       />
+                      <text
+                        x={point.x}
+                        y={point.y - 22}
+                        textAnchor="middle"
+                        fill="hsl(var(--foreground))"
+                        fontSize="12"
+                        fontWeight="600"
+                      >
+                        {point.label}
+                      </text>
                     </g>
                   ))}
                 </svg>

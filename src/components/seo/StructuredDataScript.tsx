@@ -7,5 +7,5 @@ export function StructuredDataScript() {
     "@graph": [getOrganizationSchema(), getWebsiteSchema()],
   };
 
-  return <Script id="structured-data-global" strategy="beforeInteractive" {...jsonLdScriptProps(graph)} />;
+  return <Script id="structured-data-global" strategy="afterInteractive" {...jsonLdScriptProps(graph)} />;
 }

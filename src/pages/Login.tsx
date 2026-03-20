@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('info@getfocushealth.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -63,7 +63,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="info@getfocushealth.com"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -84,11 +84,6 @@ export default function LoginPage() {
               {loading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
-          <div className="mt-4 p-3 bg-muted rounded text-xs text-muted-foreground">
-            <p><strong>Demo Credentials:</strong></p>
-            <p>Email: info@getfocushealth.com</p>
-            <p>Password: Hello@123</p>
-          </div>
         </CardContent>
       </Card>
     </div>

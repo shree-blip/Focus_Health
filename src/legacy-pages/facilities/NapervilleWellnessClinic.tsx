@@ -17,7 +17,7 @@ const wellnessServices = [
   {
     icon: Scale,
     title: 'Medical Weight Loss',
-    description: 'Physician-supervised weight management programs featuring FDA-approved medications including Semaglutide (Ozempic/Wegovy) and Tirzepatide (Mounjaro), personalized nutrition planning, and ongoing metabolic monitoring in Naperville, IL.',
+    description: 'Medical expert supervised weight management programs featuring FDA-approved medications including Semaglutide (Ozempic/Wegovy) and Tirzepatide (Mounjaro), personalized nutrition planning, and ongoing metabolic monitoring in Naperville, IL.',
     keywords: ['medical weight loss Naperville IL', 'Semaglutide Naperville', 'Wegovy Chicago suburbs', 'weight loss clinic DuPage County'],
   },
   {
@@ -88,10 +88,10 @@ const additionalServices = [
 const communityBenefits = [
   {
     title: 'Bridging the Wellness Gap in Chicago Suburbs',
-    description: 'Many residents in Naperville, Aurora, and DuPage County lack access to physician-supervised wellness services. Naperville Health & Wellness Clinic brings medical-grade aesthetic, weight loss, and preventive care to the western suburbs.',
+    description: 'Many residents in Naperville, Aurora, and DuPage County lack access to medical expert supervised wellness services. Naperville Health & Wellness Clinic brings medical-grade aesthetic, weight loss, and preventive care to the western suburbs.',
   },
   {
-    title: 'Physician-Supervised Care You Can Trust',
+    title: 'Medical Expert Supervised Care You Can Trust',
     description: 'Unlike med spas and non-medical clinics, every treatment at Naperville Health & Wellness Clinic is supervised by licensed physicians ensuring safety, proper dosing, and personalized protocols.',
   },
   {
@@ -100,7 +100,7 @@ const communityBenefits = [
   },
   {
     title: 'Serving the Greater Chicago Suburbs',
-    description: 'Naperville Health & Wellness Clinic serves residents of Naperville, Aurora, Wheaton, Lisle, Bolingbrook, Plainfield, and the greater Chicago suburban area with premium physician-supervised wellness services.',
+    description: 'Naperville Health & Wellness Clinic serves residents of Naperville, Aurora, Wheaton, Lisle, Bolingbrook, Plainfield, and the greater Chicago suburban area with premium medical expert supervised wellness services.',
   },
 ];
 
@@ -113,7 +113,7 @@ const nearbyAreas = [
 const faqs = [
   {
     q: 'What is a health and wellness clinic?',
-    a: 'A health and wellness clinic provides physician-supervised services focused on preventive care, aesthetic treatments, weight management, and hormone optimization. Naperville Health & Wellness Clinic combines medical expertise with cutting-edge wellness treatments for a comprehensive approach to health.',
+    a: 'A health and wellness clinic provides medical expert supervised services focused on preventive care, aesthetic treatments, weight management, and hormone optimization. Naperville Health & Wellness Clinic combines medical expertise with cutting-edge wellness treatments for a comprehensive approach to health.',
   },
   {
     q: 'Does Naperville Health & Wellness Clinic accept insurance?',
@@ -121,7 +121,7 @@ const faqs = [
   },
   {
     q: 'How does medical weight loss work?',
-    a: 'Our physician-supervised medical weight loss program includes FDA-approved medications (Semaglutide/Tirzepatide), personalized nutrition planning, metabolic monitoring, and ongoing support. Programs are customized based on your health history, goals, and metabolic profile.',
+    a: 'Our medical expert supervised medical weight loss program includes FDA-approved medications (Semaglutide/Tirzepatide), personalized nutrition planning, metabolic monitoring, and ongoing support. Programs are customized based on your health history, goals, and metabolic profile.',
   },
   {
     q: 'Is hormone replacement therapy safe?',
@@ -138,7 +138,7 @@ const napervilleWellnessSchema = {
   "@type": "MedicalClinic",
   "name": "Naperville Health & Wellness Clinic",
   "alternateName": "Naperville Health & Wellness Clinic – Focus Health",
-  "description": "Naperville Health & Wellness Clinic is a physician-supervised wellness center in Naperville, Illinois offering medical weight loss with Semaglutide & Tirzepatide, hormone replacement therapy, Botox, dermal fillers, IV hydration, body contouring, and preventive wellness. Serving Aurora, Wheaton & Chicago suburbs.",
+  "description": "Naperville Health & Wellness Clinic is a medical expert supervised wellness center in Naperville, Illinois offering medical weight loss with Semaglutide & Tirzepatide, hormone replacement therapy, Botox, dermal fillers, IV hydration, body contouring, and preventive wellness. Serving Aurora, Wheaton & Chicago suburbs.",
   "url": `${BASE_URL}/facilities/naperville-wellness-clinic`,
   "image": `${BASE_URL}/assets/naperville-wellness-1.jpg`,
   "address": {
@@ -185,7 +185,7 @@ const NapervilleWellnessClinic = () => {
 {/* Hero */}
       <PageHero
         title="Naperville Health & Wellness Clinic"
-        description="Physician-supervised wellness services in Naperville, Illinois — medical weight loss, hormone therapy, aesthetics, IV hydration & preventive care serving Aurora, Wheaton & Chicago suburbs."
+        description="Medical expert supervised wellness services in Naperville, Illinois — medical weight loss, hormone therapy, aesthetics, IV hydration & preventive care serving Aurora, Wheaton & Chicago suburbs."
         backgroundImage={facilityImage}
         primaryCta={{ text: "View All Facilities", link: "/track-record" }}
         secondaryCta={{ text: "Contact Us", link: "/contact" }}
@@ -203,7 +203,7 @@ const NapervilleWellnessClinic = () => {
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    <strong>Naperville Health & Wellness Clinic</strong> is a comprehensive <strong>physician-supervised wellness center</strong> in <strong>Naperville, Illinois</strong>. We provide a full range of medical wellness services including <strong>medical weight loss, hormone replacement therapy, aesthetic treatments, IV hydration therapy, body contouring, and preventive wellness care</strong>.
+                    <strong>Naperville Health & Wellness Clinic</strong> is a comprehensive <strong>medical expert supervised wellness center</strong> in <strong>Naperville, Illinois</strong>. We provide a full range of medical wellness services including <strong>medical weight loss, hormone replacement therapy, aesthetic treatments, IV hydration therapy, body contouring, and preventive wellness care</strong>.
                   </p>
                   <p>
                     Our team of <strong>licensed physicians and medical professionals</strong> delivers personalized treatment plans tailored to each patient's unique health goals. From <strong>FDA-approved weight loss medications like Semaglutide and Tirzepatide</strong> to <strong>bioidentical hormone therapy and advanced aesthetics</strong>, we combine medical expertise with the latest wellness innovations.
@@ -213,7 +213,7 @@ const NapervilleWellnessClinic = () => {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 mt-6">
-                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Physician-Supervised</span>
+                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Medical Expert Supervised</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">FDA-Approved Treatments</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Personalized Plans</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Medical-Grade Results</span>
@@ -248,7 +248,7 @@ const NapervilleWellnessClinic = () => {
                 Comprehensive Wellness & Aesthetic Services
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                Naperville Health & Wellness Clinic offers a full spectrum of physician-supervised wellness treatments designed to help you look and feel your best.
+                Naperville Health & Wellness Clinic offers a full spectrum of medical expert supervised wellness treatments designed to help you look and feel your best.
               </p>
             </div>
           </ScrollReveal>
@@ -315,7 +315,7 @@ const NapervilleWellnessClinic = () => {
                 Elevating Wellness in Naperville & Chicago Suburbs
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                Naperville Health & Wellness Clinic is committed to making physician-supervised wellness accessible to the Naperville and greater Chicago suburban community.
+                Naperville Health & Wellness Clinic is committed to making medical expert supervised wellness accessible to the Naperville and greater Chicago suburban community.
               </p>
             </div>
           </ScrollReveal>

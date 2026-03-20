@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, ArrowRight, Music, Building2, Stethoscope, Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -92,13 +93,12 @@ export const BusinessOpportunityModal = ({ isOpen, onClose }: BusinessOpportunit
             <div className="flex flex-col md:flex-row">
               {/* Left Image Section - Hidden on mobile for better UX */}
               <div className="hidden md:block relative w-2/5 min-h-[480px] bg-gradient-to-br from-primary/20 to-accent/20">
-                <img 
+                <Image 
                   src="https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=600&h=800&fit=crop&crop=bottom"
                   alt="Austin Texas Skyline"
                   width={600}
                   height={800}
                   loading="lazy"
-                  decoding="async"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />

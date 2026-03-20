@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PageHero } from '@/components/ui/PageHero';
+import { useToast } from '@/hooks/use-toast';
 const heroContact = "/hero-contact.jpg";
 
 const roles = ['Investor', 'Community', 'Operator', 'Media', 'Other'];
@@ -20,13 +21,45 @@ const ContactPage = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      const response = await fetch('/api/submissions/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || 'Submission failed');
+      }
+
+      // Save to localStorage for admin panel
+      if (payload.submission && typeof window !== 'undefined') {
+        const existing = JSON.parse(localStorage.getItem('focus_admin_submissions') || '[]');
+        existing.unshift(payload.submission);
+        localStorage.setItem('focus_admin_submissions', JSON.stringify(existing));
+      }
+
+      setIsSubmitted(true);
+      toast({
+        title: "Message Sent",
+        description: "We'll review your message and get back to you soon.",
+      });
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

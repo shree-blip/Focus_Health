@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Eye, Clock, TrendingUp, Mail, Plus } from 'lucide-react';
+import { FileText, Eye, Clock, TrendingUp, Mail, Plus, Inbox } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -132,6 +132,20 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <Mail className="h-5 w-5 text-primary" />
+              </div>
+            </Link>
+            <Link
+              href="/admin/submissions"
+              className="p-4 border rounded-lg hover:bg-muted transition-colors cursor-pointer"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold mb-2">Form Submissions</h3>
+                  <p className="text-sm text-muted-foreground">
+                    View partner & contact submissions
+                  </p>
+                </div>
+                <Inbox className="h-5 w-5 text-primary" />
               </div>
             </Link>
           </div>

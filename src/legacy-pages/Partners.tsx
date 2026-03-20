@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PageHero } from '@/components/ui/PageHero';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 const heroPartners = "/hero-partners.jpg";
 const investmentHighlights = [{
@@ -91,24 +90,33 @@ const PartnersPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('send-investor-request', {
-        body: {
+      const response = await fetch('/api/submissions/partner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: `${formData.firstName} ${formData.lastName}`,
-          firm: formData.marketInterest,
           email: formData.email,
           phone: formData.phone,
+          marketInterest: formData.marketInterest,
           cashToInvest: formData.cashToInvest,
           partnerType: formData.partnerType.join(', '),
           additionalInfo: formData.additionalInfo
-        }
+        })
       });
-      if (error) {
-        throw error;
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || 'Submission failed');
       }
-      console.log('Business opportunity request sent:', data);
+
+      // Save to localStorage for admin panel
+      if (payload.submission && typeof window !== 'undefined') {
+        const existing = JSON.parse(localStorage.getItem('focus_admin_submissions') || '[]');
+        existing.unshift(payload.submission);
+        localStorage.setItem('focus_admin_submissions', JSON.stringify(existing));
+      }
+
+      console.log('Business opportunity request sent:', payload);
       setIsSubmitted(true);
       toast({
         title: "Request Submitted",

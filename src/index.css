@@ -124,6 +124,19 @@
     scroll-behavior: smooth;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   body {
     @apply bg-background text-foreground font-body antialiased;
   }
@@ -185,6 +198,8 @@
 
   .section-padding {
     @apply py-16 md:py-24 lg:py-32;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
   }
 
   .animate-fade-up {
@@ -274,6 +289,19 @@
   50% {
     transform: translateY(-10px);
   }
+}
+
+@keyframes gradient-x {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 5s linear infinite;
 }
 
 /* Scrollbar styling */

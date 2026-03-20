@@ -25,7 +25,7 @@ const wellnessServices = [
   {
     icon: Scale,
     title: 'Medical Weight Loss',
-    description: 'Physician-supervised weight management programs featuring FDA-approved medications including Semaglutide (Ozempic/Wegovy) and Tirzepatide (Mounjaro), personalized nutrition planning, and ongoing metabolic monitoring in Irving, TX.',
+    description: 'Medical expert supervised weight management programs featuring FDA-approved medications including Semaglutide (Ozempic/Wegovy) and Tirzepatide (Mounjaro), personalized nutrition planning, and ongoing metabolic monitoring in Irving, TX.',
     keywords: ['medical weight loss Irving TX', 'Semaglutide Irving', 'Wegovy Las Colinas', 'weight loss clinic DFW'],
   },
   {
@@ -96,10 +96,10 @@ const additionalServices = [
 const communityBenefits = [
   {
     title: 'Bridging the Wellness Gap in DFW',
-    description: 'Many residents in Irving and the DFW metroplex lack access to physician-supervised wellness services. Irving Health & Wellness Clinic brings medical-grade aesthetic, weight loss, and preventive care closer to home.',
+    description: 'Many residents in Irving and the DFW metroplex lack access to medical expert supervised wellness services. Irving Health & Wellness Clinic brings medical-grade aesthetic, weight loss, and preventive care closer to home.',
   },
   {
-    title: 'Physician-Supervised Care You Can Trust',
+    title: 'Medical Expert Supervised Care You Can Trust',
     description: 'Unlike med spas and non-medical clinics, every treatment at Irving Health & Wellness Clinic is supervised by licensed physicians. This ensures safety, proper dosing, and personalized protocols.',
   },
   {
@@ -121,7 +121,7 @@ const nearbyAreas = [
 const faqs = [
   {
     q: 'What is a health and wellness clinic?',
-    a: 'A health and wellness clinic provides physician-supervised services focused on preventive care, aesthetic treatments, weight management, and hormone optimization. Irving Health & Wellness Clinic combines medical expertise with cutting-edge wellness treatments for a comprehensive approach to health.',
+    a: 'A health and wellness clinic provides medical expert supervised services focused on preventive care, aesthetic treatments, weight management, and hormone optimization. Irving Health & Wellness Clinic combines medical expertise with cutting-edge wellness treatments for a comprehensive approach to health.',
   },
   {
     q: 'Does Irving Health & Wellness Clinic accept insurance?',
@@ -129,7 +129,7 @@ const faqs = [
   },
   {
     q: 'How does medical weight loss work?',
-    a: 'Our physician-supervised medical weight loss program includes FDA-approved medications (Semaglutide/Tirzepatide), personalized nutrition planning, metabolic monitoring, and ongoing support. Programs are customized based on your health history, goals, and metabolic profile.',
+    a: 'Our medical expert supervised medical weight loss program includes FDA-approved medications (Semaglutide/Tirzepatide), personalized nutrition planning, metabolic monitoring, and ongoing support. Programs are customized based on your health history, goals, and metabolic profile.',
   },
   {
     q: 'Is hormone replacement therapy safe?',
@@ -146,7 +146,7 @@ const irvingWellnessSchema = {
   "@type": "MedicalClinic",
   "name": "Irving Health & Wellness Clinic",
   "alternateName": "Irving Health & Wellness Clinic – Focus Health",
-  "description": "Irving Health & Wellness Clinic is a physician-supervised wellness center in Irving, Texas offering medical weight loss with Semaglutide & Tirzepatide, hormone replacement therapy, Botox, dermal fillers, IV hydration, body contouring, and preventive wellness. Serving Las Colinas, Valley Ranch & DFW.",
+  "description": "Irving Health & Wellness Clinic is a medical expert supervised wellness center in Irving, Texas offering medical weight loss with Semaglutide & Tirzepatide, hormone replacement therapy, Botox, dermal fillers, IV hydration, body contouring, and preventive wellness. Serving Las Colinas, Valley Ranch & DFW.",
   "url": `${BASE_URL}/facilities/irving-wellness-clinic`,
   "image": `${BASE_URL}/assets/irving-wellness-1.jpg`,
   "address": {
@@ -193,7 +193,7 @@ const IrvingWellnessClinic = () => {
 {/* Hero */}
       <PageHero
         title="Irving Health & Wellness Clinic"
-        description="Physician-supervised wellness services in Irving, Texas — medical weight loss, hormone therapy, aesthetics, IV hydration & preventive care serving Las Colinas, Valley Ranch & DFW."
+        description="Medical expert supervised wellness services in Irving, Texas — medical weight loss, hormone therapy, aesthetics, IV hydration & preventive care serving Las Colinas, Valley Ranch & DFW."
         backgroundImage={facilityImage}
         primaryCta={{ text: "View All Facilities", link: "/track-record" }}
         secondaryCta={{ text: "Contact Us", link: "/contact" }}
@@ -211,7 +211,7 @@ const IrvingWellnessClinic = () => {
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    <strong>Irving Health & Wellness Clinic</strong> is a premier <strong>physician-supervised wellness center</strong> in <strong>Irving, Texas</strong>. We provide a comprehensive range of medical wellness services including <strong>medical weight loss, hormone replacement therapy, aesthetic treatments, IV hydration therapy, body contouring, and preventive wellness care</strong>.
+                    <strong>Irving Health & Wellness Clinic</strong> is a premier <strong>medical expert supervised wellness center</strong> in <strong>Irving, Texas</strong>. We provide a comprehensive range of medical wellness services including <strong>medical weight loss, hormone replacement therapy, aesthetic treatments, IV hydration therapy, body contouring, and preventive wellness care</strong>.
                   </p>
                   <p>
                     Our team of <strong>licensed physicians and medical professionals</strong> delivers personalized treatment plans tailored to each patient's unique health goals. From <strong>FDA-approved weight loss medications like Semaglutide and Tirzepatide</strong> to <strong>bioidentical hormone therapy and advanced aesthetics</strong>, we combine medical expertise with the latest wellness innovations.
@@ -221,7 +221,7 @@ const IrvingWellnessClinic = () => {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 mt-6">
-                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Physician-Supervised</span>
+                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Medical Expert Supervised</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">FDA-Approved Treatments</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Personalized Plans</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Medical-Grade Results</span>
@@ -304,7 +304,7 @@ const IrvingWellnessClinic = () => {
                 Comprehensive Wellness & Aesthetic Services
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                Irving Health & Wellness Clinic offers a full spectrum of physician-supervised wellness treatments designed to help you look and feel your best.
+                Irving Health & Wellness Clinic offers a full spectrum of medical expert supervised wellness treatments designed to help you look and feel your best.
               </p>
             </div>
           </ScrollReveal>
@@ -371,7 +371,7 @@ const IrvingWellnessClinic = () => {
                 Elevating Wellness in Irving & DFW
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                Irving Health & Wellness Clinic is committed to making physician-supervised wellness accessible to the Irving and DFW community.
+                Irving Health & Wellness Clinic is committed to making medical expert supervised wellness accessible to the Irving and DFW community.
               </p>
             </div>
           </ScrollReveal>
@@ -501,7 +501,7 @@ const IrvingWellnessClinic = () => {
             <Link href="/contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Contact Us
             </Link>
-            <a href="https://irvinghealthandwellness.com" target="_blank" rel="dofollow" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors">
+            <a href="https://irvingwellnessclinic.com" target="_blank" rel="dofollow" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors">
               Visit Irving Wellness Website <ArrowRight size={16} />
             </a>
           </div>

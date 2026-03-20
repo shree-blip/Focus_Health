@@ -3,11 +3,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FileText, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, LogOut, Inbox } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/blog", label: "Blog Posts", icon: FileText },
+  { href: "/admin/submissions", label: "Submissions", icon: Inbox },
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {

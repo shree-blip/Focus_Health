@@ -1,16 +1,46 @@
 "use client";
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { HeroSection } from '@/components/home/HeroSection';
-import { PillarsSection } from '@/components/home/PillarsSection';
-import { TurnkeyModelSection } from '@/components/home/TurnkeyModelSection';
-import { OperatorDNASection } from '@/components/home/OperatorDNASection';
-import { VideoShowcaseSection } from '@/components/home/VideoShowcaseSection';
-import { MarketSection } from '@/components/home/MarketSection';
-import { InvestmentSection } from '@/components/home/InvestmentSection';
-import { SplitCTASection } from '@/components/home/SplitCTASection';
-import { EarlyAccessSection } from '@/components/home/EarlyAccessSection';
-import { BusinessOpportunityModal } from '@/components/home/BusinessOpportunityModal';
+
+// Below-the-fold sections loaded dynamically to reduce initial JS bundle
+const PillarsSection = dynamic(
+  () => import('@/components/home/PillarsSection').then(mod => ({ default: mod.PillarsSection })),
+  { ssr: true }
+);
+const TurnkeyModelSection = dynamic(
+  () => import('@/components/home/TurnkeyModelSection').then(mod => ({ default: mod.TurnkeyModelSection })),
+  { ssr: true }
+);
+const OperatorDNASection = dynamic(
+  () => import('@/components/home/OperatorDNASection').then(mod => ({ default: mod.OperatorDNASection })),
+  { ssr: true }
+);
+const VideoShowcaseSection = dynamic(
+  () => import('@/components/home/VideoShowcaseSection').then(mod => ({ default: mod.VideoShowcaseSection })),
+  { ssr: true }
+);
+const MarketSection = dynamic(
+  () => import('@/components/home/MarketSection').then(mod => ({ default: mod.MarketSection })),
+  { ssr: true }
+);
+const InvestmentSection = dynamic(
+  () => import('@/components/home/InvestmentSection').then(mod => ({ default: mod.InvestmentSection })),
+  { ssr: true }
+);
+const SplitCTASection = dynamic(
+  () => import('@/components/home/SplitCTASection').then(mod => ({ default: mod.SplitCTASection })),
+  { ssr: true }
+);
+const EarlyAccessSection = dynamic(
+  () => import('@/components/home/EarlyAccessSection').then(mod => ({ default: mod.EarlyAccessSection })),
+  { ssr: true }
+);
+const BusinessOpportunityModal = dynamic(
+  () => import('@/components/home/BusinessOpportunityModal').then(mod => ({ default: mod.BusinessOpportunityModal })),
+  { ssr: false }
+);
 
 const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,12 +65,14 @@ const Index = () => {
       <SplitCTASection />
       <EarlyAccessSection />
       
-      <BusinessOpportunityModal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
-      />
+      {isModalOpen && (
+        <BusinessOpportunityModal 
+          isOpen={isModalOpen} 
+          onClose={handleCloseModal} 
+        />
+      )}
     </>
-);
+  );
 };
 
 export default Index;

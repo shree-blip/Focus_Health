@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 
 export const Footer = () => {
@@ -11,7 +12,7 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-3 sm:space-y-4 col-span-2 md:col-span-1">
             <Link href="/" aria-label="Focus Health home" className="flex items-center gap-2 sm:gap-3">
-              <img src="/focus-health-icon.png" alt="Focus Health Logo" width={80} height={80} className="h-8 sm:h-10 w-auto brightness-0 invert" />
+              <Image src="/focus-health-icon.png" alt="Focus Health Logo" width={40} height={40} loading="lazy" className="h-8 sm:h-10 w-auto brightness-0 invert" />
               <div className="flex items-baseline gap-1 sm:gap-1.5">
                 <span className="font-heading font-bold text-base sm:text-lg text-primary-foreground">Focus</span>
                 <span className="font-heading font-bold text-base sm:text-lg text-secondary">Health</span>
