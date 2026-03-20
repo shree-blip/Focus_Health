@@ -281,6 +281,44 @@
   .blog-article pre code {
     @apply bg-transparent p-0;
   }
+
+  /* ─── Tiptap Editor Prose Styles ─── */
+  .prose-styles h1 { @apply text-3xl font-heading font-bold mt-6 mb-3; }
+  .prose-styles h2 { @apply text-2xl font-heading font-semibold mt-6 mb-2; }
+  .prose-styles h3 { @apply text-xl font-semibold mt-4 mb-2; }
+  .prose-styles h4 { @apply text-lg font-semibold mt-3 mb-1; }
+  .prose-styles p { @apply text-sm leading-6 mb-2; }
+  .prose-styles a { @apply text-primary underline; }
+  .prose-styles ul { @apply list-disc pl-5 mb-2 space-y-0.5; }
+  .prose-styles ol { @apply list-decimal pl-5 mb-2 space-y-0.5; }
+  .prose-styles blockquote { @apply border-l-4 border-primary/30 pl-3 italic text-muted-foreground my-3; }
+  .prose-styles img { @apply rounded-lg border border-border max-w-full mx-auto my-3; }
+  .prose-styles hr { @apply border-border my-4; }
+  .prose-styles code { @apply bg-muted px-1.5 py-0.5 rounded text-xs; }
+  .prose-styles pre { @apply bg-muted rounded-lg p-3 overflow-x-auto my-3 text-sm; }
+  .prose-styles pre code { @apply bg-transparent p-0; }
+  .prose-styles s { @apply line-through; }
+  .prose-styles sub { @apply align-sub text-xs; }
+  .prose-styles sup { @apply align-super text-xs; }
+  .prose-styles mark { @apply rounded px-0.5; }
+  .prose-styles table { @apply border-collapse w-full my-3; }
+  .prose-styles th { @apply border border-border bg-muted px-3 py-1.5 text-left text-xs font-semibold; }
+  .prose-styles td { @apply border border-border px-3 py-1.5 text-sm; }
+  .prose-styles iframe { @apply rounded-lg border border-border my-3 mx-auto max-w-full; }
+  .prose-styles .ProseMirror-selectednode { @apply outline-2 outline-primary outline-offset-2; }
+
+  /* Tiptap placeholder */
+  .prose-styles p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply text-muted-foreground pointer-events-none float-left h-0;
+  }
+
+  /* Table cell selection highlight */
+  .prose-styles .selectedCell::after {
+    content: '';
+    @apply absolute inset-0 bg-primary/10 pointer-events-none;
+  }
+  .prose-styles td, .prose-styles th { position: relative; }
 }
 
 @layer utilities {
