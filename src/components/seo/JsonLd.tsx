@@ -11,10 +11,9 @@ const organizationSchema = {
     "Institutional-grade healthcare infrastructure company specializing in building and operating high-performance freestanding emergency rooms across Texas.",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "350 Main St Suite H-7",
-    addressLocality: "Pleasanton",
-    addressRegion: "CA",
-    postalCode: "94566",
+    streetAddress: "Dexperts",
+    addressLocality: "Texas",
+    addressRegion: "TX",
     addressCountry: "US",
   },
   email: "info@getfocushealth.com",

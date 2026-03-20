@@ -83,6 +83,11 @@ const accountingTeam = [
     photo: ganeshHeadshot,
   },
   {
+    name: "Kalash Shrestha",
+    role: "Tax Accountant",
+    category: "Accounting & Billing",
+  },
+  {
     name: "Guinness Lakhe",
     role: "Sr. Accounting Officer",
     category: "Accounting & Billing",
