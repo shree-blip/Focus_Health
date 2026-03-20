@@ -131,7 +131,7 @@ const faqs = [
   },
   {
     q: 'Where is ER of Irving located?',
-    a: 'ER of Irving is located at 7600 N MacArthur Blvd, Irving, TX 75063 — conveniently accessible from Las Colinas, Valley Ranch, Coppell, and the greater Dallas-Fort Worth area. We are open 24/7/365.',
+    a: 'ER of Irving is located at 8200 N MacArthur Blvd Suite 110, Irving, TX 75063 — conveniently accessible from Las Colinas, Valley Ranch, Coppell, and the greater Dallas-Fort Worth area. We are open 24/7/365.',
   },
 ];
 
@@ -146,7 +146,7 @@ const erOfIrvingSchema = {
   "image": `${BASE_URL}/assets/facility-er-irving-real.webp`,
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "7600 N MacArthur Blvd",
+    "streetAddress": "8200 N MacArthur Blvd Suite 110",
     "addressLocality": "Irving",
     "addressRegion": "TX",
     "postalCode": "75063",
@@ -154,8 +154,8 @@ const erOfIrvingSchema = {
   },
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": "32.9137",
-    "longitude": "-96.9584"
+    "latitude": "32.9025",
+    "longitude": "-96.9790"
   },
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
@@ -299,7 +299,7 @@ const ERofIrving = () => {
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    <strong>ER of Irving</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>7600 N MacArthur Blvd, Irving, TX 75063</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility.
+                    <strong>ER of Irving</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>8200 N MacArthur Blvd Suite 110, Irving, TX 75063</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility.
                   </p>
                   <p>
                     Our team of <strong>board-certified emergency physicians</strong> and trauma-trained nursing staff delivers comprehensive emergency medical services for patients of all ages — from infants to seniors. With <strong>on-site CT scan, digital X-ray, ultrasound, in-house laboratory, and pharmacy capabilities</strong>, we diagnose and treat emergencies without the long wait times of traditional hospital ERs.
@@ -326,7 +326,7 @@ const ERofIrving = () => {
                 />
                 <div className="p-4 bg-background flex items-center gap-3 text-sm text-muted-foreground">
                   <MapPin size={16} className="text-primary flex-shrink-0" />
-                  <span>7600 N MacArthur Blvd, Irving, TX 75063</span>
+                  <span>8200 N MacArthur Blvd Suite 110, Irving, TX 75063</span>
                 </div>
               </div>
             </ScrollReveal>

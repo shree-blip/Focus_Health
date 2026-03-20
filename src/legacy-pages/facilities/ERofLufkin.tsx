@@ -130,7 +130,7 @@ const faqs = [
   },
   {
     q: 'What should I do in a life-threatening emergency?',
-    a: 'Call 911 immediately for life-threatening emergencies such as difficulty breathing, chest pain, severe bleeding, or loss of consciousness. For emergencies that require urgent but non-life-threatening care, you can come directly to ER of Lufkin at 4633 S Medford Dr, Lufkin, TX 75901.',
+    a: 'Call 911 immediately for life-threatening emergencies such as difficulty breathing, chest pain, severe bleeding, or loss of consciousness. For emergencies that require urgent but non-life-threatening care, you can come directly to ER of Lufkin at 501 N Brentwood Dr, Lufkin, TX 75904.',
   },
 ];
 
@@ -145,16 +145,16 @@ const erOfLufkinSchema = {
   "image": `${BASE_URL}/assets/facility-er-lufkin-real.png`,
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "4633 S Medford Dr",
+    "streetAddress": "501 N Brentwood Dr",
     "addressLocality": "Lufkin",
     "addressRegion": "TX",
-    "postalCode": "75901",
+    "postalCode": "75904",
     "addressCountry": "US"
   },
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": "31.3168",
-    "longitude": "-94.7291"
+    "latitude": "31.3368",
+    "longitude": "-94.7218"
   },
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
@@ -225,7 +225,7 @@ const ERofLufkin = () => {
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    <strong>ER of Lufkin</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>4633 S Medford Dr, Lufkin, TX 75901</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility.
+                    <strong>ER of Lufkin</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>501 N Brentwood Dr, Lufkin, TX 75904</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility.
                   </p>
                   <p>
                     Our team of <strong>board-certified emergency physicians</strong> and trauma-trained nursing staff delivers comprehensive emergency medical services for patients of all ages — from infants to seniors. With <strong>on-site CT scan, digital X-ray, ultrasound, in-house laboratory, and pharmacy capabilities</strong>, we diagnose and treat emergencies without the long wait times of traditional hospital ERs.
@@ -252,7 +252,7 @@ const ERofLufkin = () => {
                 />
                 <div className="p-4 bg-background flex items-center gap-3 text-sm text-muted-foreground">
                   <MapPin size={16} className="text-primary flex-shrink-0" />
-                  <span>4633 S Medford Dr, Lufkin, TX 75901</span>
+                  <span>501 N Brentwood Dr, Lufkin, TX 75904</span>
                 </div>
               </div>
             </ScrollReveal>

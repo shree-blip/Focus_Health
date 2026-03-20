@@ -130,7 +130,7 @@ const faqs = [
   },
   {
     q: 'Where is ER of White Rock located?',
-    a: 'ER of White Rock is located at 9150 Garland Rd, Dallas, TX 75218 — conveniently accessible from White Rock Lake, Lakewood, Casa Linda, Lake Highlands, and East Dallas. We are open 24/7/365.',
+    a: 'ER of White Rock is located at 10705 Northwest Hwy, Dallas, TX 75238 — conveniently accessible from White Rock Lake, Lakewood, Casa Linda, Lake Highlands, and East Dallas. We are open 24/7/365.',
   },
 ];
 
@@ -145,16 +145,16 @@ const erOfWhiteRockSchema = {
   "image": `${BASE_URL}/assets/facility-er-whiterock.png`,
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "9150 Garland Rd",
+    "streetAddress": "10705 Northwest Hwy",
     "addressLocality": "Dallas",
     "addressRegion": "TX",
-    "postalCode": "75218",
+    "postalCode": "75238",
     "addressCountry": "US"
   },
   "geo": {
     "@type": "GeoCoordinates",
-    "latitude": "32.8407",
-    "longitude": "-96.6981"
+    "latitude": "32.8747",
+    "longitude": "-96.7199"
   },
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
@@ -220,7 +220,7 @@ const ERofWhiteRock = () => {
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    <strong>ER of White Rock</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>9150 Garland Rd, Dallas, TX 75218</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility near White Rock Lake.
+                    <strong>ER of White Rock</strong> is a state-of-the-art <strong>freestanding emergency room</strong> located at <strong>10705 Northwest Hwy, Dallas, TX 75238</strong>. Open <strong>24 hours a day, 7 days a week</strong>, we provide hospital-level emergency care with the speed and personal attention of a dedicated facility near White Rock Lake.
                   </p>
                   <p>
                     Our team of <strong>board-certified emergency physicians</strong> and trauma-trained nursing staff delivers comprehensive emergency medical services for patients of all ages. With <strong>on-site CT scan, digital X-ray, ultrasound, in-house laboratory, and pharmacy capabilities</strong>, we diagnose and treat emergencies without the long wait times of traditional hospital ERs.
@@ -247,7 +247,7 @@ const ERofWhiteRock = () => {
                 />
                 <div className="p-4 bg-background flex items-center gap-3 text-sm text-muted-foreground">
                   <MapPin size={16} className="text-primary flex-shrink-0" />
-                  <span>9150 Garland Rd, Dallas, TX 75218</span>
+                  <span>10705 Northwest Hwy, Dallas, TX 75238</span>
                 </div>
               </div>
             </ScrollReveal>

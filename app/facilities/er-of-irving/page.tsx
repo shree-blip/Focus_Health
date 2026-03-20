@@ -19,12 +19,12 @@ export default function ERofIrvingPage() {
         name="ER of Irving"
         description="24/7 freestanding emergency room in Irving, TX serving Las Colinas, Valley Ranch, Coppell, and surrounding communities."
         facilityType="EmergencyService"
-        streetAddress="7600 N MacArthur Blvd"
+        streetAddress="8200 N MacArthur Blvd Suite 110"
         city="Irving"
         state="TX"
         zip="75063"
-        latitude={32.9137}
-        longitude={-96.9584}
+        latitude={32.9025}
+        longitude={-96.9790}
         openingHours="Mo-Su 00:00-23:59"
         serviceArea={["Irving", "Las Colinas", "Valley Ranch", "Coppell", "Grapevine", "Euless", "Bedford", "Grand Prairie", "Arlington", "Dallas"]}
       />

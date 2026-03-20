@@ -17,6 +17,10 @@ const OperatorDNASection = dynamic(
   () => import('@/components/home/OperatorDNASection').then(mod => ({ default: mod.OperatorDNASection })),
   { ssr: true }
 );
+const FacilitiesMapSection = dynamic(
+  () => import('@/components/home/FacilitiesMapSection').then(mod => ({ default: mod.FacilitiesMapSection })),
+  { ssr: false }
+);
 const MarketSection = dynamic(
   () => import('@/components/home/MarketSection').then(mod => ({ default: mod.MarketSection })),
   { ssr: true }
@@ -170,6 +174,7 @@ const Index = () => {
       <PillarsSection />
       <TurnkeyModelSection />
       <OperatorDNASection />
+      <FacilitiesMapSection />
       <MarketSection onOpenOpportunities={handleOpenModal} />
       <InvestmentSection />
       <SplitCTASection />

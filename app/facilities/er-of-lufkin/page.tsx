@@ -19,12 +19,12 @@ export default function ERofLufkinPage() {
         name="ER of Lufkin"
         description="24/7 freestanding emergency room in Lufkin, TX serving Nacogdoches, Livingston, Jasper, and surrounding East Texas communities."
         facilityType="EmergencyService"
-        streetAddress="4633 S Medford Dr"
+        streetAddress="501 N Brentwood Dr"
         city="Lufkin"
         state="TX"
-        zip="75901"
-        latitude={31.3168}
-        longitude={-94.7291}
+        zip="75904"
+        latitude={31.3368}
+        longitude={-94.7218}
         openingHours="Mo-Su 00:00-23:59"
         serviceArea={["Lufkin", "Nacogdoches", "Livingston", "Jasper", "Crockett", "Center", "Diboll", "Hudson", "Huntington", "Angelina County"]}
       />

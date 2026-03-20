@@ -65,7 +65,7 @@ const healthcarePortfolio = [
     description: 'ER of Irving is a 24/7 freestanding emergency room in Irving, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, and full laboratory services. Offering pediatric and adult emergency care with minimal wait times near Las Colinas, Valley Ranch, and greater Dallas-Fort Worth.',
     url: '/facilities/er-of-irving',
     image: facilityErIrving,
-    address: '7600 N MacArthur Blvd, Irving, TX 75063',
+    address: '8200 N MacArthur Blvd Suite 110, Irving, TX 75063',
     internal: true,
   },
   {
@@ -75,7 +75,7 @@ const healthcarePortfolio = [
     description: 'ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas staffed by board-certified ER physicians with on-site imaging, in-house pharmacy, and comprehensive lab testing. Serving Angelina County, Nacogdoches, and East Texas with full-service emergency care for all ages.',
     url: '/facilities/er-of-lufkin',
     image: facilityErLufkin,
-    address: '4633 S Medford Dr, Lufkin, TX 75901',
+    address: '501 N Brentwood Dr, Lufkin, TX 75904',
     internal: true,
   },
   {
@@ -85,7 +85,7 @@ const healthcarePortfolio = [
     description: 'ER of White Rock is a 24/7 freestanding emergency room in Dallas, Texas with board-certified emergency physicians and trauma-trained nurses. Advanced on-site CT, X-ray, and lab services with minimal wait times near White Rock Lake, Lakewood, and East Dallas.',
     url: '/facilities/er-of-white-rock',
     image: facilityErWhiterock,
-    address: '9150 Garland Rd, Dallas, TX 75218',
+    address: '10705 Northwest Hwy, Dallas, TX 75238',
     internal: true,
   },
   {
