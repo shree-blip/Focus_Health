@@ -280,14 +280,6 @@ const GrandOpeningVideoCard = ({
   );
 };
 
-const eventPhotos = [
-  { src: '/Irving_Wellness/IHW-FraceMedia-03.jpg', alt: 'ER of Irving grand opening event – Focus Health team' },
-  { src: '/Irving_Wellness/IHW-FraceMedia-07.jpg', alt: 'Irving Health & Wellness grand opening celebration' },
-  { src: '/Irving_Wellness/IHW-FraceMedia-14.jpg', alt: 'Grand opening ribbon cutting ceremony – Irving TX' },
-  { src: '/Irving_Wellness/IHW-FraceMedia-33.jpg', alt: 'Focus Health grand opening event Irving TX' },
-  { src: '/Irving_Wellness/IHW-FraceMedia-43.jpg', alt: 'Irving facility grand opening community event' },
-];
-
 const GrandOpeningSection = () => (
   <section className="w-full bg-background py-10 md:py-14">
     <div className="container-focus">
@@ -300,32 +292,13 @@ const GrandOpeningSection = () => (
         </h2>
       </div>
 
-      {/* Two video cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        <GrandOpeningVideoCard
-          src="/Irving_Wellness/IHW-Event-Horizontal.mp4"
-          title="Irving Health &amp; Wellness — Grand Opening"
-          ariaLabel="Irving Health and Wellness grand opening event highlight video"
-        />
+      {/* ER video card */}
+      <div className="max-w-4xl mx-auto">
         <GrandOpeningVideoCard
           src="/ERofIrving-GrandOpening.mp4"
           title="ER of Irving — Grand Opening"
           ariaLabel="ER of Irving grand opening event highlight video"
         />
-      </div>
-
-      {/* Event photo gallery */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {eventPhotos.map((photo) => (
-          <div key={photo.src} className="rounded-xl overflow-hidden border border-border shadow-sm aspect-square bg-muted">
-            <img
-              src={photo.src}
-              alt={photo.alt}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          </div>
-        ))}
       </div>
     </div>
   </section>
