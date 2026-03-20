@@ -148,6 +148,7 @@ const LeadershipPage = () => {
         await navigator.share({ title: shareTitle, text: shareText, url });
         return;
       } catch {
+        void 0;
       }
     }
 
@@ -155,6 +156,7 @@ const LeadershipPage = () => {
       try {
         await navigator.clipboard.writeText(url);
       } catch {
+        void 0;
       }
     }
 
