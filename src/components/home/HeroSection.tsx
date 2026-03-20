@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Floating particle component
 const FloatingParticle = ({ delay, duration, x, y, size }: { delay: number; duration: number; x: number; y: number; size: number }) => (
@@ -167,11 +167,22 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
     duration: Math.random() * 3 + 4,
   }));
 
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Force autoplay — browsers may block the declarative attribute
+  useEffect(() => {
+    const v = heroVideoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
+          ref={heroVideoRef}
           src="/Irving_Wellness/IHW-Event-Horizontal.mp4"
           autoPlay
           loop

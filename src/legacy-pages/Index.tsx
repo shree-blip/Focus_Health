@@ -42,28 +42,47 @@ const BusinessOpportunityModal = dynamic(
   { ssr: false }
 );
 
-// Lazy-loaded standalone video below the hero
+// Lazy-loaded standalone video below the hero — autoplay on scroll, pause when out of view
 const ERofIrvingVideo = () => {
   const ref = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [visible, setVisible] = useState(false);
   const [muted, setMuted] = useState(true);
 
+  // Lazy load: render video element once close to viewport
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const observer = new IntersectionObserver(
+    const loadObserver = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
-          observer.disconnect();
+          loadObserver.disconnect();
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '400px' }
     );
-    observer.observe(el);
-    return () => observer.disconnect();
+    loadObserver.observe(el);
+    return () => loadObserver.disconnect();
   }, []);
+
+  // Play / pause based on visibility
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const playObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      },
+      { threshold: 0.25 }
+    );
+    playObserver.observe(v);
+    return () => playObserver.disconnect();
+  }, [visible]);
 
   const toggleSound = () => {
     if (videoRef.current) {
