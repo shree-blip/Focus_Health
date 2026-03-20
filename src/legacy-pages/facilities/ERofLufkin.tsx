@@ -257,7 +257,7 @@ const ERofLufkin = () => {
                     <a
                       href="https://maps.app.goo.gl/FZBc8KhuMQmekbWYA"
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener"
                       className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
                     >
                       Get Directions <ExternalLink size={11} />

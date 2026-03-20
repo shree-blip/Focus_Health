@@ -89,13 +89,13 @@ export const Footer = () => {
               </li>
             </ul>
             <div className="flex items-center gap-3 mt-4 sm:mt-6">
-              <a aria-label="Focus Health on Facebook" href="https://www.facebook.com/people/Focus-Health/61586849325711/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <a aria-label="Focus Health on Facebook" href="https://www.facebook.com/people/Focus-Health/61586849325711/" target="_blank" rel="noopener" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 <Facebook size={18} />
               </a>
-              <a aria-label="Focus Health on Instagram" href="https://www.instagram.com/getfocushealth/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <a aria-label="Focus Health on Instagram" href="https://www.instagram.com/getfocushealth/" target="_blank" rel="noopener" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 <Instagram size={18} />
               </a>
-              <a aria-label="Focus Health on LinkedIn" href="https://www.linkedin.com/company/getfocus-health/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <a aria-label="Focus Health on LinkedIn" href="https://www.linkedin.com/company/getfocus-health/" target="_blank" rel="noopener" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
                 <Linkedin size={18} />
               </a>
             </div>

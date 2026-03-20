@@ -4,11 +4,18 @@ import ERofIrving from "@/legacy-pages/facilities/ERofIrving";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "ER of Irving",
+  title: "ER of Irving | 24/7 Emergency Room in Irving, TX",
   description:
-    "Explore ER of Irving performance, patient services, and community impact delivered by Focus Health.",
+    "24/7 freestanding emergency room at 8200 N MacArthur Blvd Suite 110, Irving, TX 75063. Board-certified emergency physicians, on-site CT scan, X-ray, ultrasound & in-house lab. Minimal wait times serving Las Colinas, Valley Ranch, Coppell & DFW.",
   canonicalUrl: "/facilities/er-of-irving",
-  keywords: ["ER of Irving", "Irving emergency room", "24/7 ER Irving TX", "freestanding ER Las Colinas"],
+  ogImage: "/facility-er-irving-real.webp",
+  keywords: [
+    "ER of Irving", "Irving emergency room", "24/7 ER Irving TX",
+    "freestanding ER Las Colinas", "emergency room Irving Texas",
+    "ER near Las Colinas", "ER near Valley Ranch", "Irving TX ER",
+    "8200 N MacArthur Blvd Irving", "urgent care Irving TX",
+    "freestanding emergency room DFW", "ER open 24 hours Irving",
+  ],
 });
 
 export default function ERofIrvingPage() {

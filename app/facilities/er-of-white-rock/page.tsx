@@ -4,11 +4,18 @@ import ERofWhiteRock from "@/legacy-pages/facilities/ERofWhiteRock";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "ER of White Rock",
+  title: "ER of White Rock | 24/7 Emergency Room in Dallas, TX",
   description:
-    "Explore ER of White Rock emergency services and local care delivery metrics.",
+    "24/7 freestanding emergency room at 10705 Northwest Hwy, Dallas, TX 75238. Board-certified emergency physicians, advanced CT scan, X-ray & lab. Minimal wait times serving White Rock Lake, Lakewood, Casa Linda & East Dallas.",
   canonicalUrl: "/facilities/er-of-white-rock",
-  keywords: ["ER of White Rock", "White Rock emergency room", "24/7 ER Dallas TX", "freestanding ER East Dallas"],
+  ogImage: "/facility-er-whiterock.png",
+  keywords: [
+    "ER of White Rock", "White Rock emergency room", "24/7 ER Dallas TX",
+    "freestanding ER East Dallas", "emergency room White Rock Lake",
+    "ER near Lakewood Dallas", "10705 Northwest Hwy Dallas",
+    "urgent care Dallas TX 75238", "ER open 24 hours Dallas",
+    "Casa Linda emergency room", "Lake Highlands ER",
+  ],
 });
 
 export default function ERofWhiteRockPage() {

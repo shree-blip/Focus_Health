@@ -4,11 +4,18 @@ import ERofLufkin from "@/legacy-pages/facilities/ERofLufkin";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "ER of Lufkin",
+  title: "ER of Lufkin | 24/7 Emergency Room in Lufkin, TX",
   description:
-    "Explore ER of Lufkin services, operations, and healthcare delivery outcomes.",
+    "24/7 freestanding emergency room at 501 N Brentwood Dr, Lufkin, TX 75904. Board-certified ER physicians, on-site CT scan, X-ray, lab & pharmacy. Minimal wait times serving Angelina County, Nacogdoches & East Texas.",
   canonicalUrl: "/facilities/er-of-lufkin",
-  keywords: ["ER of Lufkin", "Lufkin emergency room", "24/7 ER Lufkin TX", "freestanding ER East Texas"],
+  ogImage: "/facility-er-lufkin-real.png",
+  keywords: [
+    "ER of Lufkin", "Lufkin emergency room", "24/7 ER Lufkin TX",
+    "freestanding ER East Texas", "emergency room Lufkin Texas",
+    "ER Angelina County", "501 N Brentwood Dr Lufkin",
+    "urgent care Lufkin TX", "ER open 24 hours Lufkin",
+    "Nacogdoches emergency room", "East Texas ER",
+  ],
 });
 
 export default function ERofLufkinPage() {

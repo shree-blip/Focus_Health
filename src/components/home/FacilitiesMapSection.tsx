@@ -158,7 +158,7 @@ export function FacilitiesMapSection() {
                       <a
                         href={f.mapsUrl}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener"
                         style={{
                           display: "inline-flex",
                           alignItems: "center",

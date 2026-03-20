@@ -4,11 +4,18 @@ import NapervilleWellnessClinic from "@/legacy-pages/facilities/NapervilleWellne
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Naperville Wellness Clinic",
+  title: "Naperville Health & Wellness Clinic | Naperville, IL",
   description:
-    "View services and operations for Naperville Wellness Clinic under Focus Health management.",
+    "Premier wellness clinic at 2272 95th St STE 100, Naperville, IL 60564. Medical weight loss, hormone replacement therapy, IV hydration, aesthetic services & advanced body contouring. Serving Aurora, Wheaton & Chicago suburbs.",
   canonicalUrl: "/facilities/naperville-wellness-clinic",
-  keywords: ["Naperville Wellness Clinic", "wellness clinic Naperville IL", "primary care Naperville", "Focus Health clinic"],
+  ogImage: "/naperville-wellness-1.jpg",
+  keywords: [
+    "Naperville Health Wellness Clinic", "wellness clinic Naperville IL",
+    "medical weight loss Naperville", "hormone therapy Naperville IL",
+    "IV hydration Naperville", "aesthetic clinic Naperville",
+    "2272 95th St Naperville", "body contouring Naperville IL",
+    "wellness clinic DuPage County", "Focus Health wellness Naperville",
+  ],
 });
 
 export default function NapervilleWellnessClinicPage() {
