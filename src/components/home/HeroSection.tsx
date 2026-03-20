@@ -169,11 +169,29 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-background">
-      {/* Animated gradient background orbs */}
+      {/* Background Video */}
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          src="/Irving_Wellness/IHW-Event-Horizontal.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+        >
+          <track kind="captions" srcLang="en" label="English" src="/captions/empty.vtt" default />
+        </video>
+      </div>
+
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background/95" />
+
+      {/* Subtle animated overlays on top of video */}
       <motion.div style={{ x: orbX, y: orbY }} className="absolute inset-0 pointer-events-none">
-        <GradientOrb className="w-[600px] h-[600px] -top-40 -left-40 bg-gradient-to-br from-primary/30 to-primary/5" />
-        <GradientOrb className="w-[500px] h-[500px] top-1/3 -right-40 bg-gradient-to-bl from-accent/20 to-accent/5" delay={2} />
-        <GradientOrb className="w-[400px] h-[400px] -bottom-20 left-1/3 bg-gradient-to-tr from-secondary/25 to-secondary/5" delay={4} />
+        <GradientOrb className="w-[600px] h-[600px] -top-40 -left-40 bg-gradient-to-br from-primary/20 to-primary/5" />
+        <GradientOrb className="w-[400px] h-[400px] -bottom-20 left-1/3 bg-gradient-to-tr from-secondary/15 to-secondary/5" delay={4} />
       </motion.div>
 
       {/* Floating particles */}
@@ -183,66 +201,10 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
         ))}
       </div>
 
-      {/* Animated grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-        }} />
-      </div>
-
-      {/* Pulse rings from center */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
-        <PulseRing delay={0} size={300} color="hsl(var(--primary) / 0.3)" />
-        <PulseRing delay={1} size={500} color="hsl(var(--primary) / 0.2)" />
-        <PulseRing delay={2} size={700} color="hsl(var(--accent) / 0.15)" />
-      </div>
-
       {/* Heartbeat line */}
       <div className="hidden md:block">
         <HeartbeatLine />
       </div>
-
-      {/* Network connections SVG */}
-      <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none hidden md:block" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
-        {/* Animated connection paths */}
-        <motion.path
-          d="M100 300 Q 300 200 500 300 T 900 250 T 1100 350"
-          stroke="hsl(var(--primary))"
-          strokeWidth="1"
-          fill="none"
-          strokeDasharray="10 5"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 4, ease: 'easeInOut' }}
-        />
-        <motion.path
-          d="M200 500 Q 400 400 600 500 T 1000 450"
-          stroke="hsl(var(--accent))"
-          strokeWidth="1"
-          fill="none"
-          strokeDasharray="8 4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 3.5, delay: 0.5, ease: 'easeInOut' }}
-        />
-        
-        {/* Traveling dot along path */}
-        <motion.circle
-          r="4"
-          fill="hsl(var(--accent))"
-          initial={{ offsetDistance: "0%" }}
-          animate={{ offsetDistance: "100%" }}
-          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-          style={{ offsetPath: "path('M100 300 Q 300 200 500 300 T 900 250 T 1100 350')" }}
-        />
-      </svg>
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
 
       {/* Content */}
       <div className="container-focus relative z-10 pt-20">

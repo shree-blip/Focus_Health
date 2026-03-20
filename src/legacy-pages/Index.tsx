@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { HeroSection } from '@/components/home/HeroSection';
 
@@ -42,6 +42,51 @@ const BusinessOpportunityModal = dynamic(
   { ssr: false }
 );
 
+// Lazy-loaded standalone video below the hero
+const IrvingWellnessVideo = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={ref} className="w-full bg-background py-8 md:py-12">
+      <div className="container-focus">
+        <div className="rounded-2xl overflow-hidden border border-border shadow-lg aspect-video bg-muted">
+          {visible && (
+            <video
+              src="/Irving_Wellness/IHW-Event-Horizontal.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="none"
+              aria-label="Irving Wellness Clinic event highlight video"
+              className="w-full h-full object-cover"
+            >
+              <track kind="captions" srcLang="en" label="English" src="/captions/empty.vtt" default />
+            </video>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -56,6 +101,10 @@ const Index = () => {
   return (
     <>
       <HeroSection onOpenOpportunities={handleOpenModal} />
+
+      {/* Irving Wellness Showcase Video */}
+      <IrvingWellnessVideo />
+
       <PillarsSection />
       <TurnkeyModelSection />
       <OperatorDNASection />
