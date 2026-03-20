@@ -14,6 +14,7 @@ const anjilaHeadshot = "/anjila-shrestha-headshot.png";
 const julieHeadshot = "/julie-moreno-headshot.png";
 const heroLeadership = "/hero-leadership.jpg";
 const ganeshHeadshot = "/ganesh-dahal-headshot.png";
+const kalashHeadshot = "/kalash-shrestha-DopvHPEc.png";
 const guinnessHeadshot = "/guinness-lakhe-headshot.png";
 const bhaskarHeadshot = "/bhaskar-rokka-headshot.png";
 const tikaHeadshot = "/tika-rai-headshot.png";
@@ -86,6 +87,7 @@ const accountingTeam = [
     name: "Kalash Shrestha",
     role: "Tax Accountant",
     category: "Accounting & Billing",
+    photo: kalashHeadshot,
   },
   {
     name: "Guinness Lakhe",
