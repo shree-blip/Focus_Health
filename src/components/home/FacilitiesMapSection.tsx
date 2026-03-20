@@ -29,6 +29,7 @@ const facilities = [
     lat: 32.9025,
     lng: -96.9793,
     href: "/facilities/er-of-irving",
+    mapsUrl: "https://maps.app.goo.gl/fBcbBDby6JoXqLec6",
   },
   {
     name: "Irving Health & Wellness Clinic",
@@ -38,6 +39,7 @@ const facilities = [
     lat: 32.9020,
     lng: -96.9785,
     href: "/facilities/irving-wellness-clinic",
+    mapsUrl: "https://maps.app.goo.gl/sZrkVzzgbatMVNex8",
   },
   {
     name: "ER of White Rock",
@@ -47,6 +49,7 @@ const facilities = [
     lat: 32.8747,
     lng: -96.7199,
     href: "/facilities/er-of-white-rock",
+    mapsUrl: "https://maps.app.goo.gl/1bRpejhsPCEzPPmn6",
   },
   {
     name: "ER of Lufkin",
@@ -56,6 +59,7 @@ const facilities = [
     lat: 31.3368,
     lng: -94.7218,
     href: "/facilities/er-of-lufkin",
+    mapsUrl: "https://maps.app.goo.gl/FZBc8KhuMQmekbWYA",
   },
   {
     name: "Naperville Health & Wellness Clinic",
@@ -65,6 +69,7 @@ const facilities = [
     lat: 41.6931,
     lng: -88.1561,
     href: "/facilities/naperville-wellness-clinic",
+    mapsUrl: "https://maps.app.goo.gl/LodBsKYaS3NdZ4xMA",
   },
 ];
 
@@ -145,6 +150,27 @@ export function FacilitiesMapSection() {
                         }}
                       >
                         View facility{" "}
+                        <ExternalLink
+                          size={10}
+                          style={{ display: "inline" }}
+                        />
+                      </a>
+                      <a
+                        href={f.mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                          marginTop: 4,
+                          fontSize: 12,
+                          color: "#16a34a",
+                          textDecoration: "none",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Get Directions{" "}
                         <ExternalLink
                           size={10}
                           style={{ display: "inline" }}

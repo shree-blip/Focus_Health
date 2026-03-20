@@ -7,7 +7,7 @@ import Link from 'next/link';
 import {
   MapPin, ArrowRight, CheckCircle2, Building2,
   HeartPulse, Sparkles, Droplets, Scale, Leaf, Syringe,
-  Dumbbell, Sun, Smile, FlaskConical, Pill, Activity
+  Dumbbell, Sun, Smile, FlaskConical, Pill, Activity, ExternalLink
 } from 'lucide-react';
 const facilityImage = "/irving-wellness-1.jpg";
 const ribbonCuttingVideo = "/Irving_Wellness/IHW-Event-Horizontal.mp4";
@@ -238,9 +238,19 @@ const IrvingWellnessClinic = () => {
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
-                <div className="p-4 bg-background flex items-center gap-3 text-sm text-muted-foreground">
-                  <MapPin size={16} className="text-primary flex-shrink-0" />
-                  <span>Irving, TX – Serving Las Colinas, Valley Ranch & DFW</span>
+                <div className="p-4 bg-background flex items-start gap-3 text-sm text-muted-foreground">
+                  <MapPin size={16} className="text-primary flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <span>8200 N MacArthur Blvd Suite 100, Irving, TX 75063</span>
+                    <a
+                      href="https://maps.app.goo.gl/sZrkVzzgbatMVNex8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
+                    >
+                      Get Directions <ExternalLink size={11} />
+                    </a>
+                  </div>
                 </div>
               </div>
             </ScrollReveal>

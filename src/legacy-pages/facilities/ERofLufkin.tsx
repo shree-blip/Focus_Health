@@ -8,7 +8,7 @@ import {
   Clock, Shield, Stethoscope, Heart, Activity, Baby,
   Bone, Brain, Droplets, Thermometer, Syringe, Scan,
   Users, MapPin, Phone, ArrowRight, CheckCircle2, Building2,
-  HeartPulse, Pill, Microscope, Zap
+  HeartPulse, Pill, Microscope, Zap, ExternalLink
 } from 'lucide-react';
 const facilityImage = "/facility-er-lufkin-real.png";
 
@@ -250,9 +250,19 @@ const ERofLufkin = () => {
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
-                <div className="p-4 bg-background flex items-center gap-3 text-sm text-muted-foreground">
-                  <MapPin size={16} className="text-primary flex-shrink-0" />
-                  <span>501 N Brentwood Dr, Lufkin, TX 75904</span>
+                <div className="p-4 bg-background flex items-start gap-3 text-sm text-muted-foreground">
+                  <MapPin size={16} className="text-primary flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <span>501 N Brentwood Dr, Lufkin, TX 75904</span>
+                    <a
+                      href="https://maps.app.goo.gl/FZBc8KhuMQmekbWYA"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
+                    >
+                      Get Directions <ExternalLink size={11} />
+                    </a>
+                  </div>
                 </div>
               </div>
             </ScrollReveal>

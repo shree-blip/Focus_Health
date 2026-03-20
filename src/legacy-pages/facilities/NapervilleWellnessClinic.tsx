@@ -7,7 +7,7 @@ import Link from 'next/link';
 import {
   MapPin, ArrowRight, CheckCircle2, Building2,
   HeartPulse, Sparkles, Droplets, Scale, Leaf, Syringe,
-  Dumbbell, Sun, Smile, FlaskConical, Pill, Activity
+  Dumbbell, Sun, Smile, FlaskConical, Pill, Activity, ExternalLink
 } from 'lucide-react';
 const facilityImage = "/naperville-wellness-1.jpg";
 
@@ -228,9 +228,19 @@ const NapervilleWellnessClinic = () => {
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
-                <div className="p-4 bg-background flex items-center gap-3 text-sm text-muted-foreground">
-                  <MapPin size={16} className="text-primary flex-shrink-0" />
-                  <span>Naperville, IL – Serving Aurora, Wheaton & Chicago Suburbs</span>
+                <div className="p-4 bg-background flex items-start gap-3 text-sm text-muted-foreground">
+                  <MapPin size={16} className="text-primary flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <span>2272 95th St STE 100, Naperville, IL 60564</span>
+                    <a
+                      href="https://maps.app.goo.gl/LodBsKYaS3NdZ4xMA"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
+                    >
+                      Get Directions <ExternalLink size={11} />
+                    </a>
+                  </div>
                 </div>
               </div>
             </ScrollReveal>
