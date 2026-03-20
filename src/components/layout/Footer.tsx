@@ -85,7 +85,7 @@ export const Footer = () => {
               <li className="flex items-center gap-1.5 sm:gap-2 text-primary-foreground/80 text-xs sm:text-sm">
                 <MapPin size={14} className="sm:hidden" />
                 <MapPin size={16} className="hidden sm:block" />
-                Dexperts, TX
+                3001 Skyway Cir N Irving, TX 75038
               </li>
             </ul>
             <div className="flex items-center gap-3 mt-4 sm:mt-6">
