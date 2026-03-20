@@ -1,3 +1,5 @@
+import { BLOG_POSTS } from "./blog-posts";
+
 export type AdminBlogPostStatus = "draft" | "published";
 
 export type AdminBlogPost = {
@@ -6,44 +8,86 @@ export type AdminBlogPost = {
   slug: string;
   excerpt: string;
   content: string;
+  coverImage: string;
+  coverImageAlt: string;
+  metaTitle: string;
+  metaDescription: string;
+  author: string;
   status: AdminBlogPostStatus;
   updatedAt: string;
   createdAt: string;
 };
 
 const BLOG_STORE_KEY = "focus_admin_blog_posts";
+const BLOG_STORE_VERSION_KEY = "focus_admin_blog_version";
+const CURRENT_VERSION = "2";
 
-const seedPosts: AdminBlogPost[] = [
-  {
-    id: "focus-health-market-expansion",
-    title: "How Focus Health Expands Access to Emergency Care",
-    slug: "focus-health-emergency-care-expansion",
-    excerpt: "A quick overview of our Build + Fund + Operate model and how it improves local access.",
-    content: "Use this admin panel to create and manage your blog content.",
-    status: "draft",
-    updatedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-  },
-];
+function getSeedPosts(): AdminBlogPost[] {
+  return BLOG_POSTS.map((p) => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    excerpt: p.excerpt,
+    content: p.content,
+    coverImage: p.coverImage,
+    coverImageAlt: p.title,
+    metaTitle: p.title,
+    metaDescription: p.excerpt,
+    author: p.author,
+    status: p.status,
+    updatedAt: p.publishedAt,
+    createdAt: p.publishedAt,
+  }));
+}
 
 function safeParsePosts(value: string | null): AdminBlogPost[] {
-  if (!value) return seedPosts;
-
+  if (!value) return getSeedPosts();
   try {
     const parsed = JSON.parse(value) as AdminBlogPost[];
-    if (!Array.isArray(parsed)) return seedPosts;
-    return parsed;
+    if (!Array.isArray(parsed) || parsed.length === 0) return getSeedPosts();
+    // Migrate old posts missing new fields
+    return parsed.map((p) => ({
+      ...p,
+      coverImage: p.coverImage || "/hero-market.jpg",
+      coverImageAlt: p.coverImageAlt || p.title,
+      metaTitle: p.metaTitle || p.title,
+      metaDescription: p.metaDescription || p.excerpt,
+      author: p.author || "Focus Health Team",
+    }));
   } catch {
-    return seedPosts;
+    return getSeedPosts();
   }
 }
 
-export function loadAdminBlogPosts() {
-  if (typeof window === "undefined") return seedPosts;
+export function loadAdminBlogPosts(): AdminBlogPost[] {
+  if (typeof window === "undefined") return getSeedPosts();
+  // Re-seed if store version is outdated
+  const version = window.localStorage.getItem(BLOG_STORE_VERSION_KEY);
+  if (version !== CURRENT_VERSION) {
+    const seeds = getSeedPosts();
+    window.localStorage.setItem(BLOG_STORE_KEY, JSON.stringify(seeds));
+    window.localStorage.setItem(BLOG_STORE_VERSION_KEY, CURRENT_VERSION);
+    return seeds;
+  }
   return safeParsePosts(window.localStorage.getItem(BLOG_STORE_KEY));
 }
 
 export function saveAdminBlogPosts(posts: AdminBlogPost[]) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(BLOG_STORE_KEY, JSON.stringify(posts));
+  window.localStorage.setItem(BLOG_STORE_VERSION_KEY, CURRENT_VERSION);
+}
+
+export function getAdminPostById(id: string): AdminBlogPost | undefined {
+  return loadAdminBlogPosts().find((p) => p.id === id);
+}
+
+export function getAdminPostBySlug(slug: string): AdminBlogPost | undefined {
+  return loadAdminBlogPosts().find((p) => p.slug === slug);
+}
+
+export function getPublishedAdminPosts(): AdminBlogPost[] {
+  return loadAdminBlogPosts()
+    .filter((p) => p.status === "published")
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
 }

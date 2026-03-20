@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -12,17 +12,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
-import { type AdminBlogPost, loadAdminBlogPosts, saveAdminBlogPosts } from '@/lib/admin-blog-store';
+import {
+  type AdminBlogPost,
+  loadAdminBlogPosts,
+  saveAdminBlogPosts,
+  getAdminPostById,
+} from '@/lib/admin-blog-store';
 
 function toSlug(value: string) {
   return value.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
 }
 
-export default function CreateBlogPostPage() {
+export default function EditBlogPostPage({ postId }: { postId: string }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [slugTouched, setSlugTouched] = useState(false);
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [coverImage, setCoverImage] = useState('');
@@ -31,12 +35,26 @@ export default function CreateBlogPostPage() {
   const [metaDescription, setMetaDescription] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [ready, setReady] = useState(false);
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setTitle(value);
-    if (!slugTouched) setSlug(toSlug(value));
-  };
+  useEffect(() => {
+    const post = getAdminPostById(postId);
+    if (!post) {
+      setNotFound(true);
+      return;
+    }
+    setTitle(post.title);
+    setSlug(post.slug);
+    setContent(post.content);
+    setExcerpt(post.excerpt);
+    setCoverImage(post.coverImage);
+    setCoverImageAlt(post.coverImageAlt || '');
+    setMetaTitle(post.metaTitle || '');
+    setMetaDescription(post.metaDescription || '');
+    setStatus(post.status);
+    setReady(true);
+  }, [postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,37 +66,62 @@ export default function CreateBlogPostPage() {
       }
 
       const posts = loadAdminBlogPosts();
-      if (posts.some((p) => p.slug === slug.trim())) {
-        toast.error('A post with this slug already exists');
+      if (posts.some((p) => p.slug === slug.trim() && p.id !== postId)) {
+        toast.error('Another post with this slug already exists');
         return;
       }
 
-      const newPost: AdminBlogPost = {
-        id: crypto.randomUUID(),
-        title: title.trim(),
-        slug: slug.trim(),
-        excerpt: excerpt.trim(),
-        content,
-        coverImage: coverImage.trim() || '/hero-market.jpg',
-        coverImageAlt: coverImageAlt.trim() || title.trim(),
-        metaTitle: metaTitle.trim() || title.trim(),
-        metaDescription: metaDescription.trim() || excerpt.trim(),
-        author: 'Focus Health Team',
-        status,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const updatedPosts = posts.map((p): AdminBlogPost =>
+        p.id === postId
+          ? {
+              ...p,
+              title: title.trim(),
+              slug: slug.trim(),
+              excerpt: excerpt.trim(),
+              content,
+              coverImage: coverImage.trim() || '/hero-market.jpg',
+              coverImageAlt: coverImageAlt.trim() || title.trim(),
+              metaTitle: metaTitle.trim() || title.trim(),
+              metaDescription: metaDescription.trim() || excerpt.trim(),
+              status,
+              updatedAt: new Date().toISOString(),
+            }
+          : p
+      );
 
-      saveAdminBlogPosts([newPost, ...posts]);
-      toast.success('Blog post created!');
+      saveAdminBlogPosts(updatedPosts);
+      toast.success('Post updated!');
       router.push('/admin/blog');
     } catch (error) {
-      toast.error('Failed to create blog post');
+      toast.error('Failed to update post');
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
+
+  if (notFound) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/blog" className="text-primary hover:underline">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-3xl font-bold">Post Not Found</h1>
+        </div>
+        <p className="text-muted-foreground">This post doesn&apos;t exist or has been deleted.</p>
+        <Button asChild variant="outline"><Link href="/admin/blog">Back to posts</Link></Button>
+      </div>
+    );
+  }
+
+  if (!ready) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -86,7 +129,7 @@ export default function CreateBlogPostPage() {
         <Link href="/admin/blog" className="text-primary hover:underline">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-3xl font-bold">Create Blog Post</h1>
+        <h1 className="text-3xl font-bold">Edit Blog Post</h1>
       </div>
 
       <Card>
@@ -95,7 +138,7 @@ export default function CreateBlogPostPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
-                <Input id="title" placeholder="Enter post title" value={title} onChange={handleTitleChange} required />
+                <Input id="title" placeholder="Enter post title" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="slug">Slug *</Label>
@@ -103,7 +146,7 @@ export default function CreateBlogPostPage() {
                   id="slug"
                   placeholder="post-slug"
                   value={slug}
-                  onChange={(e) => { setSlugTouched(true); setSlug(toSlug(e.target.value)); }}
+                  onChange={(e) => setSlug(toSlug(e.target.value))}
                   required
                 />
               </div>
@@ -111,7 +154,7 @@ export default function CreateBlogPostPage() {
 
             <div className="space-y-2">
               <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea id="excerpt" placeholder="Brief description of the post" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} />
+              <Textarea id="excerpt" placeholder="Brief description" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -159,7 +202,7 @@ export default function CreateBlogPostPage() {
             </div>
 
             <div className="flex gap-4">
-              <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Post'}</Button>
+              <Button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update Post'}</Button>
               <Button type="button" variant="outline" asChild><Link href="/admin/blog">Cancel</Link></Button>
             </div>
           </form>
