@@ -4,7 +4,6 @@ import { ReactNode, useState } from "react";
 import dynamic from "next/dynamic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { LazyMotion, domAnimation } from "framer-motion";
 
 // Lazy-load toast libraries — not needed for initial render
 const Toaster = dynamic(
@@ -25,13 +24,11 @@ export default function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LazyMotion features={domAnimation} strict>
         <TooltipProvider>
           <Toaster />
           <Sonner />
           {children}
         </TooltipProvider>
-      </LazyMotion>
     </QueryClientProvider>
   );
 }

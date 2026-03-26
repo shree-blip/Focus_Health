@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // Floating particle component
 const FloatingParticle = ({ delay, duration, x, y, size }: { delay: number; duration: number; x: number; y: number; size: number }) => (
@@ -151,21 +151,40 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   const { mouseX, mouseY } = useMousePosition();
-  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 1080;
-  
-  const springConfig = { stiffness: 100, damping: 30 };
-  const orbX = useSpring(useTransform(mouseX, [0, viewportWidth], [-30, 30]), springConfig);
-  const orbY = useSpring(useTransform(mouseY, [0, viewportHeight], [-30, 30]), springConfig);
 
-  const particles = Array.from({ length: 10 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 8 + 4,
-    delay: Math.random() * 5,
-    duration: Math.random() * 3 + 4,
-  }));
+  const springConfig = { stiffness: 100, damping: 30 };
+  const transformedX = useTransform(mouseX, (x) => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    return (x / w) * 60 - 30;
+  });
+  const transformedY = useTransform(mouseY, (y) => {
+    const h = typeof window !== 'undefined' ? window.innerHeight : 1080;
+    return (y / h) * 60 - 30;
+  });
+  const orbX = useSpring(transformedX, springConfig);
+  const orbY = useSpring(transformedY, springConfig);
+
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 10 }, (_, i) => {
+        const seed = (i * 9301 + 49297) % 233280;
+        const unit = seed / 233280;
+        const unit2 = ((seed * 7919) % 233280) / 233280;
+        const unit3 = ((seed * 1543) % 233280) / 233280;
+        const unit4 = ((seed * 2971) % 233280) / 233280;
+        const unit5 = ((seed * 6151) % 233280) / 233280;
+
+        return {
+          id: i,
+          x: unit * 100,
+          y: unit2 * 100,
+          size: unit3 * 8 + 4,
+          delay: unit4 * 5,
+          duration: unit5 * 3 + 4,
+        };
+      }),
+    [],
+  );
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const heroVideos = ['/Irving_Wellness/IHW-Event-Horizontal.mp4', '/ERofIrving-GrandOpening.mp4'];
@@ -247,7 +266,8 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background/95" />
 
       {/* Subtle animated overlays on top of video */}
-      <motion.div style={{ x: orbX, y: orbY }} className="absolute inset-0 pointer-events-none">
+      <motion.div style={{ x: orbX, y: orbY }} className="absolute inset-0 pointer-events-none"> 
+
         <GradientOrb className="w-[600px] h-[600px] -top-40 -left-40 bg-gradient-to-br from-primary/20 to-primary/5" />
         <GradientOrb className="w-[400px] h-[400px] -bottom-20 left-1/3 bg-gradient-to-tr from-secondary/15 to-secondary/5" delay={4} />
       </motion.div>

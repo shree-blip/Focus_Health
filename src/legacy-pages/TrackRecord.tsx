@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Clock, Shield, TrendingUp, ExternalLink, Stethoscope, Heart, ArrowRight, Users } from 'lucide-react';
+import { Building2, Clock, Shield, TrendingUp, Stethoscope, Heart, ArrowRight, Users, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
@@ -86,6 +86,15 @@ const healthcarePortfolio = [
     url: '/facilities/er-of-white-rock',
     image: facilityErWhiterock,
     address: '10705 Northwest Hwy, Dallas, TX 75238',
+    internal: true,
+  },
+  {
+    name: 'First Choice Emergency Room',
+    type: 'Emergency Room / Healthcare Facility',
+    location: '1717 Eldridge Pkwy, Houston, TX 77077, USA',
+    description: '24/7 Emergency Care Facility providing immediate, high-quality medical services.',
+    url: '/track-record/first-choice-emergency-room',
+    address: '1717 Eldridge Pkwy, Houston, TX 77077, USA',
     internal: true,
   },
   {
@@ -315,7 +324,7 @@ const TrackRecordPage = () => {
                 isInternal ? (
                   <Link
                     href={facility.url}
-                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full"
+                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full hover:shadow-xl"
                     itemScope
                     itemType="https://schema.org/MedicalClinic"
                     itemProp="itemListElement"
@@ -328,7 +337,7 @@ const TrackRecordPage = () => {
                     href={facility.url}
                     target="_blank"
                     rel="dofollow"
-                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full"
+                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full hover:shadow-xl"
                     itemScope
                     itemType="https://schema.org/MedicalClinic"
                     itemProp="itemListElement"
@@ -340,7 +349,7 @@ const TrackRecordPage = () => {
 
               return (
                 <ScrollReveal key={facility.name} delay={index * 0.1}>
-                  <motion.div whileHover={{ y: -6 }}>
+                  <motion.div whileHover={{ y: -6, scale: 1.02 }}>
                     <CardWrapper>
                       <meta itemProp="url" content={facility.url.startsWith('/') ? `https://getfocushealth.com${facility.url}` : facility.url} />
                       <meta itemProp="name" content={facility.name} />
@@ -378,18 +387,17 @@ const TrackRecordPage = () => {
 
                       {/* Content */}
                       <div className="p-6">
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center justify-between gap-3 mb-1">
                           <h3 className="font-heading font-bold text-lg" itemProp="name">{facility.name}</h3>
-                          {isInternal ? (
-                            <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                          ) : (
-                            <ExternalLink size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                          )}
+                          <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                         </div>
-                        <p className="text-xs text-primary/70 font-medium mb-2">{facility.location}</p>
+                        <div className="flex items-start gap-2 text-xs text-primary/80 font-medium mb-2">
+                          <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+                          <span>{facility.location}</span>
+                        </div>
                         <p className="text-muted-foreground text-sm leading-relaxed" itemProp="description">{facility.description}</p>
                         <span className="inline-block mt-4 text-sm font-medium text-primary group-hover:underline">
-                          {isInternal ? `Learn More About ${facility.name}` : `Visit ${facility.name}`} →
+                          View Details →
                         </span>
                       </div>
                     </CardWrapper>
