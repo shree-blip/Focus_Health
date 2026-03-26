@@ -326,7 +326,7 @@ const TrackRecordPage = () => {
                 isInternal ? (
                   <Link
                     href={facility.url}
-                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full hover:shadow-xl"
+                    className="group flex h-full flex-col rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all hover:shadow-xl"
                     itemScope
                     itemType="https://schema.org/MedicalClinic"
                     itemProp="itemListElement"
@@ -339,7 +339,7 @@ const TrackRecordPage = () => {
                     href={facility.url}
                     target="_blank"
                     rel="dofollow"
-                    className="group block rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all h-full hover:shadow-xl"
+                    className="group flex h-full flex-col rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/30 transition-all hover:shadow-xl"
                     itemScope
                     itemType="https://schema.org/MedicalClinic"
                     itemProp="itemListElement"
@@ -351,7 +351,7 @@ const TrackRecordPage = () => {
 
               return (
                 <ScrollReveal key={facility.name} delay={index * 0.1}>
-                  <motion.div whileHover={{ y: -6, scale: 1.02 }}>
+                  <motion.div whileHover={{ y: -6, scale: 1.02 }} className="h-full">
                     <CardWrapper>
                       <meta itemProp="url" content={facility.url.startsWith('/') ? `https://getfocushealth.com${facility.url}` : facility.url} />
                       <meta itemProp="name" content={facility.name} />
@@ -392,7 +392,7 @@ const TrackRecordPage = () => {
                       </div>
 
                       {/* Content */}
-                      <div className="p-6">
+                      <div className="flex flex-1 flex-col p-6">
                         <div className="flex items-center justify-between gap-3 mb-1">
                           <h3 className="font-heading font-bold text-lg" itemProp="name">{facility.name}</h3>
                           <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
@@ -401,7 +401,7 @@ const TrackRecordPage = () => {
                           <MapPin size={14} className="mt-0.5 flex-shrink-0" />
                           <span>{facility.location}</span>
                         </div>
-                        <p className="text-muted-foreground text-sm leading-relaxed" itemProp="description">{facility.description}</p>
+                        <p className="flex-1 text-muted-foreground text-sm leading-relaxed" itemProp="description">{facility.description}</p>
                         <span className="inline-block mt-4 text-sm font-medium text-primary group-hover:underline">
                           View Details →
                         </span>
