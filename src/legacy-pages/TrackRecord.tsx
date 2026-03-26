@@ -12,6 +12,7 @@ const heroTrackRecord = "/hero-track-record.jpg";
 const facilityErIrving = "/facility-er-irving-real.webp";
 const facilityErLufkin = "/facility-er-lufkin-real.png";
 const facilityErWhiterock = "/facility-er-whiterock.png";
+const facilityFirstChoiceEr = "/first-choice-emergency-room.jpg";
 const irvingWellness1 = "/irving-wellness-1.jpg";
 const irvingWellness2 = "/irving-wellness-2.jpg";
 const irvingWellness3 = "/irving-wellness-3.jpg";
@@ -94,6 +95,7 @@ const healthcarePortfolio = [
     location: '1717 Eldridge Pkwy, Houston, TX 77077, USA',
     description: '24/7 Emergency Care Facility providing immediate, high-quality medical services.',
     url: '/track-record/first-choice-emergency-room',
+    image: facilityFirstChoiceEr,
     address: '1717 Eldridge Pkwy, Houston, TX 77077, USA',
     internal: true,
   },
@@ -370,6 +372,10 @@ const TrackRecordPage = () => {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             itemProp="image"
                             loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/hero-track-record.jpg';
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
