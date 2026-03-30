@@ -183,7 +183,7 @@ const OurProcessPage = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { value: 24, suffix: '+', label: 'Locations Managed' },
-              { value: 4, suffix: '', label: 'Active Facilities' },
+              { value: 6, suffix: '', label: 'Active Facilities' },
               { value: 24, suffix: '/7', label: 'Operating Model' },
               { value: 3, suffix: '+', label: 'Acquisitions in Focus' },
             ].map((stat, index) => (
