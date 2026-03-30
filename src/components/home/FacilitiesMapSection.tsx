@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
@@ -71,12 +70,78 @@ const facilities = [
     href: "/facilities/naperville-wellness-clinic",
     mapsUrl: "https://maps.app.goo.gl/LodBsKYaS3NdZ4xMA",
   },
+  {
+    name: "First Choice Emergency Room",
+    type: "Emergency Room",
+    address: "1717 Eldridge Pkwy",
+    city: "Houston, TX 77077",
+    lat: 29.7520825,
+    lng: -95.624718,
+    href: "/track-record/first-choice-emergency-room",
+    mapsUrl:
+      "https://www.google.com/maps/search/?api=1&query=1717+Eldridge+Pkwy,+Houston,+TX+77077,+USA",
+  },
 ];
 
 export function FacilitiesMapSection() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const [isClientMounted, setIsClientMounted] = useState(false);
+
   useEffect(() => {
     fixLeafletIcon();
   }, []);
+
+  useEffect(() => {
+    setIsClientMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClientMounted || !containerRef.current || mapRef.current) return;
+
+    const element = containerRef.current as HTMLDivElement & {
+      _leaflet_id?: number;
+    };
+
+    if (typeof element._leaflet_id !== "undefined") {
+      element._leaflet_id = undefined;
+    }
+
+    const map = L.map(element, {
+      center: [36.0, -93.5],
+      zoom: 5,
+      scrollWheelZoom: false,
+    });
+
+    mapRef.current = map;
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    facilities.forEach((f) => {
+      L.marker([f.lat, f.lng])
+        .addTo(map)
+        .bindPopup(`
+          <div style="min-width:180px;">
+            <p style="font-weight:700;font-size:14px;margin-bottom:2px;">${f.name}</p>
+            <p style="font-size:11px;color:#6b7280;margin-bottom:6px;">${f.type}</p>
+            <p style="font-size:13px;margin:2px 0;">${f.address}</p>
+            <p style="font-size:13px;margin:2px 0;">${f.city}</p>
+            <a href="${f.href}" style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:12px;color:#2563eb;text-decoration:none;font-weight:500;">View Location</a>
+            <br />
+            <a href="${f.mapsUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:12px;color:#16a34a;text-decoration:none;font-weight:500;">Get Directions</a>
+          </div>
+        `);
+    });
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      element._leaflet_id = undefined;
+    };
+  }, [isClientMounted]);
 
   return (
     <section className="w-full bg-muted/30 py-16 md:py-20">
@@ -100,87 +165,9 @@ export function FacilitiesMapSection() {
         {/* Map */}
         <ScrollReveal delay={0.1}>
           <div className="rounded-2xl overflow-hidden border border-border shadow-lg h-[450px] w-full">
-            <MapContainer
-              center={[36.0, -93.5]}
-              zoom={5}
-              scrollWheelZoom={false}
-              style={{ height: "100%", width: "100%" }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {facilities.map((f) => (
-                <Marker key={f.name} position={[f.lat, f.lng]}>
-                  <Popup>
-                    <div style={{ minWidth: 180 }}>
-                      <p
-                        style={{
-                          fontWeight: 700,
-                          fontSize: 14,
-                          marginBottom: 2,
-                        }}
-                      >
-                        {f.name}
-                      </p>
-                      <p
-                        style={{
-                          fontSize: 11,
-                          color: "#6b7280",
-                          marginBottom: 6,
-                        }}
-                      >
-                        {f.type}
-                      </p>
-                      <p style={{ fontSize: 13, margin: "2px 0" }}>
-                        {f.address}
-                      </p>
-                      <p style={{ fontSize: 13, margin: "2px 0" }}>{f.city}</p>
-                      <a
-                        href={f.href}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 4,
-                          marginTop: 8,
-                          fontSize: 12,
-                          color: "#2563eb",
-                          textDecoration: "none",
-                          fontWeight: 500,
-                        }}
-                      >
-                        View facility{" "}
-                        <ExternalLink
-                          size={10}
-                          style={{ display: "inline" }}
-                        />
-                      </a>
-                      <a
-                        href={f.mapsUrl}
-                        target="_blank"
-                        rel="noopener"
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 4,
-                          marginTop: 4,
-                          fontSize: 12,
-                          color: "#16a34a",
-                          textDecoration: "none",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Get Directions{" "}
-                        <ExternalLink
-                          size={10}
-                          style={{ display: "inline" }}
-                        />
-                      </a>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+            {isClientMounted && (
+              <div ref={containerRef} className="h-full w-full" />
+            )}
           </div>
         </ScrollReveal>
 

@@ -1,65 +1,117 @@
 "use client";
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
-  Activity,
   ArrowRight,
   Baby,
-  Building2,
   Clock,
-  HeartPulse,
   MapPin,
   Phone,
   Scan,
-  Shield,
-  Siren,
+  HeartPulse,
   Stethoscope,
-  TimerReset,
+  Shield,
+  Activity,
+  ExternalLink,
+  Users,
 } from 'lucide-react';
 import { PageHero } from '@/components/ui/PageHero';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 
+const facilityImage = '/IMG_9540.jpg';
+
 const services = [
   {
-    title: 'Emergency Care',
-    description: 'Full-spectrum emergency evaluation and stabilization for acute illness, injury, severe pain, chest discomfort, respiratory symptoms, and other urgent medical needs.',
+    title: '24/7 Emergency Care',
+    description: 'Immediate emergency evaluation for chest pain, breathing concerns, severe abdominal pain, high fever, infections, and acute illness for adults and children.',
     icon: Stethoscope,
   },
   {
-    title: 'Trauma Services',
-    description: 'Rapid assessment and treatment for trauma-related injuries, lacerations, fractures, sprains, and accident-related emergencies requiring immediate intervention.',
-    icon: Siren,
+    title: 'Trauma & Injury Response',
+    description: 'Rapid stabilization and treatment for falls, fractures, lacerations, sprains, and accident-related injuries requiring urgent intervention.',
+    icon: Activity,
   },
   {
     title: 'Imaging & Diagnostics',
-    description: 'Advanced diagnostic support including imaging, laboratory workups, and clinical evaluation to support fast decision-making in time-sensitive cases.',
+    description: 'On-site imaging and clinical diagnostics support fast emergency decisions and timely care plans for high-acuity presentations.',
     icon: Scan,
   },
   {
     title: 'Pediatric Emergency Care',
-    description: 'Dedicated emergency support for children with acute fevers, infections, injuries, dehydration, and other urgent pediatric conditions.',
+    description: 'Emergency support for infants, children, and adolescents with fever, dehydration, respiratory symptoms, and injury-related needs.',
     icon: Baby,
   },
 ];
 
 const highlights = [
   {
-    title: '24/7 Availability',
-    description: 'Round-the-clock emergency care coverage designed to serve patients at any hour.',
+    title: 'Houston Energy Corridor Access',
+    description: 'Convenient emergency-room location at 1717 Eldridge Pkwy serving West Houston residents, families, and nearby business communities.',
+    icon: MapPin,
+  },
+  {
+    title: 'Open For Investment',
+    description: 'This facility is highlighted in Focus Health track record as an active emergency-care profile with ongoing investor interest.',
     icon: Clock,
   },
   {
-    title: 'Minimal Wait Time',
-    description: 'A freestanding emergency-room model built to accelerate triage and reduce patient delays.',
-    icon: TimerReset,
+    title: 'Minimal Wait-Time Goal',
+    description: 'Built to reduce traditional hospital ER delays with a streamlined triage model focused on minimal and near-zero wait-time targets when clinically possible.',
+    icon: Clock,
   },
   {
-    title: 'Advanced Equipment',
-    description: 'Modern emergency infrastructure with on-site diagnostics and clinical support capabilities.',
+    title: 'Freestanding ER Model',
+    description: 'Designed for immediate triage, fast treatment workflow, and complete emergency-room readiness with modern diagnostic support.',
     icon: Shield,
   },
+];
+
+const problemWeSolve = [
+  {
+    title: 'Long ER Wait Times',
+    description: 'Many hospital emergency departments in major metros can involve extended waiting before physician evaluation, especially during peak hours.',
+    icon: Clock,
+  },
+  {
+    title: 'Access Gap In High-Growth Areas',
+    description: 'Rapidly growing neighborhoods often need closer emergency access without long travel times or large-hospital congestion.',
+    icon: MapPin,
+  },
+  {
+    title: 'Need For Faster Triage',
+    description: 'The First Choice ER model is structured around immediate intake and fast clinical decisioning to help move patients from arrival to care quickly.',
+    icon: HeartPulse,
+  },
+];
+
+const communityContribution = [
+  {
+    title: 'Reduced Wait-Time Burden',
+    description: 'By targeting minimal and near-zero wait-time operations, this location helps reduce pressure on overloaded hospital ER systems.',
+  },
+  {
+    title: 'Local Healthcare Access',
+    description: 'The Eldridge Parkway location improves emergency-care access for residents, families, and workers across West Houston and the Energy Corridor.',
+  },
+  {
+    title: 'Job Creation & Local Impact',
+    description: 'Facility development supports local employment for clinicians, nursing professionals, technicians, and support teams as operations scale.',
+  },
+  {
+    title: '24/7 Community Safety Net',
+    description: 'Round-the-clock emergency availability strengthens community resilience for nights, weekends, holidays, and urgent after-hours events.',
+  },
+];
+
+const newsImages = [
+  '/IMG_9540.jpg',
+  '/IMG_9541.jpg',
+  '/IMG_9542.jpg',
+  '/IMG_9543.jpg',
+  '/IMG_9544.jpg',
+  '/IMG_9545.jpg',
+  '/IMG_9546.jpg',
 ];
 
 const mapUrl =
@@ -71,107 +123,61 @@ export default function FirstChoiceERDetail() {
   return (
     <>
       <PageHero
+        eyebrow="Open For Investment"
         title="First Choice Emergency Room"
-        description="A Houston emergency-care facility profile within the Focus Health track record, located in the Eldridge Parkway corridor and designed around fast-response, high-acuity emergency service delivery."
-        backgroundImage="/hero-track-record.jpg"
-        primaryCta={{ text: 'Get Directions', link: directionsUrl }}
+        description="Freestanding emergency-room profile in Houston, Texas at 1717 Eldridge Pkwy focused on rapid emergency response, 24/7 access, and high-acuity patient care."
+        backgroundImage={facilityImage}
+        primaryCta={{ text: 'View All Facilities', link: '/track-record' }}
         secondaryCta={{ text: 'View Track Record', link: '/track-record' }}
       />
 
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-card">
         <div className="container-focus">
-          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <ScrollReveal>
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
-                <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                  Healthcare Management Portfolio
-                </div>
-
-                <div className="mt-6 space-y-5">
-                  <div>
-                    <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">
-                      First Choice Emergency Room
-                    </h2>
-                    <div className="mt-3 flex items-start gap-3 text-muted-foreground">
-                      <MapPin size={18} className="mt-0.5 flex-shrink-0 text-primary" />
-                      <p>1717 Eldridge Pkwy, Houston, TX 77077, USA</p>
-                    </div>
-                  </div>
-
-                  <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                    First Choice Emergency Room represents a freestanding emergency-care model built around immediate access, high-quality diagnostics, and continuous coverage for urgent patient needs. Located in Houston's Eldridge Parkway corridor, the facility profile aligns with the broader Focus Health approach to modern healthcare operations: fast intake, dependable emergency response, and a high-standard patient experience.
+              <div>
+                <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Focus Health Facility</p>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6">
+                  First Choice Emergency Room in <span className="text-primary">Houston, Texas</span>
+                </h2>
+                <div className="space-y-4 text-muted-foreground leading-relaxed">
+                  <p>
+                    <strong>First Choice Emergency Room</strong> is a freestanding emergency care facility located at <strong>1717 Eldridge Pkwy, Houston, TX 77077, USA</strong>. The location is positioned for rapid access from the Energy Corridor and surrounding West Houston neighborhoods.
                   </p>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-border/70 bg-background p-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Category</p>
-                      <p className="mt-2 text-base font-semibold text-foreground">Emergency Room / Healthcare Facility</p>
-                    </div>
-                    <div className="rounded-2xl border border-border/70 bg-background p-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">Service Model</p>
-                      <p className="mt-2 text-base font-semibold text-foreground">24/7 Emergency Care Facility</p>
-                    </div>
-                  </div>
+                  <p>
+                    This facility profile reflects a <strong>24/7 emergency-care operating model</strong> designed around immediate triage, urgent diagnostics, and high-acuity treatment support.
+                  </p>
+                  <p>
+                    Within the Focus Health portfolio, First Choice Emergency Room is currently <strong>under construction</strong> and presented as an <strong>Open For Investment</strong> opportunity in a high-demand Houston submarket.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3 mt-6">
+                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Open For Investment</span>
+                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">24/7 Emergency Access</span>
+                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Houston, TX</span>
                 </div>
               </div>
             </ScrollReveal>
-
             <ScrollReveal delay={0.1}>
-              <div className="space-y-6">
-                <div className="overflow-hidden rounded-3xl border border-primary/15 bg-card shadow-sm">
-                  <div className="relative isolate overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(158,27,50,0.16),_transparent_35%),linear-gradient(135deg,_rgba(13,37,63,1),_rgba(19,60,94,0.96)_45%,_rgba(158,27,50,0.92))] p-6 text-white sm:p-8">
-                    <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-                    <div className="absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
-
-                    <div className="relative z-10">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">
-                        Emergency Facility Profile
-                      </div>
-
-                      <div className="mt-6 flex items-center gap-3">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
-                          <HeartPulse size={28} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium uppercase tracking-[0.16em] text-white/70">Houston Location</p>
-                          <h3 className="font-heading text-2xl font-bold">First Choice Emergency Room</h3>
-                        </div>
-                      </div>
-
-                      <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
-                          <Clock size={18} className="text-white/90" />
-                          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Availability</p>
-                          <p className="mt-1 text-sm font-semibold">24/7 Operations</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
-                          <Activity size={18} className="text-white/90" />
-                          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Care Model</p>
-                          <p className="mt-1 text-sm font-semibold">Rapid Emergency Response</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
-                          <Building2 size={18} className="text-white/90" />
-                          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Facility</p>
-                          <p className="mt-1 text-sm font-semibold">Freestanding ER Format</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-                  <div className="border-b border-border px-6 py-4">
-                    <h3 className="font-heading text-xl font-bold text-foreground">Location Overview</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Mapped reference for the Eldridge Parkway facility address.</p>
-                  </div>
-                  <div className="aspect-[4/3] w-full bg-muted">
-                    <iframe
-                      title="First Choice Emergency Room map"
-                      src={mapUrl}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      className="h-full w-full border-0"
-                    />
+              <div className="rounded-2xl overflow-hidden border border-border shadow-lg">
+                <img
+                  src={facilityImage}
+                  alt="First Choice Emergency Room at 1717 Eldridge Pkwy, Houston, TX 77077"
+                  className="w-full h-auto object-cover"
+                  loading="lazy"
+                />
+                <div className="p-4 bg-background flex items-start gap-3 text-sm text-muted-foreground">
+                  <MapPin size={16} className="text-primary flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <span>1717 Eldridge Pkwy, Houston, TX 77077, USA</span>
+                    <a
+                      href={directionsUrl}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
+                    >
+                      Get Directions <ExternalLink size={11} />
+                    </a>
                   </div>
                 </div>
               </div>
@@ -180,26 +186,14 @@ export default function FirstChoiceERDetail() {
         </div>
       </section>
 
-      <section className="section-padding bg-card">
-        <div className="container-focus">
-          <ScrollReveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">About The Facility</h2>
-              <p className="mt-4 text-lg leading-8 text-muted-foreground">
-                This facility profile highlights an emergency-care environment oriented around rapid triage, trauma response, diagnostic confidence, and around-the-clock patient access. The care model supports urgent adult and pediatric presentations while emphasizing modern equipment, efficient workflows, and a dependable clinical experience for the surrounding Houston community.
-              </p>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
       <section className="section-padding bg-background">
         <div className="container-focus">
           <ScrollReveal>
-            <div className="mb-12 text-center">
-              <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">Services</h2>
-              <p className="mt-3 text-lg text-muted-foreground">
-                Core emergency-service capabilities reflected in this portfolio detail page.
+            <div className="text-center mb-12">
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Emergency Services</p>
+              <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">Core Emergency-Care Capabilities</h2>
+              <p className="mt-3 text-lg text-muted-foreground max-w-3xl mx-auto">
+                Service focus for this Houston emergency-room profile at 1717 Eldridge Pkwy.
               </p>
             </div>
           </ScrollReveal>
@@ -207,10 +201,7 @@ export default function FirstChoiceERDetail() {
           <div className="grid gap-6 md:grid-cols-2">
             {services.map((service, index) => (
               <ScrollReveal key={service.title} delay={index * 0.08}>
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -4 }}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-all"
-                >
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-all">
                   <div className="flex items-start gap-4">
                     <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                       <service.icon size={22} />
@@ -220,7 +211,7 @@ export default function FirstChoiceERDetail() {
                       <p className="mt-2 text-sm leading-7 text-muted-foreground sm:text-base">{service.description}</p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </ScrollReveal>
             ))}
           </div>
@@ -254,15 +245,122 @@ export default function FirstChoiceERDetail() {
         </div>
       </section>
 
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">The Problem We Solve</p>
+              <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">From Long Waits To Faster Emergency Access</h2>
+              <p className="mt-3 text-lg text-muted-foreground max-w-3xl mx-auto">
+                This facility model is designed to address one of healthcare&apos;s biggest pain points: long emergency-room wait times.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {problemWeSolve.map((item, index) => (
+              <ScrollReveal key={item.title} delay={index * 0.08}>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm h-full">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <item.icon size={22} />
+                  </div>
+                  <h3 className="mt-5 font-heading text-xl font-bold text-foreground">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground sm:text-base">{item.description}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-card">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Community Contribution</p>
+              <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">How This ER Supports Society</h2>
+              <p className="mt-3 text-lg text-muted-foreground max-w-3xl mx-auto">
+                Beyond emergency care delivery, this location contributes to local healthcare access, jobs, and system-wide relief.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {communityContribution.map((item, index) => (
+              <ScrollReveal key={item.title} delay={index * 0.08}>
+                <div className="rounded-2xl border border-border bg-background p-6 shadow-sm h-full">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-accent shrink-0">
+                      <Users size={18} />
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-xl font-bold text-foreground">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-7 text-muted-foreground sm:text-base">{item.description}</p>
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="mb-12 text-center">
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Facility Progress</p>
+              <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">First Choice Emergency Room Construction Images</h2>
+              <p className="mt-3 text-lg text-muted-foreground">Current facility photos from the under-construction location at 1717 Eldridge Pkwy, Houston, TX 77077.</p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {newsImages.map((image, index) => (
+              <ScrollReveal key={image} delay={index * 0.05}>
+                <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                  <img
+                    src={image}
+                    alt={`First Choice Emergency Room construction image ${index + 1}`}
+                    className="h-64 w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding bg-card">
+        <div className="container-focus">
+          <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+            <div className="border-b border-border px-6 py-4">
+              <h3 className="font-heading text-xl font-bold text-foreground">Location Map</h3>
+              <p className="mt-1 text-sm text-muted-foreground">1717 Eldridge Pkwy, Houston, TX 77077, USA</p>
+            </div>
+            <div className="aspect-[16/9] w-full bg-muted">
+              <iframe
+                title="First Choice Emergency Room map"
+                src={mapUrl}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-full w-full border-0"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="section-padding border-t border-primary/10 bg-primary/5">
         <div className="container-focus">
           <ScrollReveal>
             <div className="rounded-3xl border border-primary/10 bg-card p-8 shadow-sm sm:p-10">
               <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
                 <div>
-                  <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">Visit Or Reach Out</h2>
+                  <h2 className="text-3xl font-heading font-bold text-foreground sm:text-4xl">Visit This Location</h2>
                   <p className="mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">
-                    Use the map to get directions to the facility address or connect with the team for questions related to the location and care access.
+                    Get directions to First Choice Emergency Room at 1717 Eldridge Pkwy, Houston, TX 77077, USA and explore this emergency facility within our track record.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
@@ -273,9 +371,9 @@ export default function FirstChoiceERDetail() {
                     </Link>
                   </Button>
                   <Button variant="outline" size="lg" asChild>
-                    <Link href="tel:+18326724010">
+                    <Link href="/contact">
                       <Phone size={18} />
-                      Contact Now
+                      Contact Us
                     </Link>
                   </Button>
                 </div>

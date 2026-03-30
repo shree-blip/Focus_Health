@@ -7,7 +7,7 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { PageHero } from "@/components/ui/PageHero";
 const rickHeadshot = "/rick-leonard-headshot.png";
-const stevenHeadshot = "/steven-thompson-headshot.png";
+const stevenHeadshot = "/Dr-Thompson.png";
 const jayHeadshot = "/jay-dahal-headshot.png";
 const jamieHeadshot = "/jamie-alcantar-headshot.png";
 const anjilaHeadshot = "/anjila-shrestha-headshot.png";
