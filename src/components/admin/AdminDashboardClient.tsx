@@ -21,7 +21,7 @@ export function AdminDashboardClient() {
   }, []);
 
   const statCards = [
-    { title: "Total Posts", value: stats.totalPosts, icon: FileText },
+    { title: "Total Insights", value: stats.totalPosts, icon: FileText },
     { title: "Published", value: stats.publishedPosts, icon: Eye },
     { title: "Drafts", value: stats.draftPosts, icon: Clock },
   ];
@@ -31,12 +31,12 @@ export function AdminDashboardClient() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">Manage Focus Health admin content and blog posts</p>
+          <p className="text-muted-foreground mt-2">Manage Focus Health admin content and insights</p>
         </div>
         <Button asChild>
           <Link href="/admin/blog">
             <PlusCircle className="h-4 w-4 mr-2" />
-            Manage Blog
+            Manage Insights
           </Link>
         </Button>
       </div>

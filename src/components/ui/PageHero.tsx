@@ -30,8 +30,11 @@ export const PageHero = ({
   secondaryCta,
 }: PageHeroProps) => {
   const router = useRouter();
-  const sharedHeroBackground = "/recent-event-hero.png";
-  const heroBackground = backgroundImage ? sharedHeroBackground : backgroundImage;
+  const sharedHeroBackground = "/recent-event-hero.webp";
+  const heroBackground = backgroundImage || sharedHeroBackground;
+  const ctas = [primaryCta, secondaryCta].filter(
+    (cta): cta is NonNullable<PageHeroProps['primaryCta']> => Boolean(cta)
+  );
 
   const handleCtaClick = (link: string) => {
     if (link.startsWith('#')) {
@@ -48,7 +51,7 @@ export const PageHero = ({
   const isHashLink = (link: string) => link.startsWith('#');
 
   return (
-    <section className="relative h-[50vh] sm:h-[60vh] min-h-[350px] sm:min-h-[450px] max-h-[650px] flex items-center justify-center overflow-hidden">
+    <section className="relative -mt-[100px] h-[calc(50vh+200px)] sm:h-[calc(60vh+200px)] min-h-[550px] sm:min-h-[650px] max-h-[850px] flex items-center justify-center overflow-hidden">
       {/* Background Image with blur effect */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
@@ -58,8 +61,8 @@ export const PageHero = ({
         }}
       />
       
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-foreground/60" />
+      {/* Muted white overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background/95" />
       
       {/* Content */}
       <div className="container-focus relative z-10 text-center px-4 sm:px-6">
@@ -68,7 +71,7 @@ export const PageHero = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-white/80 mb-3"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/15 to-accent/10 backdrop-blur-sm border border-primary/20 rounded-full px-4 py-2 mb-8 text-sm font-medium text-foreground"
           >
             {eyebrow}
           </motion.p>
@@ -77,7 +80,7 @@ export const PageHero = ({
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold text-white mb-4 sm:mb-6 max-w-4xl mx-auto leading-tight"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-heading font-bold text-foreground mb-4 sm:mb-6 max-w-4xl mx-auto leading-[1.05]"
         >
           {title}
         </motion.h1>
@@ -86,63 +89,41 @@ export const PageHero = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-sm sm:text-base md:text-lg lg:text-xl text-white/80 max-w-2xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2"
+          className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2"
         >
           {description}
         </motion.p>
         
-        {(primaryCta || secondaryCta) && (
+        {ctas.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-4"
           >
-            {primaryCta && (
-              isHashLink(primaryCta.link) ? (
+            {ctas.map((cta, index) => (
+              isHashLink(cta.link) ? (
                 <Button 
+                  key={`${cta.text}-${cta.link}`}
                   size="lg" 
-                  variant="accent" 
+                  variant={index === 0 ? 'hero' : 'hero-outline'}
                   className="gap-2 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto"
-                  onClick={() => handleCtaClick(primaryCta.link)}
+                  onClick={() => handleCtaClick(cta.link)}
                 >
-                  {primaryCta.text}
+                  {cta.text}
                   <ArrowRight size={16} className="sm:hidden" />
                   <ArrowRight size={18} className="hidden sm:block" />
                 </Button>
               ) : (
-                <Button asChild size="lg" variant="accent" className="gap-2 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto">
-                  <Link href={primaryCta.link}>
-                    {primaryCta.text}
+                <Button key={`${cta.text}-${cta.link}`} asChild size="lg" variant={index === 0 ? 'hero' : 'hero-outline'} className="gap-2 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto">
+                  <Link href={cta.link}>
+                    {cta.text}
                     <ArrowRight size={16} className="sm:hidden" />
                     <ArrowRight size={18} className="hidden sm:block" />
                   </Link>
                 </Button>
               )
-            )}
-            {secondaryCta && (
-              isHashLink(secondaryCta.link) ? (
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="gap-2 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/60"
-                  onClick={() => handleCtaClick(secondaryCta.link)}
-                >
-                  {secondaryCta.text}
-                </Button>
-              ) : (
-                <Button 
-                  asChild 
-                  size="lg" 
-                  variant="outline"
-                  className="gap-2 px-6 sm:px-8 text-sm sm:text-base w-full sm:w-auto bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white hover:border-white/60"
-                >
-                  <Link href={secondaryCta.link}>
-                    {secondaryCta.text}
-                  </Link>
-                </Button>
-              )
-            )}
+            ))}
           </motion.div>
         )}
       </div>

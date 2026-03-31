@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, ReactNode } from 'react';
+import { useEffect, useRef, ReactNode, useState } from 'react';
 import { motion, useInView, useAnimation } from 'framer-motion';
 
 interface ScrollRevealProps {
@@ -17,8 +17,9 @@ export const ScrollReveal = ({
   direction = 'up',
 }: ScrollRevealProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const isInView = useInView(ref, { once: true, margin: '-40px' });
   const controls = useAnimation();
+  const [mounted, setMounted] = useState(false);
 
   const directions = {
     up: { y: 40, x: 0 },
@@ -28,11 +29,28 @@ export const ScrollReveal = ({
   };
 
   useEffect(() => {
-    if (isInView) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && isInView) {
       controls.start('visible');
     }
-  }, [isInView, controls]);
+  }, [isInView, controls, mounted]);
 
+  // Fallback: if content hasn't animated in after 3s, force it visible
+  useEffect(() => {
+    if (!mounted) return;
+    const timer = setTimeout(() => {
+      controls.start('visible');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [mounted, controls]);
+
+  // Only animate on client after mount; on SSR, render static content to avoid hydration mismatch
+  if (!mounted) {
+    return <div ref={ref} className={className}>{children}</div>;
+  }
   return (
     <motion.div
       ref={ref}

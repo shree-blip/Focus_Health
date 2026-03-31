@@ -152,7 +152,7 @@ export function RichTextEditor({
     if (!editor) return;
     const src = window.prompt('Enter image URL', 'https://');
     if (!src) return;
-    const alt = window.prompt('Enter alt text (for accessibility)', '') || 'Blog image';
+    const alt = window.prompt('Enter alt text (for accessibility)', '') || 'Insight image';
     editor.chain().focus().setImage({ src, alt }).run();
   }, [editor]);
 

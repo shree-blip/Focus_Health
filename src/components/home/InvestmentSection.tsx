@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { DollarSign, Users, TrendingUp, Target, Building2 } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
-import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import Link from 'next/link';
 
 const investmentHighlights = [

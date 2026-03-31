@@ -3,7 +3,7 @@ import { generateSEOMetadata } from "@/lib/metadata";
 import EditBlogPost from "@/pages/admin/EditBlogPost";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Edit Blog Post - Admin",
+  title: "Edit Insight - Admin",
   canonicalUrl: "/admin/blog/edit",
   noIndex: true,
 });

@@ -8,7 +8,7 @@ export const metadata: Metadata = generateSEOMetadata({
   description:
     "24/7 freestanding emergency room at 10705 Northwest Hwy, Dallas, TX 75238. Board-certified emergency physicians, advanced CT scan, X-ray & lab. Minimal wait times serving White Rock Lake, Lakewood, Casa Linda & East Dallas.",
   canonicalUrl: "/facilities/er-of-white-rock",
-  ogImage: "/facility-er-whiterock.png",
+  ogImage: "/facility-er-whiterock.webp",
   keywords: [
     "ER of White Rock", "White Rock emergency room", "24/7 ER Dallas TX",
     "freestanding ER East Dallas", "emergency room White Rock Lake",

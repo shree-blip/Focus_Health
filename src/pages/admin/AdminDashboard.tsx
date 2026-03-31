@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       // For now, just set initial stats
-      // Blog posts will be stored in local state/DB
+      // Insights will be stored in local state/DB
       setStats({
         totalPosts: 0,
         publishedPosts: 0,
@@ -31,10 +31,10 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: 'Total Posts',
+      title: 'Total Insights',
       value: stats.totalPosts,
       icon: FileText,
-      description: 'All blog posts',
+      description: 'All published and draft insights',
     },
     {
       title: 'Published',
@@ -98,9 +98,9 @@ export default function AdminDashboard() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold mb-2">Create New Post</h3>
+                  <h3 className="font-semibold mb-2">Create New Insight</h3>
                   <p className="text-sm text-muted-foreground">
-                    Start writing a new blog post
+                    Start writing a new insight or company update
                   </p>
                 </div>
                 <Plus className="h-5 w-5 text-primary" />
@@ -112,9 +112,9 @@ export default function AdminDashboard() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold mb-2">All Posts</h3>
+                  <h3 className="font-semibold mb-2">All Insights</h3>
                   <p className="text-sm text-muted-foreground">
-                    View and manage existing posts
+                    View and manage published and draft insights
                   </p>
                 </div>
                 <FileText className="h-5 w-5 text-primary" />

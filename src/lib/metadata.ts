@@ -6,7 +6,7 @@ export const siteConfig = {
   description:
     "Institutional-grade healthcare infrastructure made simple. Focus Health builds and operates high-performance freestanding emergency rooms across Texas.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://getfocushealth.com",
-  ogImage: "/recent-event-hero.png",
+  ogImage: "/recent-event-hero.webp",
   contact: {
     email: "info@getfocushealth.com",
   },

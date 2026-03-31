@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { type AdminBlogPost, loadAdminBlogPosts, saveAdminBlogPosts } from "@/lib/admin-blog-store";
+import { INSIGHT_AUTHORS, INSIGHT_CATEGORIES, type InsightAuthor, type InsightCategory } from "@/lib/insights";
 
 function toSlug(value: string) {
   return value
@@ -24,6 +25,8 @@ export function BlogPostManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [category, setCategory] = useState<InsightCategory>("Company News");
+  const [author, setAuthor] = useState<InsightAuthor>("Focus Health Team");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [status, setStatus] = useState<"draft" | "published">("draft");
@@ -37,6 +40,8 @@ export function BlogPostManager() {
     setEditingId(null);
     setTitle("");
     setSlug("");
+    setCategory("Company News");
+    setAuthor("Focus Health Team");
     setExcerpt("");
     setContent("");
     setStatus("draft");
@@ -60,6 +65,8 @@ export function BlogPostManager() {
               ...post,
               title: title.trim(),
               slug: normalizedSlug,
+              category,
+              author: author.trim() || "Focus Health Team",
               excerpt: excerpt.trim(),
               content: content.trim(),
               status,
@@ -77,13 +84,14 @@ export function BlogPostManager() {
       id: crypto.randomUUID(),
       title: title.trim(),
       slug: normalizedSlug,
+      category,
+      author: author.trim() || "Focus Health Team",
       excerpt: excerpt.trim(),
       content: content.trim(),
       coverImage: '/hero-market.jpg',
       coverImageAlt: title.trim(),
       metaTitle: title.trim(),
       metaDescription: excerpt.trim(),
-      author: 'Focus Health Team',
       status,
       createdAt: now,
       updatedAt: now,
@@ -97,6 +105,8 @@ export function BlogPostManager() {
     setEditingId(post.id);
     setTitle(post.title);
     setSlug(post.slug);
+    setCategory(post.category);
+    setAuthor(post.author);
     setExcerpt(post.excerpt);
     setContent(post.content);
     setStatus(post.status);
@@ -124,13 +134,13 @@ export function BlogPostManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Blog Posts</h1>
-        <p className="text-muted-foreground mt-2">Create, edit, and publish posts from the admin panel</p>
+        <h1 className="text-3xl font-bold">Insights</h1>
+        <p className="text-muted-foreground mt-2">Create, edit, and publish insights from the admin panel</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{editingId ? "Edit Post" : "Create New Post"}</CardTitle>
+          <CardTitle>{editingId ? "Edit Insight" : "Create New Insight"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
@@ -144,7 +154,7 @@ export function BlogPostManager() {
                   setTitle(nextTitle);
                   if (!slug) setSlug(toSlug(nextTitle));
                 }}
-                placeholder="Post title"
+                placeholder="Insight title"
               />
             </div>
             <div className="space-y-2">
@@ -156,15 +166,45 @@ export function BlogPostManager() {
                 placeholder="post-slug"
               />
             </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="post-category">Category</Label>
+              <select
+                id="post-category"
+                value={category}
+                onChange={(event) => setCategory(event.target.value as InsightCategory)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+              >
+                {INSIGHT_CATEGORIES.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="post-author">Author</Label>
+              <select
+                id="post-author"
+                value={author}
+                onChange={(event) => setAuthor(event.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+              >
+                {INSIGHT_AUTHORS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="post-excerpt">Excerpt</Label>
+              <Label htmlFor="post-excerpt">Excerpt</Label>
             <Textarea
               id="post-excerpt"
               value={excerpt}
               onChange={(event) => setExcerpt(event.target.value)}
-              placeholder="Short summary"
+              placeholder="Short summary of the update"
             />
           </div>
 
@@ -174,7 +214,7 @@ export function BlogPostManager() {
               id="post-content"
               value={content}
               onChange={(event) => setContent(event.target.value)}
-              placeholder="Write your content"
+              placeholder="Write your insight content"
               className="min-h-32"
             />
           </div>
@@ -199,7 +239,7 @@ export function BlogPostManager() {
           <div className="flex items-center gap-3">
             <Button type="button" onClick={submitPost}>
               <Plus className="h-4 w-4 mr-2" />
-              {editingId ? "Update Post" : "Add Post"}
+              {editingId ? "Update Insight" : "Add Insight"}
             </Button>
             {editingId ? (
               <Button type="button" variant="outline" onClick={resetForm}>
@@ -212,7 +252,7 @@ export function BlogPostManager() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Posts</CardTitle>
+          <CardTitle>All Insights</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -222,6 +262,7 @@ export function BlogPostManager() {
                   <div>
                     <h3 className="font-semibold">{post.title}</h3>
                     <p className="text-sm text-muted-foreground">/{post.slug}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary mt-2">{post.category}</p>
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.excerpt || "No excerpt"}</p>
                   </div>
                   <Badge variant={post.status === "published" ? "default" : "secondary"}>{post.status}</Badge>
@@ -242,7 +283,7 @@ export function BlogPostManager() {
               </div>
             ))}
             {sortedPosts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No posts yet. Create your first post above.</p>
+                <p className="text-sm text-muted-foreground">No insights yet. Create your first one above.</p>
             ) : null}
           </div>
         </CardContent>

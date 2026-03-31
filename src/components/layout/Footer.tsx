@@ -33,9 +33,9 @@ export const Footer = () => {
                 { label: "Market", href: "/market" },
                 { label: "Track Record", href: "/track-record" },
                 { label: "Leadership", href: "/leadership" },
-                { label: "Blog", href: "/blog" },
+                { label: "Insights", href: "/insights" },
               ].map((link) => (
-                <li key={link.href}>
+                <li key={`${link.label}-${link.href}`}>
                   <Link
                     href={link.href}
                     className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-xs sm:text-sm"
@@ -56,7 +56,7 @@ export const Footer = () => {
                 { label: "For Communities", href: "/partners#opportunity-form" },
                 { label: "Early Access", href: "/contact" },
               ].map((link) => (
-                <li key={link.href}>
+                <li key={`${link.label}-${link.href}`}>
                   <Link
                     href={link.href}
                     className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-xs sm:text-sm"
@@ -138,7 +138,7 @@ export const Footer = () => {
               rel="noopener"
               className="text-primary-foreground/70 hover:text-primary-foreground transition-colors underline"
             >
-              NextGen
+              NextGenHealth
             </a>
           </p>
         </div>

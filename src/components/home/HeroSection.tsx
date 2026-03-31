@@ -134,10 +134,15 @@ const useMousePosition = () => {
   const mouseY = useMotionValue(0);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const finePointerQuery = window.matchMedia('(pointer: fine) and (min-width: 1024px)');
+    if (!finePointerQuery.matches) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
     };
+
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [mouseX, mouseY]);
@@ -241,7 +246,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-background">
+    <section className="relative -mt-[100px] min-h-[calc(100vh+200px)] flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
@@ -251,7 +256,8 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
           loop={heroVideoIndex === heroVideos.length - 1}
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
+          poster="/recent-event-hero.webp"
           onEnded={handleHeroVideoEnded}
           aria-hidden="true"
           className="w-full h-full object-cover"
@@ -285,7 +291,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       </div>
 
       {/* Content */}
-      <div className="container-focus relative z-10 pt-20">
+      <div className="container-focus relative z-10 pt-[130px]">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="max-w-2xl">
             {/* Live indicator badge */}
@@ -387,7 +393,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="hidden lg:flex items-center justify-center relative"
+            className="flex items-center justify-center relative"
           >
             <div className="relative w-96 h-96">
               {/* Video Logo Central Hub */}
@@ -429,7 +435,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
                   style={{ transformOrigin: "2.5px 160px" }}
                 >
                   <motion.div
-                    className={`w-5 h-5 rounded-full ${i % 2 === 0 ? 'bg-accent shadow-lg shadow-accent/50' : 'bg-primary shadow-lg shadow-primary/50'}`}
+                    className={`w-5 h-5 rounded-full ${i % 2 === 0 ? 'bg-secondary/80 shadow-lg shadow-secondary/40' : 'bg-accent/80 shadow-lg shadow-accent/40'}`}
                     animate={{ scale: [1, 1.3, 1] }}
                     transition={{ duration: 2, delay: i * 0.5, repeat: Infinity }}
                   />
@@ -445,8 +451,8 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               {/* Floating labels */}
               {[
                 { label: "Build", angle: -30 },
-                { label: "Operate", angle: 90 },
-                { label: "Optimize", angle: 210 },
+                { label: "Fund", angle: 90 },
+                { label: "Operate", angle: 210 },
               ].map((item, i) => {
                 const radians = (item.angle * Math.PI) / 180;
                 const x = 192 + 175 * Math.cos(radians);
@@ -454,7 +460,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
                 return (
                   <motion.div
                     key={item.label}
-                    className="absolute text-xs font-semibold text-primary bg-background/90 backdrop-blur-md px-4 py-2 rounded-full border border-primary/30 shadow-xl"
+                    className="absolute text-xs font-semibold text-primary bg-card/90 backdrop-blur-md px-4 py-2 rounded-full border border-border shadow-xl"
                     style={{ left: x - 35, top: y - 14 }}
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}

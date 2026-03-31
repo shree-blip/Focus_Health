@@ -10,7 +10,8 @@ import {
   Users, MapPin, Phone, ArrowRight, CheckCircle2, Building2,
   HeartPulse, Pill, Microscope, Zap, ExternalLink
 } from 'lucide-react';
-const facilityImage = "/facility-er-lufkin-real.png";
+const facilityImage = "/facility-er-lufkin-real.webp";
+const lufkinGrandOpeningEmbedUrl = "https://player.vimeo.com/video/1178939041?h=47ffc8be30";
 
 const BASE_URL = 'https://getfocushealth.com';
 
@@ -142,7 +143,7 @@ const erOfLufkinSchema = {
   "description": "ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care for all ages. Serving Angelina County, Nacogdoches, and East Texas.",
   "url": "https://getfocushealth.com/facilities/er-of-lufkin",
   "telephone": "+1-936-000-0000",
-  "image": `${BASE_URL}/assets/facility-er-lufkin-real.png`,
+  "image": `${BASE_URL}/assets/facility-er-lufkin-real.webp`,
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "501 N Brentwood Dr",
@@ -201,6 +202,54 @@ const faqSchema = {
   }))
 };
 
+const GrandOpeningEmbedCard = ({
+  src,
+  title,
+}: {
+  src: string;
+  title: string;
+}) => {
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="text-base font-semibold text-center text-foreground/80 tracking-wide">{title}</h3>
+      <div className="relative rounded-2xl overflow-hidden border border-border shadow-lg aspect-video bg-muted">
+        <iframe
+          title={title}
+          src={src}
+          loading="lazy"
+          frameBorder={0}
+          referrerPolicy="strict-origin-when-cross-origin"
+          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+          allowFullScreen
+          className="h-full w-full"
+        />
+      </div>
+    </div>
+  );
+};
+
+const GrandOpeningSection = () => (
+  <section className="w-full bg-background py-10 md:py-14">
+    <div className="container-focus">
+      <div className="text-center mb-8">
+        <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-xs font-semibold uppercase tracking-widest mb-3">
+          Now Open
+        </span>
+        <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+          Grand Opening
+        </h2>
+      </div>
+
+      <div className="max-w-4xl mx-auto">
+        <GrandOpeningEmbedCard
+          src={lufkinGrandOpeningEmbedUrl}
+          title="ER of Lufkin — Grand Opening"
+        />
+      </div>
+    </div>
+  </section>
+);
+
 const ERofLufkin = () => {
   return (
     <>
@@ -212,6 +261,8 @@ const ERofLufkin = () => {
         primaryCta={{ text: "View All Facilities", link: "/track-record" }}
         secondaryCta={{ text: "Contact Us", link: "/contact" }}
       />
+
+      <GrandOpeningSection />
 
       {/* Intro / Overview */}
       <section className="section-padding bg-card">
@@ -477,7 +528,7 @@ const ERofLufkin = () => {
             <Link href="/contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted transition-colors">
               Contact Us
             </Link>
-            <a href="https://erofirving.com" target="_blank" rel="dofollow" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors">
+            <a href="https://eroflufkin.com" target="_blank" rel="dofollow" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors">
               Visit ER of Lufkin Website <ArrowRight size={16} />
             </a>
           </div>

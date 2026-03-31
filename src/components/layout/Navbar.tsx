@@ -15,7 +15,7 @@ const navLinks = [
   { href: '/track-record', label: 'Track Record' },
   { href: '/leadership', label: 'Leadership' },
   { href: '/partners', label: 'Partners' },
-  { href: '/blog', label: 'Blog' },
+  { href: '/insights', label: 'Insights' },
   { href: '/contact', label: 'Contact' },
 ];
 
@@ -28,6 +28,7 @@ export const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -41,25 +42,34 @@ export const Navbar = () => {
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300 animate-fade-in',
         isScrolled
-          ? 'bg-card/95 backdrop-blur-md shadow-md'
+          ? 'bg-white/70 backdrop-blur-xl shadow-sm border-b border-white/20'
           : 'bg-transparent'
       )}
     >
       <div className="container-focus">
         <nav className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
-          <Link href="/" aria-label="Focus Health home" className="flex items-center gap-3 group">
-            <Image
-              src="/focus-health-icon.png"
-              alt="Focus Health Logo"
-              width={64}
-              height={64}
-              priority
-              className="h-12 sm:h-16 w-auto group-hover:scale-105 transition-transform"
-            />
-            <div className="hidden sm:flex items-baseline gap-1.5">
-              <span className="font-heading font-bold text-xl sm:text-2xl text-primary">Focus</span>
-              <span className="font-heading font-bold text-xl sm:text-2xl text-secondary">Health</span>
+          <Link href="/" aria-label="Focus Health home" className="flex flex-col gap-0.5 group">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/focus-health-icon.png"
+                alt="Focus Health Logo"
+                width={64}
+                height={64}
+                priority
+                className="h-12 sm:h-16 w-auto group-hover:scale-105 transition-transform"
+              />
+              <div className="hidden sm:flex flex-col gap-0.5">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-heading font-bold text-xl sm:text-2xl text-primary">Focus</span>
+                  <span className="font-heading font-bold text-xl sm:text-2xl text-secondary">Health</span>
+                </div>
+                <div className="text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest text-accent leading-tight">
+                  Dallas&nbsp;|&nbsp;Houston&nbsp;|&nbsp;Austin
+                  <br />
+                  Fort Worth&nbsp;|&nbsp;San Antonio
+                </div>
+              </div>
             </div>
           </Link>
 
@@ -70,7 +80,7 @@ export const Navbar = () => {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'nav-link font-medium text-sm',
+                  'nav-link font-bold text-sm',
                   pathname === link.href && 'active text-foreground'
                 )}
               >
@@ -110,7 +120,7 @@ export const Navbar = () => {
               key={link.href}
               href={link.href}
               className={cn(
-                'py-3 px-4 rounded-lg font-medium transition-colors',
+                'py-3 px-4 rounded-lg font-bold transition-colors',
                 pathname === link.href
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'

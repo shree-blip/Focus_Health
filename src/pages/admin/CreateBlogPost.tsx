@@ -13,6 +13,7 @@ import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { type AdminBlogPost, loadAdminBlogPosts, saveAdminBlogPosts } from '@/lib/admin-blog-store';
+import { INSIGHT_AUTHORS, INSIGHT_CATEGORIES, type InsightAuthor, type InsightCategory } from '@/lib/insights';
 
 function toSlug(value: string) {
   return value.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
@@ -23,6 +24,8 @@ export default function CreateBlogPostPage() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
+  const [category, setCategory] = useState<InsightCategory>('Company News');
+  const [author, setAuthor] = useState<InsightAuthor>('Focus Health Team');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [coverImage, setCoverImage] = useState('');
@@ -49,7 +52,7 @@ export default function CreateBlogPostPage() {
 
       const posts = loadAdminBlogPosts();
       if (posts.some((p) => p.slug === slug.trim())) {
-        toast.error('A post with this slug already exists');
+        toast.error('An insight with this slug already exists');
         return;
       }
 
@@ -57,23 +60,24 @@ export default function CreateBlogPostPage() {
         id: crypto.randomUUID(),
         title: title.trim(),
         slug: slug.trim(),
+        category,
         excerpt: excerpt.trim(),
         content,
         coverImage: coverImage.trim() || '/hero-market.jpg',
         coverImageAlt: coverImageAlt.trim() || title.trim(),
         metaTitle: metaTitle.trim() || title.trim(),
         metaDescription: metaDescription.trim() || excerpt.trim(),
-        author: 'Focus Health Team',
+        author: author.trim() || 'Focus Health Team',
         status,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
       saveAdminBlogPosts([newPost, ...posts]);
-      toast.success('Blog post created!');
+      toast.success('Insight created!');
       router.push('/admin/blog');
     } catch (error) {
-      toast.error('Failed to create blog post');
+      toast.error('Failed to create insight');
       console.error(error);
     } finally {
       setLoading(false);
@@ -86,7 +90,7 @@ export default function CreateBlogPostPage() {
         <Link href="/admin/blog" className="text-primary hover:underline">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-3xl font-bold">Create Blog Post</h1>
+        <h1 className="text-3xl font-bold">Create Insight</h1>
       </div>
 
       <Card>
@@ -95,7 +99,7 @@ export default function CreateBlogPostPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
-                <Input id="title" placeholder="Enter post title" value={title} onChange={handleTitleChange} required />
+                <Input id="title" placeholder="Enter insight title" value={title} onChange={handleTitleChange} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="slug">Slug *</Label>
@@ -110,8 +114,26 @@ export default function CreateBlogPostPage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <select id="category" value={category} onChange={(e) => setCategory(e.target.value as InsightCategory)} className="w-full px-3 py-2 border border-input rounded-md bg-background">
+                {INSIGHT_CATEGORIES.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="author">Author</Label>
+              <select id="author" value={author} onChange={(e) => setAuthor(e.target.value)} className="w-full px-3 py-2 border border-input rounded-md bg-background">
+                {INSIGHT_AUTHORS.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea id="excerpt" placeholder="Brief description of the post" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} />
+              <Textarea id="excerpt" placeholder="Brief summary of the insight" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -146,7 +168,7 @@ export default function CreateBlogPostPage() {
 
             <div className="space-y-2">
               <Label>Content *</Label>
-              <RichTextEditor value={content} onChange={setContent} placeholder="Write your blog post content here..." />
+              <RichTextEditor value={content} onChange={setContent} placeholder="Write your insight content here..." />
               <p className="text-xs text-muted-foreground">Use H1–H4, Bold, Italic, Links, Images from the toolbar.</p>
             </div>
 
@@ -159,7 +181,7 @@ export default function CreateBlogPostPage() {
             </div>
 
             <div className="flex gap-4">
-              <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Post'}</Button>
+              <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Insight'}</Button>
               <Button type="button" variant="outline" asChild><Link href="/admin/blog">Cancel</Link></Button>
             </div>
           </form>

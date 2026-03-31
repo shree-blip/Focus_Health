@@ -59,6 +59,8 @@
     "@tiptap/react": "^3.20.4",
     "@tiptap/starter-kit": "^3.20.4",
     "@types/leaflet": "^1.9.21",
+    "baseline-browser-mapping": "^2.10.12",
+    "caniuse-lite": "^1.0.30001782",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -80,6 +82,7 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "update-browserslist-db": "^1.2.3",
     "vaul": "^0.9.9",
     "zod": "^3.25.76"
   },

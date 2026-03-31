@@ -100,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
-      <body className={`${inter.variable} ${sora.variable}`}>
+      <body suppressHydrationWarning className={`${inter.variable} ${sora.variable}`}>
         <AppProviders>
           <ScrollToTop />
           <div className="min-h-screen flex flex-col">

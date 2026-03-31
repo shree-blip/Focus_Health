@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
-const heroInvestors = "/recent-event-hero.png";
+const heroInvestors = "/recent-event-hero.webp";
 const ribbonCutting = "/ERofIrving-GrandOpening.mp4";
 
 const valueProps = [
@@ -117,29 +117,29 @@ const Investors = () => {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      <section className="relative -mt-[100px] min-h-[calc(90vh+200px)] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${heroInvestors})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background/95" />
         
         <div className="container-focus relative z-10 text-center py-20 px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-sm border border-accent/30 rounded-full px-4 py-2 mb-8"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/15 to-accent/10 backdrop-blur-sm border border-primary/20 rounded-full px-4 py-2 mb-8"
           >
             <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-white">Now Raising $3.4M for New Facilities</span>
+            <span className="text-sm font-medium text-foreground">Now Raising $3.4M for New Facilities</span>
           </motion.div>
           
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-bold text-white mb-6 max-w-5xl mx-auto leading-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-heading font-bold text-foreground mb-6 max-w-5xl mx-auto leading-[1.05]"
           >
             Invest in Texas
             <span className="block text-accent">Emergency Care</span>
@@ -149,7 +149,7 @@ const Investors = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Focus Health partners with investors and communities to build and operate 
             freestanding emergency rooms—complete facilities with 24/7 care, 
@@ -162,7 +162,7 @@ const Investors = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-wrap items-center justify-center gap-4"
           >
-            <Button asChild size="lg" variant="accent" className="gap-2 px-8 text-base">
+            <Button asChild size="lg" variant="hero" className="gap-2 px-8 text-base">
               <a href="#waitlist">
                 Partner With Us
                 <ArrowRight size={18} />
@@ -171,8 +171,8 @@ const Investors = () => {
             <Button 
               asChild 
               size="lg" 
-              variant="outline"
-              className="gap-2 px-8 bg-white/10 backdrop-blur-sm border-white/40 text-white hover:bg-white/20 hover:text-white hover:border-white/60"
+              variant="hero-outline"
+              className="gap-2 px-8"
             >
               <a href="#investment">
                 View Investment Overview

@@ -7,7 +7,7 @@ import { LayoutDashboard, FileText, LogOut, Inbox } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/blog", label: "Blog Posts", icon: FileText },
+  { href: "/admin/blog", label: "Insights", icon: FileText },
   { href: "/admin/submissions", label: "Submissions", icon: Inbox },
 ];
 

@@ -1,25 +1,5 @@
 "use client";
 
-const craigHeadshot = "https://www.westllp.com/wp-content/uploads/2017/10/Craig-Capua-1.jpg";
-const craigProfile = {
-  name: "Craig Capua",
-  role: "General Counsel",
-  category: "Legal & Corporate Affairs",
-  profileUrl: "https://www.linkedin.com/in/craig-a-capua-9bb6a717/",
-  photo: craigHeadshot,
-  credentials:
-    "Partner at West & Associates, LLP. Admitted to the State Bar of Texas in 1989. J.D., St. Mary’s University; B.A., Southern Methodist University.",
-  bio: "Craig is a first chair trial attorney and trusted business advisor with decades of experience in commercial, corporate, employment, intellectual property, real estate, and personal injury law. He represents local and national clients in complex litigation, corporate transactions, and business disputes. Craig is known for his practical, efficient counsel and has led teams in significant matters before federal, state, and bankruptcy courts in Texas.",
-  highlights: [
-    "Partner at West & Associates, LLP",
-    "30+ years legal experience",
-    "J.D., St. Mary’s University",
-    "B.A., Southern Methodist University",
-    "Texas Bar Foundation Nominee"
-  ],
-};
-
-
 import { motion } from "framer-motion";
 import { ArrowRight, Share2, Quote } from "lucide-react";
 import Link from 'next/link';
@@ -32,6 +12,7 @@ const jayHeadshot = "/jay-dahal-headshot.png";
 const jamieHeadshot = "/jamie-alcantar-headshot.png";
 const anjilaHeadshot = "/anjila-shrestha-headshot.png";
 const julieHeadshot = "/julie-moreno-headshot.png";
+const craigHeadshot = "/Craig-Capua.png";
 const heroLeadership = "/hero-leadership.jpg";
 const ganeshHeadshot = "/ganesh-dahal-headshot.png";
 const kalashHeadshot = "/kalash-shrestha-DopvHPEc.png";
@@ -157,6 +138,26 @@ const stevenProfile = {
     "Emergency medicine-focused physician leader with 31+ years of clinical experience, a medical degree from New York Medical College (1994), and extensive ER practice leadership in Dallas.",
   bio: "Dr. Thompson brings decades of emergency care experience to Focus Health's leadership team. As Chief Medical Officer, he leads ER physician alignment, clinical quality, and rapid-response care standards across Focus Health's freestanding emergency room platform.",
   highlights: ["31+ years in medicine", "Emergency care leadership", "New York Medical College, 1994", "Dallas ER practice experience"],
+};
+const craigProfile = {
+  name: "Craig Capua",
+  role: "General Counsel",
+  category: "Legal & Corporate Affairs",
+  profileUrl: "https://www.westllp.com/attorneys/craig-capua/",
+  linkedinUrl: "https://www.linkedin.com/in/craig-a-capua-9bb6a717/",
+  photo: craigHeadshot,
+  credentials:
+    "Partner at West & Associates, LLP. Admitted to the State Bar of Texas in 1989. J.D., St. Mary’s University; B.A., Southern Methodist University.",
+  quote:
+    "Effective legal counsel is about enabling growth while safeguarding the organization's mission and integrity at every step.",
+  bio: "Craig is a first chair trial attorney and trusted business advisor with decades of experience in commercial, corporate, employment, intellectual property, real estate, and personal injury law. He represents local and national clients in complex litigation, corporate transactions, and business disputes. Craig is known for his practical, efficient counsel and has led teams in significant matters before federal, state, and bankruptcy courts in Texas.",
+  highlights: [
+    "Partner at West & Associates, LLP",
+    "30+ years legal experience",
+    "J.D., St. Mary’s University",
+    "B.A., Southern Methodist University",
+    "Texas Bar Foundation Nominee",
+  ],
 };
 const LeadershipPage = () => {
   const handleShare = (url: string) => {
@@ -429,14 +430,13 @@ const LeadershipPage = () => {
         </div>
       </section>
 
-      {/* Featured Leader - Craig Capua */}
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-card">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Content (left) */}
-            <ScrollReveal direction="left">
-              <div>
-                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
+            {/* Content - Left side for Craig */}
+            <ScrollReveal>
+              <div className="order-2 lg:order-1">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold uppercase tracking-wider mb-6">
                   {craigProfile.category}
                 </span>
 
@@ -444,11 +444,16 @@ const LeadershipPage = () => {
                   {craigProfile.name}
                 </h2>
 
-                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{craigProfile.role}</p>
+                <p className="text-lg sm:text-xl text-accent font-medium mb-6 sm:mb-8">{craigProfile.role}</p>
 
-                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
+                  {craigProfile.credentials}
+                </p>
+
+                {/* Quote */}
+                <div className="border-l-4 border-accent pl-4 sm:pl-6 mb-6 sm:mb-8">
                   <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
-                    {craigProfile.credentials}
+                    "{craigProfile.quote}"
                   </p>
                 </div>
 
@@ -456,11 +461,12 @@ const LeadershipPage = () => {
                   {craigProfile.bio}
                 </p>
 
+                {/* Stats */}
                 <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
                   {craigProfile.highlights.map((highlight, i) => (
                     <span
                       key={i}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-background border border-border rounded-lg text-xs sm:text-sm font-medium"
                     >
                       {highlight}
                     </span>
@@ -468,12 +474,24 @@ const LeadershipPage = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Button asChild className="gap-2">
-                    <a href={craigProfile.profileUrl} target="_blank" rel="noopener">
+                  <Button variant="accent" asChild className="gap-2">
+                    <a href={craigProfile.profileUrl} target="_blank" rel="dofollow noopener">
                       Connect With Craig
                       <ArrowRight size={18} />
                     </a>
                   </Button>
+                  <a
+                    href={craigProfile.linkedinUrl}
+                    target="_blank"
+                    rel="dofollow noopener"
+                    aria-label="Craig Capua LinkedIn profile"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-transform hover:scale-110"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 72 72">
+                      <rect width="72" height="72" rx="8" fill="#0A66C2" />
+                      <path d="M20.5 29h6.8v21.8h-6.8V29zm3.4-10.8c2.2 0 3.9 1.8 3.9 3.9 0 2.2-1.7 3.9-3.9 3.9-2.2 0-3.9-1.8-3.9-3.9 0-2.2 1.7-3.9 3.9-3.9zM33.3 29h6.5v3h.1c.9-1.7 3.1-3.5 6.4-3.5 6.8 0 8.1 4.5 8.1 10.3v11.9h-6.8V40.6c0-2.4 0-5.6-3.4-5.6-3.4 0-3.9 2.7-3.9 5.4v10.4h-6.8V29z" fill="#fff" />
+                    </svg>
+                  </a>
                   <Button
                     variant="outline"
                     size="icon"
@@ -486,20 +504,23 @@ const LeadershipPage = () => {
               </div>
             </ScrollReveal>
 
-            {/* Photo (right) */}
-            <ScrollReveal>
+            {/* Photo - Right side for Craig */}
+            <ScrollReveal direction="left">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{
+                  scale: 1.02,
+                }}
                 className="relative order-1 lg:order-2"
               >
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/10 to-primary/10">
                   <img
                     src={craigProfile.photo}
                     alt={craigProfile.name}
                     className="w-full h-full object-cover object-top"
                   />
                 </div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+                {/* Decorative element */}
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/10 rounded-2xl -z-10" />
               </motion.div>
             </ScrollReveal>
           </div>
@@ -507,10 +528,10 @@ const LeadershipPage = () => {
       </section>
 
       {/* Featured Leader - Joel */}
-      <section className="section-padding bg-card">
+      <section className="section-padding bg-background">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Photo (left) */}
+            {/* Photo */}
             <ScrollReveal>
               <motion.div
                 whileHover={{
@@ -590,13 +611,14 @@ const LeadershipPage = () => {
         <div className="container-focus">
           <ScrollReveal>
             <div className="mb-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold mb-3 sm:mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-foreground mb-3 sm:mb-4 leading-tight">
                 Strategic Minds Behind Focus Health
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
+              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mb-5">
                 Our leadership team brings together financial expertise, operational rigor, and deep healthcare industry
                 experience.
               </p>
+              <div className="w-12 h-1.5 bg-primary rounded-full" />
             </div>
           </ScrollReveal>
 
@@ -605,21 +627,20 @@ const LeadershipPage = () => {
               <ScrollReveal key={member.name} delay={index * 0.15}>
                 <motion.div
                   whileHover={{
-                    y: -8,
+                    y: -6,
                   }}
-                  className="group relative rounded-2xl overflow-hidden cursor-pointer"
+                  className="group card-premium overflow-hidden"
                 >
-                  {/* Photo */}
-                  <div className="aspect-[4/5]">
+                  <div className="aspect-[4/5] bg-muted/40">
                     {member.photo ? (
                       <img
                         src={member.photo}
                         alt={member.name}
-                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                        <span className="text-4xl font-bold text-primary/50">
+                        <span className="text-4xl font-heading font-bold text-primary/50">
                           {member.name
                             .split(" ")
                             .map((n) => n[0])
@@ -629,13 +650,10 @@ const LeadershipPage = () => {
                     )}
                   </div>
 
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent" />
-
-                  {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-xl font-heading font-bold text-white mt-1">{member.name}</h3>
-                    <p className="text-white/70 text-sm">{member.role}</p>
+                  <div className="p-5">
+                    <p className="text-xs uppercase tracking-wider font-semibold text-primary mb-2">{member.category}</p>
+                    <h3 className="text-lg font-heading font-bold text-foreground">{member.name}</h3>
+                    <p className="text-muted-foreground text-sm mt-1">{member.role}</p>
                   </div>
                 </motion.div>
               </ScrollReveal>
@@ -649,13 +667,14 @@ const LeadershipPage = () => {
         <div className="container-focus">
           <ScrollReveal>
             <div className="mb-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold mb-3 sm:mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-foreground mb-3 sm:mb-4 leading-tight">
                 Accounting & Billing Team
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl">
+              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mb-5">
                 Our dedicated finance professionals ensure operational excellence and financial accuracy across all
                 facilities.
               </p>
+              <div className="w-12 h-1.5 bg-primary rounded-full" />
             </div>
           </ScrollReveal>
 
@@ -664,21 +683,20 @@ const LeadershipPage = () => {
               <ScrollReveal key={member.name} delay={index * 0.1}>
                 <motion.div
                   whileHover={{
-                    y: -8,
+                    y: -6,
                   }}
-                  className="group relative rounded-2xl overflow-hidden cursor-pointer"
+                  className="group card-premium overflow-hidden"
                 >
-                  {/* Photo */}
-                  <div className="aspect-[4/5]">
+                  <div className="aspect-[4/5] bg-muted/40">
                     {member.photo ? (
                       <img
                         src={member.photo}
                         alt={member.name}
-                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                        <span className="text-4xl font-bold text-primary/50">
+                        <span className="text-4xl font-heading font-bold text-primary/50">
                           {member.name
                             .split(" ")
                             .map((n) => n[0])
@@ -688,13 +706,10 @@ const LeadershipPage = () => {
                     )}
                   </div>
 
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent" />
-
-                  {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-xl font-heading font-bold text-white mt-1">{member.name}</h3>
-                    <p className="text-white/70 text-sm">{member.role}</p>
+                  <div className="p-5">
+                    <p className="text-xs uppercase tracking-wider font-semibold text-primary mb-2">{member.category}</p>
+                    <h3 className="text-lg font-heading font-bold text-foreground">{member.name}</h3>
+                    <p className="text-muted-foreground text-sm mt-1">{member.role}</p>
                   </div>
                 </motion.div>
               </ScrollReveal>

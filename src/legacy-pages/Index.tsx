@@ -130,6 +130,32 @@ const GrandOpeningVideoCard = ({
   );
 };
 
+const GrandOpeningEmbedCard = ({
+  src,
+  title,
+}: {
+  src: string;
+  title: string;
+}) => {
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="text-base font-semibold text-center text-foreground/80 tracking-wide">{title}</h3>
+      <div className="relative rounded-2xl overflow-hidden border border-border shadow-lg aspect-video bg-muted">
+        <iframe
+          title={title}
+          src={src}
+          loading="lazy"
+          frameBorder={0}
+          referrerPolicy="strict-origin-when-cross-origin"
+          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+          allowFullScreen
+          className="h-full w-full"
+        />
+      </div>
+    </div>
+  );
+};
+
 const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -137,10 +163,44 @@ const Index = () => {
     if (typeof window === 'undefined') return;
     const seenKey = 'focus_home_business_modal_seen';
     const hasSeenModal = window.sessionStorage.getItem(seenKey);
-    if (!hasSeenModal) {
+    if (hasSeenModal) return;
+
+    let timeoutId: number | undefined;
+    const idleCallback = (
+      window as Window & {
+        requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+        cancelIdleCallback?: (handle: number) => void;
+      }
+    ).requestIdleCallback;
+    const cancelIdleCallback = (
+      window as Window & {
+        requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+        cancelIdleCallback?: (handle: number) => void;
+      }
+    ).cancelIdleCallback;
+
+    const openModal = () => {
       setIsModalOpen(true);
       window.sessionStorage.setItem(seenKey, '1');
+    };
+
+    let idleId: number | undefined;
+    if (idleCallback) {
+      idleId = idleCallback(() => {
+        timeoutId = window.setTimeout(openModal, 1800);
+      });
+    } else {
+      timeoutId = window.setTimeout(openModal, 3000);
     }
+
+    return () => {
+      if (typeof idleId === 'number' && cancelIdleCallback) {
+        cancelIdleCallback(idleId);
+      }
+      if (typeof timeoutId === 'number') {
+        window.clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   const handleCloseModal = () => {
@@ -166,7 +226,7 @@ const Index = () => {
               Grand Opening Videos
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <GrandOpeningVideoCard
               src="/Irving_Wellness/IHW-Event-Horizontal.mp4"
               title="Irving Health & Wellness — Grand Opening"
@@ -176,6 +236,10 @@ const Index = () => {
               src="/ERofIrving-GrandOpening.mp4"
               title="ER of Irving — Grand Opening"
               ariaLabel="ER of Irving grand opening event highlight video"
+            />
+            <GrandOpeningEmbedCard
+              src="https://player.vimeo.com/video/1178939041?h=47ffc8be30"
+              title="ER of Lufkin — Grand Opening"
             />
           </div>
         </div>

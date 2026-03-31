@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
+import { BuildFundOperateLoop } from '@/components/ui/BuildFundOperateLoop';
 import { RefreshCw, Building, Zap, Users, LineChart, FileText, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
@@ -79,68 +80,8 @@ const PlatformPage = () => {
         <div className="container-focus relative z-[2]">
           <ScrollReveal>
             <div className="max-w-4xl mx-auto">
-              <div className="relative flex items-center justify-center py-16">
-                {/* Loop Animation */}
-                <svg viewBox="0 0 400 200" className="w-full max-w-lg">
-                  {/* Background Circle */}
-                  <motion.ellipse
-                    cx="200"
-                    cy="100"
-                    rx="150"
-                    ry="70"
-                    fill="none"
-                    stroke="hsl(var(--border))"
-                    strokeWidth="2"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 2 }}
-                  />
-
-                  {/* Animated Pulse */}
-                  <motion.circle
-                    r="8"
-                    fill="hsl(var(--accent))"
-                    initial={{ offsetDistance: '0%' }}
-                    animate={{ offsetDistance: '100%' }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                    style={{ offsetPath: 'ellipse(150px 70px at 200px 100px)' }}
-                  />
-
-                  {/* Nodes */}
-                  {[
-                    { x: 50, y: 100, label: 'Build' },
-                    { x: 200, y: 30, label: 'Fund' },
-                    { x: 350, y: 100, label: 'Operate' },
-                  ].map((node, i) => (
-                    <g key={node.label}>
-                      <motion.circle
-                        cx={node.x}
-                        cy={node.y}
-                        r="30"
-                        fill="hsl(var(--primary))"
-                        initial={{ scale: 0 }}
-                        whileInView={{ scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.2 }}
-                      />
-                      <motion.text
-                        x={node.x}
-                        y={node.y + 5}
-                        textAnchor="middle"
-                        fill="hsl(var(--primary-foreground))"
-                        fontSize="12"
-                        fontWeight="600"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.2 + 0.3 }}
-                      >
-                        {node.label}
-                      </motion.text>
-                    </g>
-                  ))}
-                </svg>
+              <div className="flex items-center justify-center py-16">
+                <BuildFundOperateLoop />
               </div>
             </div>
           </ScrollReveal>

@@ -15,7 +15,7 @@ const routes = [
   "/privacy",
   "/terms",
   "/track-record",
-  "/blog",
+  "/insights",
   "/facilities/er-of-irving",
   "/facilities/er-of-lufkin",
   "/facilities/er-of-white-rock",
@@ -30,12 +30,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${siteConfig.url}${route}`,
     lastModified: now,
     changeFrequency: route === "" ? "daily" : "weekly",
-    priority: route === "" ? 1 : route === "/blog" ? 0.85 : 0.8,
+    priority: route === "" ? 1 : route === "/insights" ? 0.85 : 0.8,
   }));
 
-  const fallbackBlogEntries: MetadataRoute.Sitemap = BLOG_POSTS.filter((post) => post.status === "published").map(
+  const fallbackInsightEntries: MetadataRoute.Sitemap = BLOG_POSTS.filter((post) => post.status === "published").map(
     (post) => ({
-      url: `${siteConfig.url}/blog/${post.slug}`,
+      url: `${siteConfig.url}/insights/${post.slug}`,
       lastModified: new Date(post.publishedAt),
       changeFrequency: "monthly",
       priority: 0.75,
@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_VITE_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    return [...staticEntries, ...fallbackBlogEntries];
+    return [...staticEntries, ...fallbackInsightEntries];
   }
 
   try {
@@ -66,20 +66,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .order("published_at", { ascending: false });
 
     if (error || !posts) {
-      return [...staticEntries, ...fallbackBlogEntries];
+      return [...staticEntries, ...fallbackInsightEntries];
     }
 
-    const dynamicBlogEntries: MetadataRoute.Sitemap = posts
+    const dynamicInsightEntries: MetadataRoute.Sitemap = posts
       .filter((post) => post.slug)
       .map((post) => ({
-        url: `${siteConfig.url}/blog/${post.slug}`,
+        url: `${siteConfig.url}/insights/${post.slug}`,
         lastModified: new Date(post.updated_at || post.published_at || now),
         changeFrequency: "monthly",
         priority: 0.75,
       }));
 
-    return [...staticEntries, ...dynamicBlogEntries];
+    return [...staticEntries, ...dynamicInsightEntries];
   } catch {
-    return [...staticEntries, ...fallbackBlogEntries];
+    return [...staticEntries, ...fallbackInsightEntries];
   }
 }

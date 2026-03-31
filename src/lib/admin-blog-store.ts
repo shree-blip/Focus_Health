@@ -1,4 +1,5 @@
 import { BLOG_POSTS } from "./blog-posts";
+import { type InsightCategory, inferInsightCategory } from "./insights";
 
 export type AdminBlogPostStatus = "draft" | "published";
 
@@ -6,6 +7,7 @@ export type AdminBlogPost = {
   id: string;
   title: string;
   slug: string;
+  category: InsightCategory;
   excerpt: string;
   content: string;
   coverImage: string;
@@ -20,13 +22,14 @@ export type AdminBlogPost = {
 
 const BLOG_STORE_KEY = "focus_admin_blog_posts";
 const BLOG_STORE_VERSION_KEY = "focus_admin_blog_version";
-const CURRENT_VERSION = "2";
+const CURRENT_VERSION = "3";
 
 function getSeedPosts(): AdminBlogPost[] {
   return BLOG_POSTS.map((p) => ({
     id: p.id,
     title: p.title,
     slug: p.slug,
+    category: p.category,
     excerpt: p.excerpt,
     content: p.content,
     coverImage: p.coverImage,
@@ -48,6 +51,7 @@ function safeParsePosts(value: string | null): AdminBlogPost[] {
     // Migrate old posts missing new fields
     return parsed.map((p) => ({
       ...p,
+      category: p.category || inferInsightCategory({ title: p.title, excerpt: p.excerpt, content: p.content }),
       coverImage: p.coverImage || "/hero-market.jpg",
       coverImageAlt: p.coverImageAlt || p.title,
       metaTitle: p.metaTitle || p.title,

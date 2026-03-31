@@ -56,16 +56,16 @@ export default function BlogManagementPage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold">Blog Posts</h1>
+            <h1 className="text-3xl font-bold">Insights</h1>
             <p className="text-muted-foreground mt-1">
-              Manage your blog content ({posts.length} posts)
+              Manage news, updates, and thought leadership ({posts.length} items)
             </p>
           </div>
         </div>
         <Button asChild>
           <Link href="/admin/blog/create" className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            New Post
+            New Insight
           </Link>
         </Button>
       </div>
@@ -77,9 +77,9 @@ export default function BlogManagementPage() {
       ) : sorted.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">No blog posts yet</p>
+            <p className="text-muted-foreground mb-4">No insights yet</p>
             <Button asChild variant="outline">
-              <Link href="/admin/blog/create">Create your first post</Link>
+              <Link href="/admin/blog/create">Create your first insight</Link>
             </Button>
           </CardContent>
         </Card>
@@ -105,6 +105,7 @@ export default function BlogManagementPage() {
                       <div className="min-w-0">
                         <h3 className="font-semibold text-lg truncate">{post.title}</h3>
                         <p className="text-sm text-muted-foreground">/{post.slug}</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary mt-1">{post.category}</p>
                         {post.excerpt && (
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{post.excerpt}</p>
                         )}
@@ -140,7 +141,7 @@ export default function BlogManagementPage() {
                       </Button>
                       {post.status === 'published' && (
                         <Button asChild variant="ghost" size="sm">
-                          <Link href={`/blog/${post.slug}`} target="_blank">View</Link>
+                          <Link href={`/insights/${post.slug}`} target="_blank">View</Link>
                         </Button>
                       )}
                       <Button variant="destructive" size="sm" onClick={() => deletePost(post.id)}>

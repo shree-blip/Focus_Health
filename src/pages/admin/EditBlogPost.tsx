@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
+import { INSIGHT_AUTHORS, INSIGHT_CATEGORIES, type InsightAuthor, type InsightCategory } from '@/lib/insights';
 import {
   type AdminBlogPost,
   loadAdminBlogPosts,
@@ -27,6 +28,8 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [category, setCategory] = useState<InsightCategory>('Company News');
+  const [author, setAuthor] = useState<InsightAuthor>('Focus Health Team');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [coverImage, setCoverImage] = useState('');
@@ -46,6 +49,8 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
     }
     setTitle(post.title);
     setSlug(post.slug);
+    setCategory(post.category);
+    setAuthor(post.author || 'Focus Health Team');
     setContent(post.content);
     setExcerpt(post.excerpt);
     setCoverImage(post.coverImage);
@@ -67,7 +72,7 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
 
       const posts = loadAdminBlogPosts();
       if (posts.some((p) => p.slug === slug.trim() && p.id !== postId)) {
-        toast.error('Another post with this slug already exists');
+        toast.error('Another insight with this slug already exists');
         return;
       }
 
@@ -77,12 +82,14 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
               ...p,
               title: title.trim(),
               slug: slug.trim(),
+              category,
               excerpt: excerpt.trim(),
               content,
               coverImage: coverImage.trim() || '/hero-market.jpg',
               coverImageAlt: coverImageAlt.trim() || title.trim(),
               metaTitle: metaTitle.trim() || title.trim(),
               metaDescription: metaDescription.trim() || excerpt.trim(),
+              author: author.trim() || 'Focus Health Team',
               status,
               updatedAt: new Date().toISOString(),
             }
@@ -90,10 +97,10 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
       );
 
       saveAdminBlogPosts(updatedPosts);
-      toast.success('Post updated!');
+      toast.success('Insight updated!');
       router.push('/admin/blog');
     } catch (error) {
-      toast.error('Failed to update post');
+      toast.error('Failed to update insight');
       console.error(error);
     } finally {
       setLoading(false);
@@ -107,10 +114,10 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
           <Link href="/admin/blog" className="text-primary hover:underline">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-3xl font-bold">Post Not Found</h1>
+          <h1 className="text-3xl font-bold">Insight Not Found</h1>
         </div>
-        <p className="text-muted-foreground">This post doesn&apos;t exist or has been deleted.</p>
-        <Button asChild variant="outline"><Link href="/admin/blog">Back to posts</Link></Button>
+        <p className="text-muted-foreground">This insight doesn&apos;t exist or has been deleted.</p>
+        <Button asChild variant="outline"><Link href="/admin/blog">Back to insights</Link></Button>
       </div>
     );
   }
@@ -129,7 +136,7 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
         <Link href="/admin/blog" className="text-primary hover:underline">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-3xl font-bold">Edit Blog Post</h1>
+        <h1 className="text-3xl font-bold">Edit Insight</h1>
       </div>
 
       <Card>
@@ -138,7 +145,7 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
-                <Input id="title" placeholder="Enter post title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                <Input id="title" placeholder="Enter insight title" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="slug">Slug *</Label>
@@ -153,8 +160,26 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <select id="category" value={category} onChange={(e) => setCategory(e.target.value as InsightCategory)} className="w-full px-3 py-2 border border-input rounded-md bg-background">
+                {INSIGHT_CATEGORIES.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="author">Author</Label>
+              <select id="author" value={author} onChange={(e) => setAuthor(e.target.value)} className="w-full px-3 py-2 border border-input rounded-md bg-background">
+                {INSIGHT_AUTHORS.map((option) => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea id="excerpt" placeholder="Brief description" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} />
+              <Textarea id="excerpt" placeholder="Brief summary of the insight" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -189,7 +214,7 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
 
             <div className="space-y-2">
               <Label>Content *</Label>
-              <RichTextEditor value={content} onChange={setContent} placeholder="Write your blog post content here..." />
+              <RichTextEditor value={content} onChange={setContent} placeholder="Write your insight content here..." />
               <p className="text-xs text-muted-foreground">Use H1–H4, Bold, Italic, Links, Images from the toolbar.</p>
             </div>
 
@@ -202,7 +227,7 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
             </div>
 
             <div className="flex gap-4">
-              <Button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update Post'}</Button>
+              <Button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update Insight'}</Button>
               <Button type="button" variant="outline" asChild><Link href="/admin/blog">Cancel</Link></Button>
             </div>
           </form>
