@@ -433,24 +433,7 @@ const LeadershipPage = () => {
       <section className="section-padding bg-background">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Photo */}
-            <ScrollReveal>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="relative"
-              >
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
-                  <img
-                    src={craigProfile.photo}
-                    alt={craigProfile.name}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
-              </motion.div>
-            </ScrollReveal>
-
-            {/* Content */}
+            {/* Content (left) */}
             <ScrollReveal direction="left">
               <div>
                 <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
@@ -502,6 +485,23 @@ const LeadershipPage = () => {
                 </div>
               </div>
             </ScrollReveal>
+
+            {/* Photo (right) */}
+            <ScrollReveal>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="relative order-1 lg:order-2"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                  <img
+                    src={craigProfile.photo}
+                    alt={craigProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+              </motion.div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -510,7 +510,26 @@ const LeadershipPage = () => {
       <section className="section-padding bg-card">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Content (left) */}
+            {/* Photo (left) */}
+            <ScrollReveal>
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                }}
+                className="relative"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                  <img
+                    src={joelProfile.photo}
+                    alt={joelProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+              </motion.div>
+            </ScrollReveal>
+
+            {/* Content (right) */}
             <ScrollReveal direction="left">
               <div>
                 <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
@@ -561,25 +580,6 @@ const LeadershipPage = () => {
                   </Button>
                 </div>
               </div>
-            </ScrollReveal>
-
-            {/* Photo (right) */}
-            <ScrollReveal>
-              <motion.div
-                whileHover={{
-                  scale: 1.02,
-                }}
-                className="relative order-1 lg:order-2"
-              >
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
-                  <img
-                    src={joelProfile.photo}
-                    alt={joelProfile.name}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
-              </motion.div>
             </ScrollReveal>
           </div>
         </div>
