@@ -1,5 +1,25 @@
 "use client";
 
+const craigHeadshot = "https://www.westllp.com/wp-content/uploads/2017/10/Craig-Capua-1.jpg";
+const craigProfile = {
+  name: "Craig Capua",
+  role: "General Counsel",
+  category: "Legal & Corporate Affairs",
+  profileUrl: "https://www.linkedin.com/in/craig-a-capua-9bb6a717/",
+  photo: craigHeadshot,
+  credentials:
+    "Partner at West & Associates, LLP. Admitted to the State Bar of Texas in 1989. J.D., St. Mary’s University; B.A., Southern Methodist University.",
+  bio: "Craig is a first chair trial attorney and trusted business advisor with decades of experience in commercial, corporate, employment, intellectual property, real estate, and personal injury law. He represents local and national clients in complex litigation, corporate transactions, and business disputes. Craig is known for his practical, efficient counsel and has led teams in significant matters before federal, state, and bankruptcy courts in Texas.",
+  highlights: [
+    "Partner at West & Associates, LLP",
+    "30+ years legal experience",
+    "J.D., St. Mary’s University",
+    "B.A., Southern Methodist University",
+    "Texas Bar Foundation Nominee"
+  ],
+};
+
+
 import { motion } from "framer-motion";
 import { ArrowRight, Share2, Quote } from "lucide-react";
 import Link from 'next/link';
@@ -399,6 +419,83 @@ const LeadershipPage = () => {
                     size="icon"
                     onClick={() => handleShare(stevenProfile.profileUrl)}
                     aria-label="Share Dr. Steven Thompson profile"
+                  >
+                    <Share2 size={18} />
+                  </Button>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Leader - Craig Capua */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Photo */}
+            <ScrollReveal>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="relative"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                  <img
+                    src={craigProfile.photo}
+                    alt={craigProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+              </motion.div>
+            </ScrollReveal>
+
+            {/* Content */}
+            <ScrollReveal direction="left">
+              <div>
+                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
+                  {craigProfile.category}
+                </span>
+
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
+                  {craigProfile.name}
+                </h2>
+
+                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{craigProfile.role}</p>
+
+                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
+                    {craigProfile.credentials}
+                  </p>
+                </div>
+
+                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
+                  {craigProfile.bio}
+                </p>
+
+                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
+                  {craigProfile.highlights.map((highlight, i) => (
+                    <span
+                      key={i}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Button asChild className="gap-2">
+                    <a href={craigProfile.profileUrl} target="_blank" rel="noopener">
+                      Connect With Craig
+                      <ArrowRight size={18} />
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare(craigProfile.profileUrl)}
+                    aria-label="Share Craig Capua profile"
                   >
                     <Share2 size={18} />
                   </Button>
