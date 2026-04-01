@@ -27,8 +27,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
-const heroInvestors = "/recent-event-hero.webp";
-const ribbonCutting = "/ERofIrving-GrandOpening.mp4";
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
+
+const heroInvestors = lufkinGrandOpeningMedia.heroDesktop;
+const heroInvestorsMobile = lufkinGrandOpeningMedia.heroMobile;
+const ribbonCutting = lufkinGrandOpeningMedia.videoDesktop;
 
 const valueProps = [
   {
@@ -119,7 +122,11 @@ const Investors = () => {
       {/* Hero Section */}
       <section className="relative -mt-[100px] min-h-[calc(90vh+200px)] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat sm:hidden"
+          style={{ backgroundImage: `url(${heroInvestorsMobile})` }}
+        />
+        <div 
+          className="absolute inset-0 hidden bg-cover bg-center bg-no-repeat sm:block"
           style={{ backgroundImage: `url(${heroInvestors})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background/95" />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { generateSEOMetadata } from "@/lib/metadata";
+import { lufkinGrandOpeningMedia } from "@/lib/lufkin-grand-opening-media";
 import ERofLufkin from "@/legacy-pages/facilities/ERofLufkin";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
 
@@ -8,7 +9,7 @@ export const metadata: Metadata = generateSEOMetadata({
   description:
     "24/7 freestanding emergency room at 501 N Brentwood Dr, Lufkin, TX 75904. Board-certified ER physicians, on-site CT scan, X-ray, lab & pharmacy. Minimal wait times serving Angelina County, Nacogdoches & East Texas.",
   canonicalUrl: "/facilities/er-of-lufkin",
-  ogImage: "/facility-er-lufkin-real.webp",
+  ogImage: lufkinGrandOpeningMedia.heroDesktop,
   keywords: [
     "ER of Lufkin", "Lufkin emergency room", "24/7 ER Lufkin TX",
     "freestanding ER East Texas", "emergency room Lufkin Texas",

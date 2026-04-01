@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { HeroSection } from '@/components/home/HeroSection';
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
 
 // Below-the-fold sections loaded dynamically to reduce initial JS bundle
 const PillarsSection = dynamic(
@@ -130,32 +131,6 @@ const GrandOpeningVideoCard = ({
   );
 };
 
-const GrandOpeningEmbedCard = ({
-  src,
-  title,
-}: {
-  src: string;
-  title: string;
-}) => {
-  return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-base font-semibold text-center text-foreground/80 tracking-wide">{title}</h3>
-      <div className="relative rounded-2xl overflow-hidden border border-border shadow-lg aspect-video bg-muted">
-        <iframe
-          title={title}
-          src={src}
-          loading="lazy"
-          frameBorder={0}
-          referrerPolicy="strict-origin-when-cross-origin"
-          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-          allowFullScreen
-          className="h-full w-full"
-        />
-      </div>
-    </div>
-  );
-};
-
 const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -237,9 +212,10 @@ const Index = () => {
               title="ER of Irving — Grand Opening"
               ariaLabel="ER of Irving grand opening event highlight video"
             />
-            <GrandOpeningEmbedCard
-              src="https://player.vimeo.com/video/1178939041?h=47ffc8be30"
+            <GrandOpeningVideoCard
+              src={lufkinGrandOpeningMedia.videoDesktop}
               title="ER of Lufkin — Grand Opening"
+              ariaLabel="ER of Lufkin grand opening event highlight video"
             />
           </div>
         </div>

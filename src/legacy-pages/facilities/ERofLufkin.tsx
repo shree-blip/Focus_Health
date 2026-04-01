@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useRef, useState } from 'react';
 import { PageHero } from '@/components/ui/PageHero';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
 import Link from 'next/link';
 import {
   Clock, Shield, Stethoscope, Heart, Activity, Baby,
@@ -11,7 +14,9 @@ import {
   HeartPulse, Pill, Microscope, Zap, ExternalLink
 } from 'lucide-react';
 const facilityImage = "/facility-er-lufkin-real.webp";
-const lufkinGrandOpeningEmbedUrl = "https://player.vimeo.com/video/1178939041?h=47ffc8be30";
+const heroImage = lufkinGrandOpeningMedia.heroDesktop;
+const heroImageMobile = lufkinGrandOpeningMedia.heroMobile;
+const grandOpeningGallery = lufkinGrandOpeningMedia.galleryImages;
 
 const BASE_URL = 'https://getfocushealth.com';
 
@@ -143,7 +148,7 @@ const erOfLufkinSchema = {
   "description": "ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care for all ages. Serving Angelina County, Nacogdoches, and East Texas.",
   "url": "https://getfocushealth.com/facilities/er-of-lufkin",
   "telephone": "+1-936-000-0000",
-  "image": `${BASE_URL}/assets/facility-er-lufkin-real.webp`,
+  "image": `${BASE_URL}${heroImage}`,
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "501 N Brentwood Dr",
@@ -202,27 +207,101 @@ const faqSchema = {
   }))
 };
 
-const GrandOpeningEmbedCard = ({
-  src,
+const GrandOpeningVideoCard = ({
+  desktopSrc,
+  mobileSrc,
   title,
+  ariaLabel,
 }: {
-  src: string;
+  desktopSrc: string;
+  mobileSrc: string;
   title: string;
+  ariaLabel: string;
 }) => {
+  const isMobile = useIsMobile();
+  const src = isMobile ? mobileSrc : desktopSrc;
+  const poster = isMobile ? heroImageMobile : heroImage;
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setLoaded(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [loaded, src]);
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !videoRef.current.muted;
+    setMuted(videoRef.current.muted);
+  };
+
   return (
     <div className="flex flex-col gap-3">
       <h3 className="text-base font-semibold text-center text-foreground/80 tracking-wide">{title}</h3>
-      <div className="relative rounded-2xl overflow-hidden border border-border shadow-lg aspect-video bg-muted">
-        <iframe
-          title={title}
-          src={src}
-          loading="lazy"
-          frameBorder={0}
-          referrerPolicy="strict-origin-when-cross-origin"
-          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-          allowFullScreen
-          className="h-full w-full"
-        />
+      <div
+        ref={wrapperRef}
+        className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-muted shadow-lg aspect-[9/16] sm:max-w-none sm:aspect-video group"
+      >
+        {loaded && (
+          <video
+            key={src}
+            ref={videoRef}
+            src={src}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="none"
+            poster={poster}
+            aria-label={ariaLabel}
+            className="h-full w-full object-cover"
+          >
+            <track kind="captions" srcLang="en" label="English" src="/captions/empty.vtt" default />
+          </video>
+        )}
+        {loaded && (
+          <button
+            onClick={toggleMute}
+            aria-label={muted ? 'Unmute video' : 'Mute video'}
+            className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+          >
+            {muted ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -240,11 +319,35 @@ const GrandOpeningSection = () => (
         </h2>
       </div>
 
-      <div className="max-w-4xl mx-auto">
-        <GrandOpeningEmbedCard
-          src={lufkinGrandOpeningEmbedUrl}
+      <div className="max-w-6xl mx-auto">
+        <GrandOpeningVideoCard
+          desktopSrc={lufkinGrandOpeningMedia.videoDesktop}
+          mobileSrc={lufkinGrandOpeningMedia.videoMobile}
           title="ER of Lufkin — Grand Opening"
+          ariaLabel="ER of Lufkin grand opening event highlight video"
         />
+      </div>
+
+      <div className="max-w-6xl mx-auto mt-10 sm:mt-14">
+        <div className="text-center mb-8">
+          <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Opening Day Gallery</p>
+          <p className="text-muted-foreground max-w-3xl mx-auto">
+            A look at the ribbon cutting, the community turnout, and the team that opened ER of Lufkin to East Texas.
+          </p>
+        </div>
+
+        <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
+          {grandOpeningGallery.map((image, index) => (
+            <div key={image} className="mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+              <img
+                src={image}
+                alt={`ER of Lufkin grand opening photo ${index + 1}`}
+                loading="lazy"
+                className="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </section>
@@ -257,7 +360,8 @@ const ERofLufkin = () => {
       <PageHero
         title="ER of Lufkin"
         description="24/7 freestanding emergency room in Lufkin, Texas — board-certified physicians, on-site imaging, and minimal wait times serving Angelina County and East Texas."
-        backgroundImage={facilityImage}
+        backgroundImage={heroImage}
+        mobileBackgroundImage={heroImageMobile}
         primaryCta={{ text: "View All Facilities", link: "/track-record" }}
         secondaryCta={{ text: "Contact Us", link: "/contact" }}
       />

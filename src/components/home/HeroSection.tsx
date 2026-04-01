@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 // Floating particle component
@@ -156,6 +158,7 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   const { mouseX, mouseY } = useMousePosition();
+  const isMobile = useIsMobile();
 
   const springConfig = { stiffness: 100, damping: 30 };
   const transformedX = useTransform(mouseX, (x) => {
@@ -192,8 +195,12 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   );
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
-  const heroVideos = ['/Irving_Wellness/IHW-Event-Horizontal.mp4', '/ERofIrving-GrandOpening.mp4'];
-  const [heroVideoIndex, setHeroVideoIndex] = useState(0);
+  const heroVideoSrc = isMobile
+    ? lufkinGrandOpeningMedia.videoMobile
+    : lufkinGrandOpeningMedia.videoDesktop;
+  const heroPosterSrc = isMobile
+    ? lufkinGrandOpeningMedia.heroMobile
+    : lufkinGrandOpeningMedia.heroDesktop;
 
   // Robust autoplay: handles first load, tab focus, back-nav (bfcache), retries
   useEffect(() => {
@@ -236,29 +243,22 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, []);
-
-  const handleHeroVideoEnded = () => {
-    setHeroVideoIndex((current) => {
-      if (current < heroVideos.length - 1) return current + 1;
-      return current;
-    });
-  };
+  }, [heroVideoSrc]);
 
   return (
     <section className="relative -mt-[100px] min-h-[calc(100vh+200px)] flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
+          key={heroVideoSrc}
           ref={heroVideoRef}
-          src={heroVideos[heroVideoIndex]}
+          src={heroVideoSrc}
           autoPlay
-          loop={heroVideoIndex === heroVideos.length - 1}
+          loop
           muted
           playsInline
           preload="metadata"
-          poster="/recent-event-hero.webp"
-          onEnded={handleHeroVideoEnded}
+          poster={heroPosterSrc}
           aria-hidden="true"
           className="w-full h-full object-cover"
           /* Extra attributes for iOS/Safari autoplay */
