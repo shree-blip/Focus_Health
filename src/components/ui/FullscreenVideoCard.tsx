@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
-import { Maximize2, Play, Volume2, VolumeX, X } from "lucide-react";
+import { Volume2, VolumeX, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -282,18 +282,7 @@ export function FullscreenVideoCard({
             />
           ) : null}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
-
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/90 backdrop-blur-sm">
-            <Maximize2 size={12} />
-            Watch Fullscreen
-          </div>
-
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/15 bg-black/55 text-white shadow-xl backdrop-blur-sm transition-transform duration-300 group-hover:scale-105">
-              <Play size={22} className="ml-1" />
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/15" />
 
           {loaded && (
             <button
