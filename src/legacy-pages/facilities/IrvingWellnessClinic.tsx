@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHero } from '@/components/ui/PageHero';
+import { FullscreenVideoCard } from '@/components/ui/FullscreenVideoCard';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -274,15 +275,14 @@ const IrvingWellnessClinic = () => {
           </ScrollReveal>
 
           <ScrollReveal>
-            <div className="rounded-2xl overflow-hidden border border-border shadow-lg mb-8">
-              <video
-                src={ribbonCuttingVideo}
-                controls
-                playsInline
-                preload="metadata"
-                className="w-full h-auto object-contain"
-              />
-            </div>
+            <FullscreenVideoCard
+              className="mb-8"
+              desktopSrc={ribbonCuttingVideo}
+              title="Irving Health & Wellness — Ribbon Cutting"
+              ariaLabel="Irving Health and Wellness ribbon-cutting event highlight video"
+              showTitle={false}
+              previewVideoClassName="object-contain bg-black"
+            />
           </ScrollReveal>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">

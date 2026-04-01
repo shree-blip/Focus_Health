@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
 import { PageHero } from '@/components/ui/PageHero';
+import { FullscreenVideoCard } from '@/components/ui/FullscreenVideoCard';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -197,89 +197,6 @@ const faqSchema = {
   }))
 };
 
-/* ── Grand Opening Section – two video cards + event photo gallery ── */
-const GrandOpeningVideoCard = ({
-  src,
-  title,
-  ariaLabel,
-}: {
-  src: string;
-  title: string;
-  ariaLabel: string;
-}) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [muted, setMuted] = useState(true);
-
-  useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setLoaded(true); obs.disconnect(); } },
-      { rootMargin: '300px' }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { v.play().catch(() => {}); } else { v.pause(); } },
-      { threshold: 0.2 }
-    );
-    obs.observe(v);
-    return () => obs.disconnect();
-  }, [loaded]);
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !videoRef.current.muted;
-    setMuted(videoRef.current.muted);
-  };
-
-  return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-base font-semibold text-center text-foreground/80 tracking-wide">{title}</h3>
-      <div
-        ref={wrapperRef}
-        className="relative rounded-2xl overflow-hidden border border-border shadow-lg aspect-video bg-muted group"
-      >
-        {loaded && (
-          <video
-            ref={videoRef}
-            src={src}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="none"
-            aria-label={ariaLabel}
-            className="w-full h-full object-cover"
-          >
-            <track kind="captions" srcLang="en" label="English" src="/captions/empty.vtt" default />
-          </video>
-        )}
-        {loaded && (
-          <button
-            onClick={toggleMute}
-            aria-label={muted ? 'Unmute video' : 'Mute video'}
-            className="absolute bottom-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm text-white hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-          >
-            {muted ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-            )}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
-
 const GrandOpeningSection = () => (
   <section className="w-full bg-background py-10 md:py-14">
     <div className="container-focus">
@@ -294,8 +211,8 @@ const GrandOpeningSection = () => (
 
       {/* ER video card */}
       <div className="max-w-4xl mx-auto">
-        <GrandOpeningVideoCard
-          src="/ERofIrving-GrandOpening.mp4"
+        <FullscreenVideoCard
+          desktopSrc="/ERofIrving-GrandOpening.mp4"
           title="ER of Irving — Grand Opening"
           ariaLabel="ER of Irving grand opening event highlight video"
         />

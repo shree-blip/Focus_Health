@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
 import { PageHero } from '@/components/ui/PageHero';
+import { FullscreenVideoCard } from '@/components/ui/FullscreenVideoCard';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { motion } from 'framer-motion';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
 import Link from 'next/link';
 import {
@@ -207,106 +206,6 @@ const faqSchema = {
   }))
 };
 
-const GrandOpeningVideoCard = ({
-  desktopSrc,
-  mobileSrc,
-  title,
-  ariaLabel,
-}: {
-  desktopSrc: string;
-  mobileSrc: string;
-  title: string;
-  ariaLabel: string;
-}) => {
-  const isMobile = useIsMobile();
-  const src = isMobile ? mobileSrc : desktopSrc;
-  const poster = isMobile ? heroImageMobile : heroImage;
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [muted, setMuted] = useState(true);
-
-  useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setLoaded(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '300px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
-      },
-      { threshold: 0.2 }
-    );
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, [loaded, src]);
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !videoRef.current.muted;
-    setMuted(videoRef.current.muted);
-  };
-
-  return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-base font-semibold text-center text-foreground/80 tracking-wide">{title}</h3>
-      <div
-        ref={wrapperRef}
-        className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-muted shadow-lg aspect-[9/16] sm:max-w-none sm:aspect-video group"
-      >
-        {loaded && (
-          <video
-            key={src}
-            ref={videoRef}
-            src={src}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="none"
-            poster={poster}
-            aria-label={ariaLabel}
-            className="h-full w-full object-cover"
-          >
-            <track kind="captions" srcLang="en" label="English" src="/captions/empty.vtt" default />
-          </video>
-        )}
-        {loaded && (
-          <button
-            onClick={toggleMute}
-            aria-label={muted ? 'Unmute video' : 'Mute video'}
-            className="absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
-          >
-            {muted ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-            )}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
-
 const GrandOpeningSection = () => (
   <section className="w-full bg-background py-10 md:py-14">
     <div className="container-focus">
@@ -320,11 +219,15 @@ const GrandOpeningSection = () => (
       </div>
 
       <div className="max-w-6xl mx-auto">
-        <GrandOpeningVideoCard
+        <FullscreenVideoCard
           desktopSrc={lufkinGrandOpeningMedia.videoDesktop}
           mobileSrc={lufkinGrandOpeningMedia.videoMobile}
+          poster={heroImage}
+          mobilePoster={heroImageMobile}
           title="ER of Lufkin — Grand Opening"
           ariaLabel="ER of Lufkin grand opening event highlight video"
+          previewContainerClassName="mx-auto max-w-sm sm:max-w-none"
+          previewAspectClassName="aspect-[9/16] sm:aspect-video"
         />
       </div>
 

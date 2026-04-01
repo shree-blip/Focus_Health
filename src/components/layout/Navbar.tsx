@@ -49,8 +49,8 @@ export const Navbar = () => {
       <div className="container-focus">
         <nav className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
-          <Link href="/" aria-label="Focus Health home" className="flex flex-col gap-0.5 group">
-            <div className="flex items-center gap-3">
+          <Link href="/" aria-label="Focus Health home" className="group">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Image
                 src="/focus-health-icon.png"
                 alt="Focus Health Logo"
@@ -59,12 +59,12 @@ export const Navbar = () => {
                 priority
                 className="h-12 sm:h-16 w-auto group-hover:scale-105 transition-transform"
               />
-              <div className="hidden sm:flex flex-col gap-0.5">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading font-bold text-xl sm:text-2xl text-primary">Focus</span>
-                  <span className="font-heading font-bold text-xl sm:text-2xl text-secondary">Health</span>
+              <div className="flex flex-col gap-0.5 max-w-[140px] sm:max-w-none">
+                <div className="flex items-baseline gap-1 leading-none sm:gap-1.5">
+                  <span className="font-heading font-bold text-sm sm:text-xl lg:text-2xl text-primary whitespace-nowrap">Focus</span>
+                  <span className="font-heading font-bold text-sm sm:text-xl lg:text-2xl text-secondary whitespace-nowrap">Health</span>
                 </div>
-                <div className="text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest text-accent leading-tight">
+                <div className="text-[6px] sm:text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest text-accent leading-tight">
                   Dallas&nbsp;|&nbsp;Houston&nbsp;|&nbsp;Austin
                   <br />
                   Fort Worth&nbsp;|&nbsp;San Antonio
@@ -111,7 +111,7 @@ export const Navbar = () => {
       <div
         className={cn(
           'lg:hidden bg-card border-t border-border overflow-hidden transition-all duration-300',
-          isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          isMobileMenuOpen ? 'max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0'
         )}
       >
         <div className="container-focus py-6 flex flex-col gap-4">
