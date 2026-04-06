@@ -44,8 +44,20 @@ const BusinessOpportunityModal = dynamic(
   { ssr: false }
 );
 
+const nafecTafecLogoCandidates = [
+  '/lufkin-grand-opening/gallery/nafec-tafec-membership.webp',
+  '/nafec-tafec-membership.png',
+  '/nafec-tafec.png',
+  '/NAFEC-TAFEC-membership.png',
+  '/image.png',
+];
+
 const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [nafecLogoIndex, setNafecLogoIndex] = useState(0);
+  const [showNafecLogo, setShowNafecLogo] = useState(true);
+
+  const nafecLogoSrc = nafecTafecLogoCandidates[nafecLogoIndex];
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -144,6 +156,101 @@ const Index = () => {
       <MarketSection onOpenOpportunities={handleOpenModal} />
       <InvestmentSection />
       <SplitCTASection />
+
+      <section className="w-full bg-card py-10 md:py-14">
+        <div className="container-focus">
+          <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-background p-4 sm:p-5">
+            <p className="text-center text-sm sm:text-base font-heading font-bold text-foreground mb-3">
+              Our Emergency Room are member of{' '}
+              <a
+                href="https://nafec.org"
+                target="_blank"
+                rel="dofollow noopener"
+                className="text-primary hover:underline"
+              >
+                NAFEC
+              </a>{' '}
+              and{' '}
+              <a
+                href="https://tafec.org"
+                target="_blank"
+                rel="dofollow noopener"
+                className="text-primary hover:underline"
+              >
+                TAFEC
+              </a>
+              .
+            </p>
+            <div className="flex items-center justify-center">
+              {showNafecLogo ? (
+                <div className="w-full max-w-2xl rounded-xl bg-white border border-border/60 p-2">
+                  <a
+                    href="https://nafec.org"
+                    target="_blank"
+                    rel="dofollow noopener"
+                    aria-label="Visit NAFEC"
+                    className="block"
+                  >
+                    <img
+                      src={nafecLogoSrc}
+                      alt="NAFEC and TAFEC membership logos"
+                      className="w-full h-auto object-contain"
+                      loading="lazy"
+                      onError={() => {
+                        if (nafecLogoIndex < nafecTafecLogoCandidates.length - 1) {
+                          setNafecLogoIndex(nafecLogoIndex + 1);
+                        } else {
+                          setShowNafecLogo(false);
+                        }
+                      }}
+                    />
+                  </a>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Please add the NAFEC/TAFEC logo file to the public folder.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-background py-10 md:py-14">
+        <div className="container-focus">
+          <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-card p-4 sm:p-5">
+            <p className="text-center text-sm sm:text-base font-heading font-bold text-foreground mb-3">
+              We are Partner with{' '}
+              <a
+                href="https://cityambulance.com"
+                target="_blank"
+                rel="dofollow noopener"
+                className="text-primary hover:underline"
+              >
+                City Ambulance
+              </a>
+              .
+            </p>
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-xs rounded-xl bg-white border border-border/60 p-2.5 sm:p-3">
+                <a
+                  href="https://cityambulance.com"
+                  target="_blank"
+                  rel="dofollow noopener"
+                  aria-label="Visit City Ambulance"
+                  className="block"
+                >
+                  <img
+                    src="/city-ambulance-logo.png"
+                    alt="City Ambulance logo"
+                    className="w-full max-h-32 h-auto object-contain mx-auto"
+                    loading="lazy"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <EarlyAccessSection />
       
       {isModalOpen && (
