@@ -13,6 +13,7 @@ const jamieHeadshot = "/jamie-alcantar-headshot.png";
 const anjilaHeadshot = "/anjila-shrestha-headshot.png";
 const julieHeadshot = "/julie-moreno-headshot.png";
 const craigHeadshot = "/Craig-Capua.png";
+const adishHeadshot = "/Adish Dahal.png";
 const heroLeadership = "/hero-leadership.jpg";
 const ganeshHeadshot = "/ganesh-dahal-headshot.png";
 const kalashHeadshot = "/kalash-shrestha-DopvHPEc.png";
@@ -157,6 +158,24 @@ const craigProfile = {
     "J.D., St. Mary’s University",
     "B.A., Southern Methodist University",
     "Texas Bar Foundation Nominee",
+  ],
+};
+const adishProfile = {
+  name: "Adish Dahal",
+  role: "VP of Operations",
+  category: "Operations & Strategic Implementation",
+  profileUrl: "https://www.linkedin.com/in/adish-dahal-a02998180/",
+  photo: adishHeadshot,
+  credentials:
+    "VP of Operations at Focus Health. B.A., San Francisco State University.",
+  quote:
+    "Operational excellence is achieved through meticulous planning, streamlined processes, and empowering teams to execute with precision and accountability.",
+  bio: "Adish brings strategic operational expertise to Focus Health's multi-facility management infrastructure. With a proven track record in healthcare operations optimization, he specializes in scaling operations across multiple locations while maintaining quality standards. His focus on process efficiency, resource management, and operational metrics has driven measurable improvements in facility performance and staff productivity across the organization.",
+  highlights: [
+    "VP of Operations at Focus Health",
+    "Multi-facility operations management",
+    "Process optimization & efficiency",
+    "San Francisco State University, B.A.",
   ],
 };
 const LeadershipPage = () => {
@@ -522,6 +541,92 @@ const LeadershipPage = () => {
                 {/* Decorative element */}
                 <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/10 rounded-2xl -z-10" />
               </motion.div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Leader - Adish */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Photo */}
+            <ScrollReveal>
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                }}
+                className="relative"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+                  <img
+                    src={adishProfile.photo}
+                    alt={adishProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                {/* Decorative element */}
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+              </motion.div>
+            </ScrollReveal>
+
+            {/* Content */}
+            <ScrollReveal direction="left">
+              <div>
+                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
+                  {adishProfile.category}
+                </span>
+
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
+                  {adishProfile.name}
+                </h2>
+
+                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{adishProfile.role}</p>
+
+                <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
+                  {adishProfile.credentials}
+                </p>
+
+                {/* Quote */}
+                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
+                    "{adishProfile.quote}"
+                  </p>
+                </div>
+
+                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
+                  {adishProfile.bio}
+                </p>
+
+                {/* Stats */}
+                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
+                  {adishProfile.highlights.map((highlight, i) => (
+                    <span
+                      key={i}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Button asChild className="gap-2">
+                    <a href={adishProfile.profileUrl} target="_blank" rel="noopener">
+                      Connect With Adish
+                      <ArrowRight size={18} />
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare(adishProfile.profileUrl)}
+                    aria-label="Share Adish Dahal profile"
+                  >
+                    <Share2 size={18} />
+                  </Button>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
