@@ -24,6 +24,10 @@ const arslanHeadshot = "/arslan-iftikhar-headshot.png";
 const bipulHeadshot = "/bipul-maharjan-headshot.png";
 const joelHeadshot = "/joel-lanehart-headshot.png";
 const michaelHeadshot = "/michael-headshot.png";
+const salmonHeadshot = "/Salmon.png";
+const mandeepHeadshot = "/Mandeep.png";
+const samridhiHeadshot = "/samriddhi.png";
+const shreeHeadshot = "/Shree Gauli.png";
 const featuredLeader = {
   name: "Jay Dahal",
   role: "Founder & CEO",
@@ -78,6 +82,18 @@ const teamMembers = [
     category: "Operations",
     photo: michaelHeadshot,
   },
+  {
+    name: "Shree Gauli",
+    role: "Sr. Marketing Officer",
+    category: "Marketing",
+    photo: shreeHeadshot,
+  },
+  {
+    name: "Fatima Salimi",
+    role: "Field Marketing",
+    category: "Marketing",
+    photo: "",
+  },
 ];
 
 const accountingTeam = [
@@ -100,6 +116,24 @@ const accountingTeam = [
     photo: guinnessHeadshot,
   },
   {
+    name: "Bipul Maharjan",
+    role: "Sr. Accounting Officer",
+    category: "Accounting & Billing",
+    photo: bipulHeadshot,
+  },
+  {
+    name: "Salmon",
+    role: "Sr. Accounting Officer",
+    category: "Accounting & Billing",
+    photo: salmonHeadshot,
+  },
+  {
+    name: "Sambridhi",
+    role: "Accountant",
+    category: "Accounting & Billing",
+    photo: samridhiHeadshot,
+  },
+  {
     name: "Bhaskar Rokka",
     role: "Staff Accountant",
     category: "Accounting & Billing",
@@ -112,10 +146,16 @@ const accountingTeam = [
     photo: tikaHeadshot,
   },
   {
-    name: "Bipul Maharjan",
-    role: "Sr. Accounting Officer",
+    name: "Mandeep",
+    role: "Staff Accountant",
     category: "Accounting & Billing",
-    photo: bipulHeadshot,
+    photo: mandeepHeadshot,
+  },
+  {
+    name: "Mohit Luitel",
+    role: "Staff Accountant",
+    category: "Accounting & Billing",
+    photo: "",
   },
 ];
 const rickProfile = {
@@ -636,28 +676,9 @@ const LeadershipPage = () => {
       <section className="section-padding bg-background">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Photo */}
+            {/* Content (left) */}
             <ScrollReveal>
-              <motion.div
-                whileHover={{
-                  scale: 1.02,
-                }}
-                className="relative"
-              >
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
-                  <img
-                    src={joelProfile.photo}
-                    alt={joelProfile.name}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
-              </motion.div>
-            </ScrollReveal>
-
-            {/* Content (right) */}
-            <ScrollReveal direction="left">
-              <div>
+              <div className="order-2 lg:order-1">
                 <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
                   {joelProfile.category}
                 </span>
@@ -706,6 +727,25 @@ const LeadershipPage = () => {
                   </Button>
                 </div>
               </div>
+            </ScrollReveal>
+
+            {/* Photo (right) */}
+            <ScrollReveal direction="left">
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                }}
+                className="relative order-1 lg:order-2"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                  <img
+                    src={joelProfile.photo}
+                    alt={joelProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+              </motion.div>
             </ScrollReveal>
           </div>
         </div>
