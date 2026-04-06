@@ -24,9 +24,9 @@ const arslanHeadshot = "/arslan-iftikhar-headshot.png";
 const bipulHeadshot = "/bipul-maharjan-headshot.png";
 const joelHeadshot = "/joel-lanehart-headshot.png";
 const michaelHeadshot = "/michael-headshot.png";
-const salmonHeadshot = "/Salmon.png";
+const salmonHeadshot = "/salmon.png";
 const mandeepHeadshot = "/Mandeep.png";
-const samridhiHeadshot = "/samriddhi.png";
+const samridhiHeadshot = "/Samriddhi.png";
 const shreeHeadshot = "/Shree Gauli.png";
 const featuredLeader = {
   name: "Jay Dahal",
