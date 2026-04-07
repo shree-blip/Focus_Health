@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Send, Mail, MapPin, Calendar, CheckCircle, Clock, ArrowRight, Building2, Users, TrendingUp, BookOpen } from 'lucide-react';
+import { SubmissionSuccessModal } from '@/components/ui/SubmissionSuccessModal';
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const ContactPage = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,10 +47,7 @@ const ContactPage = () => {
       }
 
       setIsSubmitted(true);
-      toast({
-        title: "Message Sent",
-        description: "We'll review your message and get back to you soon.",
-      });
+      setShowModal(true);
     } catch (error) {
       console.error('Error submitting contact form:', error);
       toast({
@@ -63,6 +62,14 @@ const ContactPage = () => {
 
   return (
     <>
+      <SubmissionSuccessModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="Message Sent!"
+        message="Thank you for reaching out. Our team will review your message and get back to you within 1–2 business days."
+        email={formData.email}
+      />
+
       {/* Hero */}
       <PageHero
         title="Contact Us"

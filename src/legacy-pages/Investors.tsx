@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { SubmissionSuccessModal } from '@/components/ui/SubmissionSuccessModal';
 import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
 
 const heroInvestors = lufkinGrandOpeningMedia.heroDesktop;
@@ -101,6 +102,7 @@ const Investors = () => {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +125,7 @@ const Investors = () => {
       }
 
       setIsSubmitted(true);
-      toast.success('Welcome to the waitlist! Check your inbox for the investor deck.');
+      setShowModal(true);
     } catch (error) {
       console.error('Error submitting investor waitlist:', error);
       toast.error('Failed to join the waitlist. Please try again.');
@@ -134,6 +136,14 @@ const Investors = () => {
 
   return (
     <>
+      <SubmissionSuccessModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="You're on the List!"
+        message="Welcome to the Focus Health investor waitlist. We'll send your investor deck and be in touch with exclusive updates."
+        email={formData.email}
+      />
+
       {/* Hero Section */}
       <section className="relative -mt-[100px] min-h-[calc(90vh+200px)] flex items-center justify-center overflow-hidden">
         <div 

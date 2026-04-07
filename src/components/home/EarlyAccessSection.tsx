@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle } from 'lucide-react';
+import { SubmissionSuccessModal } from '@/components/ui/SubmissionSuccessModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
@@ -18,6 +19,7 @@ export const EarlyAccessSection = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +47,7 @@ export const EarlyAccessSection = () => {
       }
 
       setIsSubmitted(true);
+      setShowModal(true);
     } catch (error) {
       console.error('Error submitting early access form:', error);
     } finally {
@@ -53,6 +56,14 @@ export const EarlyAccessSection = () => {
   };
 
   return (
+    <>
+    <SubmissionSuccessModal
+      open={showModal}
+      onClose={() => setShowModal(false)}
+      title="You're on the List!"
+      message="Thank you for joining our early access waiting list. We'll be in touch soon with updates."
+      email={formData.email}
+    />
     <section className="section-padding bg-background">
       <div className="container-focus">
         <div className="max-w-2xl mx-auto">
@@ -181,5 +192,6 @@ export const EarlyAccessSection = () => {
         </div>
       </div>
     </section>
+    </>
   );
 };

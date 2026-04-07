@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronDown, Sparkles, UserRound } from 'lucide-react';
+import { SubmissionSuccessModal } from '@/components/ui/SubmissionSuccessModal';
 import { getPublishedAdminPosts, type AdminBlogPost } from '@/lib/admin-blog-store';
 import { estimateReadTime, getInsightAuthorImage, INSIGHT_FILTERS, type InsightCategory } from '@/lib/insights';
 
@@ -16,6 +17,7 @@ function NewsletterCapture() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +46,7 @@ function NewsletterCapture() {
         localStorage.setItem(NEWSLETTER_STORE_KEY, JSON.stringify(existing));
       }
       setSubmitted(true);
+      setShowModal(true);
       setError('');
     } catch {
       setError('Failed to subscribe. Please try again.');
@@ -54,9 +57,18 @@ function NewsletterCapture() {
 
   if (submitted) {
     return (
-      <div className="mt-8">
-        <p className="text-white/90 text-sm font-medium">You&apos;re subscribed. We&apos;ll be in touch.</p>
-      </div>
+      <>
+        <SubmissionSuccessModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          title="You're Subscribed!"
+          message="Thanks for subscribing. You'll receive updates on healthcare infrastructure trends and investor education content."
+          email={email}
+        />
+        <div className="mt-8">
+          <p className="text-white/90 text-sm font-medium">You&apos;re subscribed. We&apos;ll be in touch.</p>
+        </div>
+      </>
     );
   }
 

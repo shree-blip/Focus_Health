@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Building2, Users, CheckCircle, Send, TrendingUp, Shield, Stethoscope, MapPin, DollarSign, Briefcase, ArrowRight } from 'lucide-react';
+import { SubmissionSuccessModal } from '@/components/ui/SubmissionSuccessModal';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +54,7 @@ const PartnersPage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const {
     toast
   } = useToast();
@@ -134,6 +136,14 @@ const PartnersPage = () => {
     }
   };
   return <>
+      <SubmissionSuccessModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="Request Received!"
+        message="Thank you for your interest. Our team will review your information and reach out shortly to discuss investment opportunities."
+        email={formData.email}
+      />
+
       {/* Hero */}
       <PageHero title="Business Opportunities" description="Investing in Freestanding Emergency Room Clinics — End to End Turnkey Healthcare Solutions. Buy and own a turn-key ER location or partner with Focus Health for comprehensive management support." backgroundImage={heroPartners} primaryCta={{
       text: "Request More Info",
