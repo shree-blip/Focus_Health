@@ -202,3 +202,98 @@ export function jsonLdScriptProps(data: unknown) {
     },
   };
 }
+
+export function getFAQPageSchema(faqs: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.a,
+      },
+    })),
+  };
+}
+
+export function getHowToSchema({
+  name,
+  description,
+  totalTime,
+  steps,
+}: {
+  name: string;
+  description: string;
+  totalTime?: string; // ISO 8601 duration e.g. "P120D"
+  steps: { name: string; text: string; url?: string }[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name,
+    description,
+    ...(totalTime ? { totalTime } : {}),
+    step: steps.map((step, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: step.name,
+      text: step.text,
+      ...(step.url ? { url: step.url } : {}),
+    })),
+  };
+}
+
+export function getBreadcrumbSchema(
+  items: { name: string; path: string }[],
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: `${siteConfig.url}${item.path}`,
+    })),
+  };
+}
+
+export function getContactPageSchema({
+  path,
+  title,
+  description,
+}: {
+  path: string;
+  title: string;
+  description: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      getOrganizationSchema(),
+      getWebsiteSchema(),
+      {
+        "@type": "ContactPage",
+        "@id": `${siteConfig.url}${path}#webpage`,
+        url: `${siteConfig.url}${path}`,
+        name: title,
+        description,
+        isPartOf: { "@id": `${siteConfig.url}/#website` },
+        about: { "@id": `${siteConfig.url}/#organization` },
+        mainEntity: {
+          "@type": "Organization",
+          "@id": `${siteConfig.url}/#organization`,
+          contactPoint: {
+            "@type": "ContactPoint",
+            email: siteConfig.contact.email,
+            contactType: "customer service",
+            areaServed: "US",
+            availableLanguage: "English",
+          },
+        },
+      },
+    ],
+  };
+}

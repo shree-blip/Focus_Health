@@ -150,7 +150,7 @@ const PartnersPage = () => {
                 Healthcare Real Estate Investment
               </h2>
               <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-                Focus Health is a leading operator in the healthcare infrastructure space. We develop and manage freestanding emergency rooms that deliver comprehensive, fast ER care to Texas communities.
+                Focus Health is a leading operator in the healthcare infrastructure space. We develop and manage freestanding emergency rooms that deliver comprehensive, fast ER care to Texas communities. <Link href="/investors" className="text-primary hover:underline font-medium">View detailed investor information</Link> or <Link href="/market" className="text-primary hover:underline font-medium">explore the Texas market opportunity</Link>.
               </p>
               <div className="bg-primary/5 rounded-2xl p-8 border border-primary/20">
                 <p className="text-xl sm:text-2xl font-heading font-semibold text-foreground">
@@ -382,6 +382,46 @@ const PartnersPage = () => {
 
       {/* Due Diligence Resources */}
       <section className="section-padding bg-card border-t border-border">
+
+      {/* FAQ Section */}
+      </section>
+      <section className="section-padding bg-background" id="faq">
+        <div className="container-focus max-w-4xl">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">FAQ</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Common questions from physicians, investors, and partners considering freestanding ER ownership
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="space-y-6">
+            {[
+              { q: 'How much capital is required to own a freestanding ER?', a: 'Investment levels vary based on the partnership model. Turn-key ownership typically requires $250,000–$5,000,000+ in cash available to invest, depending on the market and facility scope. Financing options are available.' },
+              { q: 'Do I need to be a physician to partner with Focus Health?', a: 'No. Focus Health works with both physician-partners and non-physician investors. We offer distinct partnership tracks for each, with dedicated operational and clinical support.' },
+              { q: 'What partnership models does Focus Health offer?', a: 'We offer two primary models: Turn-Key ER Ownership, where you purchase a fully operational facility, and Management Support, where you own the location with comprehensive management and operational backing from Focus Health.' },
+              { q: 'How long does it take to open a new freestanding ER?', a: 'From site selection to grand opening, our proven process typically takes 90–120 days for facility build-out and launch. Exact timelines depend on permitting, construction scope, and local regulations.' },
+              { q: 'What markets does Focus Health operate in?', a: 'We currently operate facilities in Irving TX, Lufkin TX, and Dallas TX, with a wellness clinic in Naperville IL. Our expansion pipeline targets the DFW metroplex, Houston suburbs, and the Austin–San Antonio corridor.' },
+              { q: 'What support does Focus Health provide after opening?', a: 'Our management support model includes 24/7 clinical operations, staff recruitment and training, compliance and licensing, revenue cycle management, and continuous performance optimisation.' },
+              { q: 'How do I get started?', a: 'Fill out the investment enquiry form on this page, or contact us directly at info@getfocushealth.com. Our team will reach out to discuss opportunities that match your investment goals and involvement preferences.' },
+            ].map((faq, index) => (
+              <ScrollReveal key={index} delay={index * 0.08}>
+                <div className="p-6 rounded-2xl bg-card border border-border">
+                  <h3 className="font-heading font-bold text-lg mb-2">{faq.q}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{faq.a}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Due Diligence & Learn More */}
+      <section className="section-padding bg-card border-t border-border">
         <div className="container-focus">
           <ScrollReveal>
             <div className="text-center mb-12">
@@ -422,7 +462,7 @@ const PartnersPage = () => {
                 <TrendingUp className="w-10 h-10 text-primary mb-4" />
                 <h3 className="font-heading font-bold text-lg mb-3">Track Record</h3>
                 <p className="text-muted-foreground mb-6">
-                  Review our operational outcomes across 24+ successfully managed healthcare locations with proven financial performance.
+                  <Link href="/track-record" className="text-primary hover:underline font-medium">See our portfolio of 24+ facilities</Link> and review operational outcomes with proven financial performance.
                 </p>
                 <Button variant="ghost" size="sm" asChild className="group">
                   <Link href="/track-record" className="flex items-center">
@@ -439,13 +479,13 @@ const PartnersPage = () => {
                 className="p-8 rounded-lg bg-background border border-border hover:border-primary/30 transition-all"
               >
                 <Users className="w-10 h-10 text-primary mb-4" />
-                <h3 className="font-heading font-bold text-lg mb-3">Leadership Team</h3>
+                <h3 className="font-heading font-bold text-lg mb-3">Investor Checklist</h3>
                 <p className="text-muted-foreground mb-6">
-                  Meet the experienced operators and healthcare professionals driving Focus Health's growth and success.
+                  Read <Link href="/insights/investor-checklist-healthcare-infrastructure-operators" className="text-primary hover:underline font-medium">what to look for in a healthcare operator</Link> — a practical checklist for evaluating infrastructure partners.
                 </p>
                 <Button variant="ghost" size="sm" asChild className="group">
-                  <Link href="/leadership" className="flex items-center">
-                    Meet the Team
+                  <Link href="/insights/investor-checklist-healthcare-infrastructure-operators" className="flex items-center">
+                    Read Checklist
                     <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>

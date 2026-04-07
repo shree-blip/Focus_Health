@@ -4,10 +4,16 @@ import { WebPageStructuredData } from '@/components/seo/WebPageStructuredData';
 import BlogListClient from '@/components/blog/BlogListClient';
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: 'Insights',
+  title: 'Healthcare Infrastructure Insights | Focus Health Research & Analysis',
   description:
-    'Focus Health insights, news, and market commentary on freestanding emergency room development, healthcare infrastructure, and operator-led execution.',
+    'Expert insights on freestanding emergency rooms, healthcare investment, and facility operations from the Focus Health platform team.',
   canonicalUrl: '/insights',
+  keywords: [
+    'healthcare infrastructure insights',
+    'freestanding ER industry trends',
+    'healthcare investment research',
+    'emergency room market analysis',
+  ],
 });
 
 export default function InsightsPage() {
@@ -15,8 +21,8 @@ export default function InsightsPage() {
     <>
       <WebPageStructuredData
         path="/insights"
-        title="Insights | Focus Health"
-        description="Focus Health insights, news, and market commentary on freestanding emergency room development, healthcare infrastructure, and operator-led execution."
+        title="Healthcare Infrastructure Insights | Focus Health Research & Analysis"
+        description="Expert insights on freestanding emergency rooms, healthcare investment, and facility operations from the Focus Health platform team."
       />
 
       <BlogListClient />

@@ -4,10 +4,16 @@ import Platform from "@/legacy-pages/Platform";
 import { WebPageStructuredData } from "@/components/seo/WebPageStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Platform",
+  title: "Healthcare Infrastructure Platform | Build, Fund, Operate Model | Focus Health",
   description:
-    "Discover Focus Health's build, fund, and operate platform—an integrated solution for freestanding emergency room development with proven track record of success across 24+ healthcare locations.",
-  canonicalUrl: "/platform"
+    "Discover how Focus Health's build-fund-operate platform delivers turn-key freestanding emergency rooms from site selection to operations.",
+  canonicalUrl: "/platform",
+  keywords: [
+    "healthcare infrastructure platform",
+    "build fund operate healthcare",
+    "freestanding ER development platform",
+    "turn-key emergency room",
+  ],
 });
 
 export default function PlatformPage() {
@@ -15,8 +21,8 @@ export default function PlatformPage() {
     <>
       <WebPageStructuredData
         path="/platform"
-        title="Platform | Focus Health"
-        description="Discover Focus Health's build, fund, and operate platform—an integrated solution for freestanding emergency room development with proven track record of success across 24+ healthcare locations."
+        title="Healthcare Infrastructure Platform | Build, Fund, Operate Model | Focus Health"
+        description="Discover how Focus Health's build-fund-operate platform delivers turn-key freestanding emergency rooms from site selection to operations."
       />
       <Platform />
     </>

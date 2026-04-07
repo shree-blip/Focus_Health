@@ -146,7 +146,6 @@ const erOfLufkinSchema = {
   "alternateName": "ER of Lufkin – Freestanding Emergency Room",
   "description": "ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care for all ages. Serving Angelina County, Nacogdoches, and East Texas.",
   "url": "https://getfocushealth.com/facilities/er-of-lufkin",
-  "telephone": "+1-936-000-0000",
   "image": `${BASE_URL}${heroImage}`,
   "address": {
     "@type": "PostalAddress",

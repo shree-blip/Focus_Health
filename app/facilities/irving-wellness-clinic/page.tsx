@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { generateSEOMetadata } from "@/lib/metadata";
 import IrvingWellnessClinic from "@/legacy-pages/facilities/IrvingWellnessClinic";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
+import { getBreadcrumbSchema, jsonLdScriptProps } from "@/lib/structuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Irving Health & Wellness Clinic | Irving, TX",
@@ -27,10 +29,16 @@ export default function IrvingWellnessClinicPage() {
         name="Irving Health & Wellness Clinic"
         description="Primary care and wellness clinic in Irving, TX operated by Focus Health, serving Las Colinas, Valley Ranch, Coppell, and surrounding communities."
         facilityType="MedicalClinic"
+        streetAddress="8200 N MacArthur Blvd Suite 100"
         city="Irving"
         state="TX"
+        zip="75063"
+        latitude={32.9025}
+        longitude={-96.9790}
+        openingHours="Mo-Fr 08:00-17:00"
         serviceArea={["Irving", "Las Colinas", "Valley Ranch", "Coppell", "Grapevine", "Euless", "Bedford", "Grand Prairie", "Arlington", "Dallas"]}
       />
+      <Script id="structured-data-breadcrumb-irving-wellness" strategy="beforeInteractive" {...jsonLdScriptProps(getBreadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Facilities', path: '/track-record' }, { name: 'Irving Wellness Clinic', path: '/facilities/irving-wellness-clinic' }]))} />
       <IrvingWellnessClinic />
     </>
   );

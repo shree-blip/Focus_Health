@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronDown, Sparkles, UserRound } from 'lucide-react';
@@ -8,6 +8,61 @@ import { getPublishedAdminPosts, type AdminBlogPost } from '@/lib/admin-blog-sto
 import { estimateReadTime, getInsightAuthorImage, INSIGHT_FILTERS, type InsightCategory } from '@/lib/insights';
 
 type InsightFilter = (typeof INSIGHT_FILTERS)[number];
+
+const NEWSLETTER_STORE_KEY = 'focus_newsletter_subscribers';
+
+function NewsletterCapture() {
+  const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    try {
+      const existing = JSON.parse(localStorage.getItem(NEWSLETTER_STORE_KEY) || '[]') as string[];
+      if (!existing.includes(email)) {
+        existing.push(email);
+        localStorage.setItem(NEWSLETTER_STORE_KEY, JSON.stringify(existing));
+      }
+    } catch {
+      // fail silently
+    }
+    setSubmitted(true);
+    setError('');
+  }, [email]);
+
+  if (submitted) {
+    return (
+      <div className="mt-8">
+        <p className="text-white/90 text-sm font-medium">You&apos;re subscribed. We&apos;ll be in touch.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-8 mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
+      <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => { setEmail(e.target.value); setError(''); }}
+        className="flex-1 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm text-white placeholder-white/50 outline-none focus:border-white/40 focus:ring-1 focus:ring-white/30"
+        aria-label="Email address for newsletter"
+      />
+      <button
+        type="submit"
+        className="rounded-xl bg-accent px-6 py-3 text-sm font-bold text-white transition hover:bg-accent/90"
+      >
+        Subscribe
+      </button>
+      {error && <p className="text-red-400 text-xs sm:absolute">{error}</p>}
+    </form>
+  );
+}
 
 function formatLongDate(value: string) {
   return new Date(value).toLocaleDateString('en-US', {
@@ -282,9 +337,13 @@ export default function BlogListClient() {
             </span>
             <h2 className="mt-8 text-4xl font-black tracking-tight sm:text-5xl">Stay Informed</h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/70">
-              Follow Focus Health for monthly updates on healthcare infrastructure, expansion opportunities, and company news across our operating markets.
+              Subscribe for monthly updates on healthcare infrastructure, expansion opportunities, and company news across our operating markets.
             </p>
-            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+
+            {/* Newsletter email capture */}
+            <NewsletterCapture />
+
+            <div className="mt-6 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/contact"
                 className="inline-flex items-center justify-center rounded-2xl bg-white px-8 py-4 text-sm font-bold text-slate-950 transition hover:bg-slate-100"

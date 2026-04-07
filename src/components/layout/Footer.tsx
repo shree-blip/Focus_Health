@@ -11,11 +11,27 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
           {/* Brand */}
           <div className="space-y-3 sm:space-y-4 col-span-2 md:col-span-1">
-            <Link href="/" aria-label="Focus Health home" className="flex items-center gap-2 sm:gap-3">
-              <Image src="/focus-health-icon.png" alt="Focus Health Logo" width={40} height={40} loading="lazy" className="h-8 sm:h-10 w-auto brightness-0 invert" />
-              <div className="flex items-baseline gap-1 sm:gap-1.5">
-                <span className="font-heading font-bold text-base sm:text-lg text-primary-foreground">Focus</span>
-                <span className="font-heading font-bold text-base sm:text-lg text-secondary">Health</span>
+            <Link href="/" aria-label="Focus Health home" className="group">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Image
+                  src="/focus-health-icon.png"
+                  alt="Focus Health Logo"
+                  width={64}
+                  height={64}
+                  loading="lazy"
+                  className="h-12 sm:h-16 w-auto group-hover:scale-105 transition-transform"
+                />
+                <div className="flex flex-col gap-0.5 max-w-[140px] sm:max-w-none">
+                  <div className="flex items-baseline gap-1 leading-none sm:gap-1.5">
+                    <span className="font-heading font-bold text-sm sm:text-xl lg:text-2xl text-primary-foreground whitespace-nowrap">Focus</span>
+                    <span className="font-heading font-bold text-sm sm:text-xl lg:text-2xl text-secondary whitespace-nowrap">Health</span>
+                  </div>
+                  <div className="text-[6px] sm:text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest text-accent leading-tight">
+                    Dallas&nbsp;|&nbsp;Houston&nbsp;|&nbsp;Austin
+                    <br />
+                    Fort Worth&nbsp;|&nbsp;San Antonio
+                  </div>
+                </div>
               </div>
             </Link>
             <p className="text-primary-foreground/80 text-xs sm:text-sm leading-relaxed">

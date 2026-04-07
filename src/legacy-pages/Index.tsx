@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { FullscreenVideoCard } from '@/components/ui/FullscreenVideoCard';
 import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
@@ -252,6 +254,27 @@ const Index = () => {
       </section>
 
       <EarlyAccessSection />
+
+      {/* Insights CTA */}
+      <section className="w-full bg-card py-10 md:py-14 border-t border-border">
+        <div className="container-focus">
+          <div className="max-w-3xl mx-auto text-center">
+            <BookOpen size={32} className="text-primary mx-auto mb-4" />
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-3">
+              Read Our Latest Healthcare Infrastructure Insights
+            </h2>
+            <p className="text-muted-foreground text-lg mb-6">
+              Market analysis, operational updates, and strategic perspectives for healthcare investors and partners.
+            </p>
+            <Link
+              href="/insights"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            >
+              Explore Insights <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
       
       {isModalOpen && (
         <BusinessOpportunityModal 

@@ -1,27 +1,8 @@
 "use client";
 
-const craigHeadshot = "https://www.westllp.com/wp-content/uploads/2017/10/Craig-Capua-1.jpg";
-const craigProfile = {
-  name: "Craig Capua",
-  role: "General Counsel",
-  category: "Legal & Corporate Affairs",
-  profileUrl: "https://www.linkedin.com/in/craig-a-capua-9bb6a717/",
-  photo: craigHeadshot,
-  credentials:
-    "Partner at West & Associates, LLP. Admitted to the State Bar of Texas in 1989. J.D., St. Mary’s University; B.A., Southern Methodist University.",
-  bio: "Craig is a first chair trial attorney and trusted business advisor with decades of experience in commercial, corporate, employment, intellectual property, real estate, and personal injury law. He represents local and national clients in complex litigation, corporate transactions, and business disputes. Craig is known for his practical, efficient counsel and has led teams in significant matters before federal, state, and bankruptcy courts in Texas.",
-  highlights: [
-    "Partner at West & Associates, LLP",
-    "30+ years legal experience",
-    "J.D., St. Mary’s University",
-    "B.A., Southern Methodist University",
-    "Texas Bar Foundation Nominee"
-  ],
-};
-
 
 import { motion } from "framer-motion";
-import { ArrowRight, Share2, Quote } from "lucide-react";
+import { ArrowRight, Share2, Quote, Link2 } from "lucide-react";
 import Link from 'next/link';
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Button } from "@/components/ui/button";
@@ -32,6 +13,12 @@ const jayHeadshot = "/jay-dahal-headshot.png";
 const jamieHeadshot = "/jamie-alcantar-headshot.png";
 const anjilaHeadshot = "/anjila-shrestha-headshot.png";
 const julieHeadshot = "/julie-moreno-headshot.png";
+const craigHeadshot = "/Craig-Capua.png";
+const adishHeadshot = "/Adish Dahal.png";
+const shreeHeadshot = "/Shree Gauli.png";
+const salmonHeadshot = "/salmon.png";
+const samriddhiHeadshot = "/Samriddhi.png";
+const mandeepHeadshot = "/Mandeep.png";
 const heroLeadership = "/hero-leadership.jpg";
 const ganeshHeadshot = "/ganesh-dahal-headshot.png";
 const kalashHeadshot = "/kalash-shrestha-DopvHPEc.png";
@@ -96,6 +83,14 @@ const teamMembers = [
     category: "Operations",
     photo: michaelHeadshot,
   },
+  {
+    name: "Shree Gauli",
+    role: "Sr. Marketing Officer",
+    category: "Marketing",
+    photo: shreeHeadshot,
+    websiteUrl: "https://www.shreegauli.com/",
+    linkedinUrl: "https://www.linkedin.com/in/gauli/",
+  },
 ];
 
 const accountingTeam = [
@@ -135,6 +130,24 @@ const accountingTeam = [
     category: "Accounting & Billing",
     photo: bipulHeadshot,
   },
+  {
+    name: "Salmon",
+    role: "Sr. Accounting Officer",
+    category: "Accounting & Billing",
+    photo: salmonHeadshot,
+  },
+  {
+    name: "Sambridhi",
+    role: "Accountant",
+    category: "Accounting & Billing",
+    photo: samriddhiHeadshot,
+  },
+  {
+    name: "Mandeep",
+    role: "Staff Accountant",
+    category: "Accounting & Billing",
+    photo: mandeepHeadshot,
+  },
 ];
 const rickProfile = {
   name: "Rick Leonard",
@@ -157,6 +170,44 @@ const stevenProfile = {
     "Emergency medicine-focused physician leader with 31+ years of clinical experience, a medical degree from New York Medical College (1994), and extensive ER practice leadership in Dallas.",
   bio: "Dr. Thompson brings decades of emergency care experience to Focus Health's leadership team. As Chief Medical Officer, he leads ER physician alignment, clinical quality, and rapid-response care standards across Focus Health's freestanding emergency room platform.",
   highlights: ["31+ years in medicine", "Emergency care leadership", "New York Medical College, 1994", "Dallas ER practice experience"],
+};
+const craigProfile = {
+  name: "Craig Capua",
+  role: "General Counsel",
+  category: "Legal & Corporate Affairs",
+  profileUrl: "https://www.westllp.com/attorneys/craig-capua/",
+  linkedinUrl: "https://www.linkedin.com/in/craig-a-capua-9bb6a717/",
+  photo: craigHeadshot,
+  credentials:
+    "Partner at West & Associates, LLP. Admitted to the State Bar of Texas in 1989. J.D., St. Mary's University; B.A., Southern Methodist University.",
+  quote:
+    "Effective legal counsel is about enabling growth while safeguarding the organization's mission and integrity at every step.",
+  bio: "Craig is a first chair trial attorney and trusted business advisor with decades of experience in commercial, corporate, employment, intellectual property, real estate, and personal injury law. He represents local and national clients in complex litigation, corporate transactions, and business disputes. Craig is known for his practical, efficient counsel and has led teams in significant matters before federal, state, and bankruptcy courts in Texas.",
+  highlights: [
+    "Partner at West & Associates, LLP",
+    "30+ years legal experience",
+    "J.D., St. Mary's University",
+    "B.A., Southern Methodist University",
+    "Texas Bar Foundation Nominee",
+  ],
+};
+const adishProfile = {
+  name: "Adish Dahal",
+  role: "VP of Operations",
+  category: "Operations & Strategic Implementation",
+  profileUrl: "https://www.linkedin.com/in/adish-dahal-a02998180/",
+  photo: adishHeadshot,
+  credentials:
+    "VP of Operations at Focus Health. B.A., San Francisco State University.",
+  quote:
+    "Operational excellence is achieved through meticulous planning, streamlined processes, and empowering teams to execute with precision and accountability.",
+  bio: "Adish brings strategic operational expertise to Focus Health's multi-facility management infrastructure. With a proven track record in healthcare operations optimization, he specializes in scaling operations across multiple locations while maintaining quality standards. His focus on process efficiency, resource management, and operational metrics has driven measurable improvements in facility performance and staff productivity across the organization.",
+  highlights: [
+    "VP of Operations at Focus Health",
+    "Multi-facility operations management",
+    "Process optimization & efficiency",
+    "San Francisco State University, B.A.",
+  ],
 };
 const LeadershipPage = () => {
   const handleShare = (url: string) => {
@@ -430,13 +481,13 @@ const LeadershipPage = () => {
       </section>
 
       {/* Featured Leader - Craig Capua */}
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-card">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Content (left) */}
-            <ScrollReveal direction="left">
-              <div>
-                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
+            {/* Content - Left side for Craig */}
+            <ScrollReveal>
+              <div className="order-2 lg:order-1">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold uppercase tracking-wider mb-6">
                   {craigProfile.category}
                 </span>
 
@@ -444,11 +495,16 @@ const LeadershipPage = () => {
                   {craigProfile.name}
                 </h2>
 
-                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{craigProfile.role}</p>
+                <p className="text-lg sm:text-xl text-accent font-medium mb-6 sm:mb-8">{craigProfile.role}</p>
 
-                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
+                  {craigProfile.credentials}
+                </p>
+
+                {/* Quote */}
+                <div className="border-l-4 border-accent pl-4 sm:pl-6 mb-6 sm:mb-8">
                   <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
-                    {craigProfile.credentials}
+                    &quot;{craigProfile.quote}&quot;
                   </p>
                 </div>
 
@@ -456,11 +512,12 @@ const LeadershipPage = () => {
                   {craigProfile.bio}
                 </p>
 
+                {/* Stats */}
                 <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
                   {craigProfile.highlights.map((highlight, i) => (
                     <span
                       key={i}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-background border border-border rounded-lg text-xs sm:text-sm font-medium"
                     >
                       {highlight}
                     </span>
@@ -468,12 +525,24 @@ const LeadershipPage = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Button asChild className="gap-2">
-                    <a href={craigProfile.profileUrl} target="_blank" rel="noopener">
+                  <Button variant="accent" asChild className="gap-2">
+                    <a href={craigProfile.profileUrl} target="_blank" rel="dofollow noopener">
                       Connect With Craig
                       <ArrowRight size={18} />
                     </a>
                   </Button>
+                  <a
+                    href={craigProfile.linkedinUrl}
+                    target="_blank"
+                    rel="dofollow noopener"
+                    aria-label="Craig Capua LinkedIn profile"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-transform hover:scale-110"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 72 72">
+                      <rect width="72" height="72" rx="8" fill="#0A66C2" />
+                      <path d="M20.5 29h6.8v21.8h-6.8V29zm3.4-10.8c2.2 0 3.9 1.8 3.9 3.9 0 2.2-1.7 3.9-3.9 3.9-2.2 0-3.9-1.8-3.9-3.9 0-2.2 1.7-3.9 3.9-3.9zM33.3 29h6.5v3h.1c.9-1.7 3.1-3.5 6.4-3.5 6.8 0 8.1 4.5 8.1 10.3v11.9h-6.8V40.6c0-2.4 0-5.6-3.4-5.6-3.4 0-3.9 2.7-3.9 5.4v10.4h-6.8V29z" fill="#fff" />
+                    </svg>
+                  </a>
                   <Button
                     variant="outline"
                     size="icon"
@@ -486,21 +555,109 @@ const LeadershipPage = () => {
               </div>
             </ScrollReveal>
 
-            {/* Photo (right) */}
-            <ScrollReveal>
+            {/* Photo - Right side for Craig */}
+            <ScrollReveal direction="left">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{
+                  scale: 1.02,
+                }}
                 className="relative order-1 lg:order-2"
               >
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-accent/10 to-primary/10">
                   <img
                     src={craigProfile.photo}
                     alt={craigProfile.name}
                     className="w-full h-full object-cover object-top"
                   />
                 </div>
+                {/* Decorative element */}
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/10 rounded-2xl -z-10" />
+              </motion.div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Leader - Adish Dahal */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Photo */}
+            <ScrollReveal>
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                }}
+                className="relative"
+              >
+                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+                  <img
+                    src={adishProfile.photo}
+                    alt={adishProfile.name}
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
                 <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
               </motion.div>
+            </ScrollReveal>
+
+            {/* Content */}
+            <ScrollReveal direction="left">
+              <div>
+                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
+                  {adishProfile.category}
+                </span>
+
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-2">
+                  {adishProfile.name}
+                </h2>
+
+                <p className="text-lg sm:text-xl text-primary font-medium mb-6 sm:mb-8">{adishProfile.role}</p>
+
+                <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
+                  {adishProfile.credentials}
+                </p>
+
+                {/* Quote */}
+                <div className="border-l-4 border-primary pl-4 sm:pl-6 mb-6 sm:mb-8">
+                  <p className="text-muted-foreground italic text-base sm:text-lg leading-relaxed">
+                    &quot;{adishProfile.quote}&quot;
+                  </p>
+                </div>
+
+                <p className="text-muted-foreground leading-relaxed mb-6 sm:mb-8 text-sm sm:text-base">
+                  {adishProfile.bio}
+                </p>
+
+                {/* Stats */}
+                <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8">
+                  {adishProfile.highlights.map((highlight, i) => (
+                    <span
+                      key={i}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium"
+                    >
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Button asChild className="gap-2">
+                    <a href={adishProfile.profileUrl} target="_blank" rel="noopener">
+                      Connect With Adish
+                      <ArrowRight size={18} />
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare(adishProfile.profileUrl)}
+                    aria-label="Share Adish Dahal profile"
+                  >
+                    <Share2 size={18} />
+                  </Button>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
         </div>
@@ -634,7 +791,34 @@ const LeadershipPage = () => {
 
                   {/* Content */}
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-xl font-heading font-bold text-white mt-1">{member.name}</h3>
+                    <h3 className="text-xl font-heading font-bold text-white mt-1 relative">
+                      <span className="whitespace-nowrap">{member.name}</span>
+                      {member.name === "Shree Gauli" && (
+                        <span className="absolute right-0 top-1/2 -translate-y-1/2 hidden group-hover:inline-flex items-center gap-2">
+                          <a
+                            href={member.websiteUrl}
+                            target="_blank"
+                            rel="dofollow noopener"
+                            aria-label="Connect with Shree Gauli"
+                            className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-background/95 text-primary hover:scale-105 transition-transform"
+                          >
+                            <Link2 size={12} />
+                          </a>
+                          <a
+                            href={member.linkedinUrl}
+                            target="_blank"
+                            rel="dofollow noopener"
+                            aria-label="Shree Gauli LinkedIn profile"
+                            className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-background/95 hover:scale-105 transition-transform"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 72 72">
+                              <rect width="72" height="72" rx="8" fill="#0A66C2" />
+                              <path d="M20.5 29h6.8v21.8h-6.8V29zm3.4-10.8c2.2 0 3.9 1.8 3.9 3.9 0 2.2-1.7 3.9-3.9 3.9-2.2 0-3.9-1.8-3.9-3.9 0-2.2 1.7-3.9 3.9-3.9zM33.3 29h6.5v3h.1c.9-1.7 3.1-3.5 6.4-3.5 6.8 0 8.1 4.5 8.1 10.3v11.9h-6.8V40.6c0-2.4 0-5.6-3.4-5.6-3.4 0-3.9 2.7-3.9 5.4v10.4h-6.8V29z" fill="#fff" />
+                            </svg>
+                          </a>
+                        </span>
+                      )}
+                    </h3>
                     <p className="text-white/70 text-sm">{member.role}</p>
                   </div>
                 </motion.div>

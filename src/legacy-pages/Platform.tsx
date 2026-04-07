@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { BuildFundOperateLoop } from '@/components/ui/BuildFundOperateLoop';
-import { RefreshCw, Building, Zap, Users, LineChart, FileText, ArrowRight } from 'lucide-react';
+import { RefreshCw, Building, Zap, Users, LineChart, FileText, ArrowRight, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { PageHero } from '@/components/ui/PageHero';
@@ -117,6 +117,89 @@ const PlatformPage = () => {
                 </motion.div>
               </ScrollReveal>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Deep Dive */}
+      <section className="section-padding bg-card">
+        <div className="container-focus">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <ScrollReveal>
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-6">
+                  How the Platform Works
+                </h2>
+                <div className="space-y-4 text-muted-foreground leading-relaxed">
+                  <p>
+                    The Focus Health platform integrates three core disciplines — <strong className="text-foreground">facility development</strong>, <strong className="text-foreground">capital structuring</strong>, and <strong className="text-foreground">24/7 clinical operations</strong> — into a single repeatable system. Rather than cobbling together separate contractors, consultants, and management companies, we control every stage from site selection to ongoing optimisation.
+                  </p>
+                  <p>
+                    This approach eliminates the coordination failures that plague fragmented healthcare development. Our standardised build specs keep construction timelines predictable, our in-house credentialing pipeline ensures facilities are fully staffed before day one, and our operating playbook means every new location benefits from the lessons of the previous 24+.
+                  </p>
+                  <p>
+                    <Link href="/insights/focus-health-build-fund-operate-platform" className="text-primary hover:underline font-medium">Learn more about the build-fund-operate model</Link> or <Link href="/our-process" className="text-primary hover:underline font-medium">view the full development process</Link>.
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15}>
+              <div className="space-y-4">
+                {[
+                  { step: 'Build', desc: 'Site selection, facility design, construction management, and regulatory compliance — all handled in-house with standardised specs.' },
+                  { step: 'Fund', desc: 'Transparent underwriting, milestone-based capital deployment, and investor reporting from pre-construction through stabilisation.' },
+                  { step: 'Operate', desc: '24/7 staffing, clinical quality assurance, revenue cycle management, and continuous performance optimisation.' },
+                ].map((phase, i) => (
+                  <div key={phase.step} className="flex gap-4 p-5 rounded-xl bg-background border border-border">
+                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold flex-shrink-0">
+                      {i + 1}
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-semibold mb-1">{phase.step}</h3>
+                      <p className="text-muted-foreground text-sm">{phase.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Related Insights */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">Platform Insights</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Explore our insights library for deeper analysis on healthcare infrastructure
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {[
+              { title: 'How Focus Health Builds, Funds, and Operates', href: '/insights/focus-health-build-fund-operate-platform', desc: 'A detailed look at how our integrated model eliminates fragmented execution and accelerates facility launches.' },
+              { title: 'Operational Readiness: 90 Days Before Opening', href: '/insights/operational-readiness-90-days-before-facility-opening', desc: 'From staffing and training to systems testing — what happens in the critical final months before launch.' },
+            ].map((article, index) => (
+              <ScrollReveal key={article.href} delay={index * 0.1}>
+                <Link href={article.href} className="block p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group h-full">
+                  <BookOpen size={20} className="text-primary mb-3" />
+                  <h3 className="font-heading font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{article.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{article.desc}</p>
+                  <span className="inline-flex items-center gap-1 mt-3 text-sm text-primary font-medium">Read Article <ArrowRight size={14} /></span>
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Button variant="outline" asChild>
+              <Link href="/insights" className="gap-2">
+                Explore our insights library <ArrowRight size={16} />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

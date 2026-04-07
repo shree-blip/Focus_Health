@@ -142,7 +142,6 @@ const erOfIrvingSchema = {
   "alternateName": "ER of Irving – Freestanding Emergency Room",
   "description": "ER of Irving is a 24/7 freestanding emergency room in Irving, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care for all ages. Serving Las Colinas, Valley Ranch, Coppell, and greater Dallas-Fort Worth.",
   "url": `${BASE_URL}/facilities/er-of-irving`,
-  "telephone": "+1-972-000-0000",
   "image": `${BASE_URL}/assets/facility-er-irving-real.webp`,
   "address": {
     "@type": "PostalAddress",

@@ -21,6 +21,7 @@ const routes = [
   "/facilities/er-of-white-rock",
   "/facilities/irving-wellness-clinic",
   "/facilities/naperville-wellness-clinic",
+  "/track-record/first-choice-emergency-room",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

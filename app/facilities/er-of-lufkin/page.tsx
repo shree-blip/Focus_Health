@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { generateSEOMetadata } from "@/lib/metadata";
 import { lufkinGrandOpeningMedia } from "@/lib/lufkin-grand-opening-media";
 import ERofLufkin from "@/legacy-pages/facilities/ERofLufkin";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
+import { getBreadcrumbSchema, jsonLdScriptProps } from "@/lib/structuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "ER of Lufkin | 24/7 Emergency Room in Lufkin, TX",
@@ -36,6 +38,7 @@ export default function ERofLufkinPage() {
         openingHours="Mo-Su 00:00-23:59"
         serviceArea={["Lufkin", "Nacogdoches", "Livingston", "Jasper", "Crockett", "Center", "Diboll", "Hudson", "Huntington", "Angelina County"]}
       />
+      <Script id="structured-data-breadcrumb-er-lufkin" strategy="beforeInteractive" {...jsonLdScriptProps(getBreadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Facilities', path: '/track-record' }, { name: 'ER of Lufkin', path: '/facilities/er-of-lufkin' }]))} />
       <ERofLufkin />
     </>
   );

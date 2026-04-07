@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { Send, Mail, MapPin, Calendar, CheckCircle } from 'lucide-react';
+import { Send, Mail, MapPin, Calendar, CheckCircle, Clock, ArrowRight, Building2, Users, TrendingUp, BookOpen } from 'lucide-react';
+import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -103,8 +104,21 @@ const ContactPage = () => {
                       <MapPin size={22} className="text-primary hidden sm:block" />
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Location</p>
-                      <p className="font-medium text-sm sm:text-base">Texas, USA</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Headquarters</p>
+                      <p className="font-medium text-sm sm:text-base">3001 Skyway Cir N</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Irving, TX 75038</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Clock size={18} className="text-primary sm:hidden" />
+                      <Clock size={22} className="text-primary hidden sm:block" />
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Office Hours</p>
+                      <p className="font-medium text-sm sm:text-base">Mon–Fri 9:00 AM – 5:00 PM CT</p>
+                      <p className="text-xs text-muted-foreground">ER facilities open 24/7/365</p>
                     </div>
                   </div>
 
@@ -226,6 +240,66 @@ const ContactPage = () => {
                   </div>
                 </form>
               )}
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Links */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-3">Looking for Something Specific?</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Browse the links below to find the information you need, or use the form above to get in touch directly.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <ScrollReveal delay={0}>
+              <Link href="/partners" className="block p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group">
+                <Building2 size={24} className="text-primary mb-3" />
+                <h3 className="font-heading font-semibold mb-1 group-hover:text-primary transition-colors">Interested in partnering with us?</h3>
+                <p className="text-muted-foreground text-sm">Explore ownership and management support models for freestanding ERs.</p>
+                <span className="inline-flex items-center gap-1 mt-3 text-sm text-primary font-medium">
+                  Business Opportunities <ArrowRight size={14} />
+                </span>
+              </Link>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.1}>
+              <Link href="/investors" className="block p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group">
+                <TrendingUp size={24} className="text-primary mb-3" />
+                <h3 className="font-heading font-semibold mb-1 group-hover:text-primary transition-colors">Looking for investor information?</h3>
+                <p className="text-muted-foreground text-sm">Request the investor deck and learn about our current capital raise.</p>
+                <span className="inline-flex items-center gap-1 mt-3 text-sm text-primary font-medium">
+                  Investor Relations <ArrowRight size={14} />
+                </span>
+              </Link>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.2}>
+              <Link href="/insights" className="block p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group">
+                <BookOpen size={24} className="text-primary mb-3" />
+                <h3 className="font-heading font-semibold mb-1 group-hover:text-primary transition-colors">Read our latest insights</h3>
+                <p className="text-muted-foreground text-sm">Market analysis, operational updates, and healthcare infrastructure trends.</p>
+                <span className="inline-flex items-center gap-1 mt-3 text-sm text-primary font-medium">
+                  View Insights <ArrowRight size={14} />
+                </span>
+              </Link>
+            </ScrollReveal>
+
+            <ScrollReveal delay={0.3}>
+              <Link href="/leadership" className="block p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group">
+                <Users size={24} className="text-primary mb-3" />
+                <h3 className="font-heading font-semibold mb-1 group-hover:text-primary transition-colors">Meet our leadership team</h3>
+                <p className="text-muted-foreground text-sm">The experienced operators and healthcare professionals behind Focus Health.</p>
+                <span className="inline-flex items-center gap-1 mt-3 text-sm text-primary font-medium">
+                  Leadership <ArrowRight size={14} />
+                </span>
+              </Link>
             </ScrollReveal>
           </div>
         </div>

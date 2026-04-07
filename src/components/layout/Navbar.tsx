@@ -15,6 +15,7 @@ const navLinks = [
   { href: '/track-record', label: 'Track Record' },
   { href: '/leadership', label: 'Leadership' },
   { href: '/partners', label: 'Partners' },
+  { href: '/investors', label: 'Investors' },
   { href: '/insights', label: 'Insights' },
   { href: '/contact', label: 'Contact' },
 ];

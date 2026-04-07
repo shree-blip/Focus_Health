@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { generateSEOMetadata } from "@/lib/metadata";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
+import { getBreadcrumbSchema, jsonLdScriptProps } from "@/lib/structuredData";
 import FirstChoiceERDetail from "@/legacy-pages/facilities/FirstChoiceERDetail";
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -34,6 +36,7 @@ export default function FirstChoiceEmergencyRoomPage() {
         openingHours="Mo-Su 00:00-23:59"
         serviceArea={["Houston", "West Houston", "Energy Corridor", "Briar Forest", "Eldridge Parkway"]}
       />
+      <Script id="structured-data-breadcrumb-first-choice-er" strategy="beforeInteractive" {...jsonLdScriptProps(getBreadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Track Record', path: '/track-record' }, { name: 'First Choice ER', path: '/track-record/first-choice-emergency-room' }]))} />
       <FirstChoiceERDetail />
     </>
   );

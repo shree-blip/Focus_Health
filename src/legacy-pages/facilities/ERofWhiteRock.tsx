@@ -141,7 +141,6 @@ const erOfWhiteRockSchema = {
   "alternateName": "ER of White Rock – Freestanding Emergency Room",
   "description": "ER of White Rock is a 24/7 freestanding emergency room in Dallas, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care. Serving White Rock Lake, Lakewood, Casa Linda, Lake Highlands & East Dallas.",
   "url": `${BASE_URL}/facilities/er-of-white-rock`,
-  "telephone": "+1-214-000-0000",
   "image": `${BASE_URL}/assets/facility-er-whiterock.webp`,
   "address": {
     "@type": "PostalAddress",
