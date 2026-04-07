@@ -195,12 +195,35 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   );
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
-  const heroVideoSrc = isMobile
-    ? lufkinGrandOpeningMedia.videoMobile
-    : lufkinGrandOpeningMedia.videoDesktop;
-  const heroPosterSrc = isMobile
-    ? lufkinGrandOpeningMedia.heroMobile
-    : lufkinGrandOpeningMedia.heroDesktop;
+  const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0);
+
+  const heroVideoPlaylist = useMemo(
+    () => [
+      {
+        src: isMobile ? lufkinGrandOpeningMedia.videoMobile : lufkinGrandOpeningMedia.videoDesktop,
+        poster: isMobile ? lufkinGrandOpeningMedia.heroMobile : lufkinGrandOpeningMedia.heroDesktop,
+      },
+      {
+        src: '/Irving_Wellness/IHW-Event-Horizontal.mp4',
+        poster: isMobile ? lufkinGrandOpeningMedia.heroMobile : lufkinGrandOpeningMedia.heroDesktop,
+      },
+      {
+        src: '/ERofIrving-GrandOpening.mp4',
+        poster: isMobile ? lufkinGrandOpeningMedia.heroMobile : lufkinGrandOpeningMedia.heroDesktop,
+      },
+    ],
+    [isMobile],
+  );
+
+  const currentHeroVideo = heroVideoPlaylist[currentHeroVideoIndex];
+
+  const handleHeroVideoEnded = () => {
+    setCurrentHeroVideoIndex((previousIndex) => (previousIndex + 1) % heroVideoPlaylist.length);
+  };
+
+  useEffect(() => {
+    setCurrentHeroVideoIndex(0);
+  }, [isMobile]);
 
   // Robust autoplay: handles first load, tab focus, back-nav (bfcache), retries
   useEffect(() => {
@@ -243,22 +266,22 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [heroVideoSrc]);
+  }, [currentHeroVideo.src]);
 
   return (
     <section className="relative -mt-[100px] min-h-[calc(100vh+200px)] flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
-          key={heroVideoSrc}
+          key={currentHeroVideo.src}
           ref={heroVideoRef}
-          src={heroVideoSrc}
+          src={currentHeroVideo.src}
           autoPlay
-          loop
           muted
           playsInline
           preload="metadata"
-          poster={heroPosterSrc}
+          poster={currentHeroVideo.poster}
+          onEnded={handleHeroVideoEnded}
           aria-hidden="true"
           className="w-full h-full object-cover"
           /* Extra attributes for iOS/Safari autoplay */
