@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { siteConfig } from "@/lib/metadata";
 
 type EmailField = {
@@ -232,36 +232,39 @@ export function buildSubmissionEmailPreviews(payload: SubmissionEmailPayload) {
 }
 
 export async function sendSubmissionEmails(payload: SubmissionEmailPayload) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL;
-  const infoEmail = process.env.RESEND_INFO_EMAIL || "info@getfocushealth.com";
+  const smtpUser = process.env.SMTP_USER;          // e.g. yourname@gmail.com
+  const smtpPass = process.env.SMTP_APP_PASSWORD;  // Gmail App Password (16 chars)
+  const fromEmail = process.env.SMTP_FROM_EMAIL || smtpUser; // Display "from" address
+  const infoEmail = process.env.SMTP_INFO_EMAIL || "info@getfocushealth.com";
   const additionalNotificationRecipients = ["jaya.r.dahal@focusyourfinance.com"];
   const notificationRecipients = Array.from(new Set([infoEmail, ...additionalNotificationRecipients]));
 
-  if (!apiKey) {
-    throw new Error("Missing RESEND_API_KEY");
+  if (!smtpUser || !smtpPass) {
+    throw new Error("Missing SMTP_USER or SMTP_APP_PASSWORD environment variables");
   }
 
-  if (!fromEmail) {
-    throw new Error("Missing RESEND_FROM_EMAIL");
-  }
-
-  const resend = new Resend(apiKey);
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: smtpUser,
+      pass: smtpPass,
+    },
+  });
 
   const userHtml = buildUserConfirmationHtml(payload);
   const adminHtml = buildAdminNotificationHtml(payload);
 
   const [userResult, adminResult] = await Promise.all([
-    resend.emails.send({
-      from: fromEmail,
-      to: [payload.userEmail],
+    transporter.sendMail({
+      from: `"Focus Health" <${fromEmail}>`,
+      to: payload.userEmail,
       subject: payload.userSubject,
       html: userHtml,
       replyTo: infoEmail,
     }),
-    resend.emails.send({
-      from: fromEmail,
-      to: notificationRecipients,
+    transporter.sendMail({
+      from: `"Focus Health" <${fromEmail}>`,
+      to: notificationRecipients.join(", "),
       subject: payload.adminSubject,
       html: adminHtml,
       replyTo: payload.userEmail,
@@ -269,7 +272,7 @@ export async function sendSubmissionEmails(payload: SubmissionEmailPayload) {
   ]);
 
   return {
-    userEmailId: userResult.data?.id,
-    adminEmailId: adminResult.data?.id,
+    userMessageId: userResult.messageId,
+    adminMessageId: adminResult.messageId,
   };
 }
