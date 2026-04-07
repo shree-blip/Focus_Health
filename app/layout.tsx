@@ -86,6 +86,9 @@ export const metadata: Metadata = {
     "ai-content-declaration": "human-created",
     generator: "Focus Health Platform",
   },
+  verification: {
+    google: "kVTMKF1yXhHI2kXP5GGaNjc7felwVeI9NxWVsGGU8bQ",
+  },
   alternates: {
     canonical: siteConfig.url,
   },
