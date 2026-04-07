@@ -6,7 +6,7 @@ type EmailField = {
   value: string;
 };
 
-type SubmissionEmailPayload = {
+export type SubmissionEmailPayload = {
   formName: string;
   userName?: string;
   userEmail: string;
@@ -16,44 +16,37 @@ type SubmissionEmailPayload = {
   fields: EmailField[];
 };
 
+/* ── Brand tokens ───────────────────────────────────────── */
 const BRAND = {
-  primary: "#1e4db7",
-  secondary: "#1d2f5f",
-  accent: "#e11d48",
-  text: "#0f172a",
-  muted: "#64748b",
-  border: "#e2e8f0",
-  surface: "#f8fafc",
+  dark: "#0f1d3d",       /* Dark navy – header bg */
+  primary: "#1e4db7",    /* Link / accent blue */
+  secondary: "#1d2f5f",  /* Heading colour */
+  text: "#333333",       /* Body copy */
+  muted: "#6b7280",      /* Secondary copy */
+  border: "#e5e7eb",
+  surface: "#f5f5f5",    /* Footer bg */
 };
-
-const USEFUL_LINKS = [
-  { label: "Platform", href: `${siteConfig.url}/platform` },
-  { label: "Market", href: `${siteConfig.url}/market` },
-  { label: "Insights", href: `${siteConfig.url}/insights` },
-  { label: "Contact", href: `${siteConfig.url}/contact` },
-];
 
 const SOCIAL_LINKS = [
   {
     label: "Facebook",
     href: "https://www.facebook.com/people/Focus-Health/61586849325711/",
-    bg: "#1877F2",
+    /* Facebook "f" via Unicode */
     symbol: "f",
   },
   {
     label: "Instagram",
     href: "https://www.instagram.com/getfocushealth/",
-    bg: "#E1306C",
     symbol: "◎",
   },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/company/getfocus-health/",
-    bg: "#0A66C2",
     symbol: "in",
   },
 ];
 
+/* ── Helpers ─────────────────────────────────────────────── */
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -68,44 +61,79 @@ function buildFieldsTable(fields: EmailField[]): string {
     .map(
       (field) => `
         <tr>
-          <td style="padding:10px 12px;border:1px solid ${BRAND.border};background:#ffffff;font-weight:600;color:${BRAND.secondary};width:180px;vertical-align:top;">${escapeHtml(field.label)}</td>
-          <td style="padding:10px 12px;border:1px solid ${BRAND.border};background:#ffffff;color:${BRAND.text};line-height:1.5;">${escapeHtml(field.value || "-")}</td>
+          <td style="padding:12px 14px;border:1px solid ${BRAND.border};background:#ffffff;font-weight:600;color:${BRAND.secondary};width:180px;vertical-align:top;font-size:14px;">${escapeHtml(field.label)}</td>
+          <td style="padding:12px 14px;border:1px solid ${BRAND.border};background:#ffffff;color:${BRAND.text};line-height:1.6;font-size:14px;">${escapeHtml(field.value || "-")}</td>
         </tr>
       `,
     )
     .join("");
 
   return `
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:16px;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:20px;">
       ${rows}
     </table>
   `;
 }
 
-function buildFooter(): string {
-  const usefulLinks = USEFUL_LINKS.map(
-    (link) => `<a href="${link.href}" style="color:${BRAND.primary};text-decoration:none;font-weight:600;margin:0 8px;">${escapeHtml(link.label)}</a>`,
-  ).join("<span style=\"color:#cbd5e1;\">|</span>");
-
-  const socialLinks = SOCIAL_LINKS.map(
-    (link) => `
-      <a href="${link.href}" aria-label="${escapeHtml(link.label)}" style="display:inline-block;width:34px;height:34px;line-height:34px;text-align:center;border-radius:9999px;background:${link.bg};color:#ffffff;text-decoration:none;font-weight:700;font-family:Arial,sans-serif;margin:0 4px;">${escapeHtml(link.symbol)}</a>
-    `,
-  ).join("");
-
+/* ── Contact Row (phone + email, centered) ───────────────── */
+function buildContactRow(): string {
   return `
-    <div style="padding:24px 28px;border-top:1px solid ${BRAND.border};background:${BRAND.surface};text-align:center;">
-      <p style="margin:0 0 12px 0;color:${BRAND.muted};font-size:13px;line-height:1.6;">Useful Links</p>
-      <div style="margin-bottom:14px;font-size:13px;line-height:1.8;">${usefulLinks}</div>
-      <div style="margin-bottom:14px;">${socialLinks}</div>
-      <p style="margin:0;color:${BRAND.muted};font-size:12px;line-height:1.6;">
-        Focus Healthcare LLC · 3001 Skyway Cir N, Irving, TX 75038<br />
-        <a href="mailto:info@getfocushealth.com" style="color:${BRAND.primary};text-decoration:none;">info@getfocushealth.com</a>
-      </p>
+    <div style="text-align:center;padding:24px 0 0 0;">
+      <span style="font-size:15px;color:${BRAND.text};">&#9742;&nbsp; (972) 891-8650</span>
+      <span style="color:${BRAND.muted};margin:0 8px;">|</span>
+      <span style="font-size:15px;">&#9993;&nbsp;<a href="mailto:info@getfocushealth.com" style="color:${BRAND.text};text-decoration:underline;">info@getfocushealth.com</a></span>
     </div>
   `;
 }
 
+/* ── Footer (matches Irving H&W reference) ───────────────── */
+function buildFooter(): string {
+  const socialIcons = SOCIAL_LINKS.map(
+    (link) => `
+      <a href="${link.href}" aria-label="${escapeHtml(link.label)}"
+         style="display:inline-block;width:38px;height:38px;line-height:38px;text-align:center;
+                border-radius:9999px;background:${BRAND.dark};color:#ffffff;
+                text-decoration:none;font-weight:700;font-family:Arial,sans-serif;
+                font-size:14px;margin:0 5px;">
+        ${escapeHtml(link.symbol)}
+      </a>`,
+  ).join("");
+
+  return `
+    <!-- divider -->
+    <tr><td style="padding:0 40px;"><div style="border-top:1px solid ${BRAND.border};"></div></td></tr>
+
+    <!-- footer -->
+    <tr>
+      <td style="padding:28px 40px 16px;background:${BRAND.surface};text-align:center;">
+        <!-- social icons -->
+        <div style="margin-bottom:18px;">${socialIcons}</div>
+
+        <!-- policy links -->
+        <p style="margin:0 0 16px 0;font-size:13px;color:${BRAND.text};">
+          <a href="${siteConfig.url}/terms" style="color:${BRAND.text};text-decoration:none;">Terms of Service</a>
+          <span style="margin:0 6px;color:${BRAND.muted};">•</span>
+          <a href="${siteConfig.url}/privacy" style="color:${BRAND.text};text-decoration:none;">Privacy Policy</a>
+        </p>
+
+        <p style="margin:0;font-size:12px;color:${BRAND.muted};">
+          Disclaimer: This email is for informational purposes and is not medical advice.
+        </p>
+      </td>
+    </tr>
+
+    <!-- brand line -->
+    <tr>
+      <td style="padding:14px 40px;background:${BRAND.surface};text-align:center;">
+        <p style="margin:0;font-size:11px;color:${BRAND.muted};">
+          © ${new Date().getFullYear()} Focus Healthcare · 3001 Skyway Cir N, Irving, TX 75038
+        </p>
+      </td>
+    </tr>
+  `;
+}
+
+/* ── Master layout ───────────────────────────────────────── */
 function buildEmailLayout({
   title,
   subtitle,
@@ -119,34 +147,47 @@ function buildEmailLayout({
     <!doctype html>
     <html lang="en">
       <head>
-        <meta charSet="utf-8" />
+        <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>${escapeHtml(title)}</title>
       </head>
-      <body style="margin:0;padding:24px;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:${BRAND.text};">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;margin:0 auto;border-collapse:separate;border-spacing:0;background:#ffffff;border:1px solid ${BRAND.border};border-radius:14px;overflow:hidden;">
+      <body style="margin:0;padding:24px 0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:${BRAND.text};">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+               style="max-width:640px;margin:0 auto;border-collapse:collapse;background:#ffffff;">
+          <!-- ===== HEADER ===== -->
           <tr>
-            <td style="padding:22px 28px;background:linear-gradient(135deg, ${BRAND.secondary} 0%, ${BRAND.primary} 70%);">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            <td style="background:${BRAND.dark};padding:22px 20px;text-align:center;">
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto;">
                 <tr>
-                  <td style="vertical-align:middle;">
-                    <img src="${siteConfig.url}/focus-health-icon.png" alt="Focus Health" width="42" height="42" style="display:inline-block;vertical-align:middle;border:0;margin-right:10px;" />
-                    <span style="display:inline-block;vertical-align:middle;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:0.2px;">Focus Health</span>
+                  <td style="vertical-align:middle;padding-right:12px;">
+                    <img src="${siteConfig.url}/focus-health-icon.png" alt="Focus Health" width="44" height="44"
+                         style="display:block;border:0;" />
+                  </td>
+                  <td style="vertical-align:middle;white-space:nowrap;">
+                    <span style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;font-family:Arial,Helvetica,sans-serif;">
+                      FOCUS HEALTH
+                    </span>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
+
+          <!-- ===== BODY ===== -->
           <tr>
-            <td style="padding:28px;">
-              <h1 style="margin:0 0 8px 0;font-size:24px;line-height:1.25;color:${BRAND.secondary};">${escapeHtml(title)}</h1>
-              <p style="margin:0 0 18px 0;font-size:14px;color:${BRAND.muted};">${escapeHtml(subtitle)}</p>
+            <td style="padding:36px 40px;">
+              <h1 style="margin:0 0 6px 0;font-size:26px;line-height:1.3;color:${BRAND.secondary};text-align:center;font-weight:800;">
+                ${escapeHtml(title)}
+              </h1>
+              <p style="margin:0 0 24px 0;font-size:14px;color:${BRAND.muted};text-align:center;">
+                ${escapeHtml(subtitle)}
+              </p>
               ${body}
+              ${buildContactRow()}
             </td>
           </tr>
-          <tr>
-            <td>${buildFooter()}</td>
-          </tr>
+
+          ${buildFooter()}
         </table>
       </body>
     </html>
@@ -157,16 +198,15 @@ function buildUserConfirmationHtml(payload: SubmissionEmailPayload): string {
   const greetingName = payload.userName?.trim() || "there";
 
   return buildEmailLayout({
-    title: "Thanks for reaching out",
+    title: "Thanks for Reaching Out",
     subtitle: `${payload.formName} submission received`,
     body: `
-      <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;">Hi ${escapeHtml(greetingName)},</p>
-      <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;">${escapeHtml(payload.userIntro)}</p>
-      <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;">We have received the details below:</p>
+      <p style="margin:0 0 16px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">Hi ${escapeHtml(greetingName)},</p>
+      <p style="margin:0 0 16px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">${escapeHtml(payload.userIntro)}</p>
+      <p style="margin:0 0 16px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">We have received the details below:</p>
       ${buildFieldsTable(payload.fields)}
-      <p style="margin:16px 0 0 0;font-size:14px;line-height:1.7;color:${BRAND.muted};">
-        If you need immediate assistance, reply to this email or contact us at
-        <a href="mailto:info@getfocushealth.com" style="color:${BRAND.primary};text-decoration:none;font-weight:600;"> info@getfocushealth.com</a>.
+      <p style="margin:24px 0 0 0;font-size:15px;line-height:1.7;color:${BRAND.muted};text-align:center;">
+        Questions? Reply to this email or call us &mdash; our team is happy to help.
       </p>
     `,
   });
@@ -174,24 +214,33 @@ function buildUserConfirmationHtml(payload: SubmissionEmailPayload): string {
 
 function buildAdminNotificationHtml(payload: SubmissionEmailPayload): string {
   return buildEmailLayout({
-    title: `New ${payload.formName} submission`,
+    title: `New ${payload.formName} Submission`,
     subtitle: "A new website form submission has been received",
     body: `
-      <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;">
+      <p style="margin:0 0 16px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">
         A new submission was received from <strong>${escapeHtml(payload.userEmail)}</strong>.
       </p>
       ${buildFieldsTable(payload.fields)}
-      <p style="margin:16px 0 0 0;font-size:14px;line-height:1.7;color:${BRAND.muted};">
-        You can also review submissions in the admin panel.
+      <p style="margin:24px 0 0 0;font-size:14px;line-height:1.7;color:${BRAND.muted};text-align:center;">
+        You can also review submissions in the <a href="${siteConfig.url}/admin/submissions" style="color:${BRAND.primary};text-decoration:underline;">admin panel</a>.
       </p>
     `,
   });
+}
+
+export function buildSubmissionEmailPreviews(payload: SubmissionEmailPayload) {
+  return {
+    userHtml: buildUserConfirmationHtml(payload),
+    adminHtml: buildAdminNotificationHtml(payload),
+  };
 }
 
 export async function sendSubmissionEmails(payload: SubmissionEmailPayload) {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL;
   const infoEmail = process.env.RESEND_INFO_EMAIL || "info@getfocushealth.com";
+  const additionalNotificationRecipients = ["jaya.r.dahal@focusyourfinance.com"];
+  const notificationRecipients = Array.from(new Set([infoEmail, ...additionalNotificationRecipients]));
 
   if (!apiKey) {
     throw new Error("Missing RESEND_API_KEY");
@@ -216,7 +265,7 @@ export async function sendSubmissionEmails(payload: SubmissionEmailPayload) {
     }),
     resend.emails.send({
       from: fromEmail,
-      to: [infoEmail],
+      to: notificationRecipients,
       subject: payload.adminSubject,
       html: adminHtml,
       replyTo: payload.userEmail,
