@@ -4,26 +4,40 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/platform', label: 'Platform' },
-  { href: '/market', label: 'Market' },
-  { href: '/track-record', label: 'Track Record' },
   { href: '/leadership', label: 'Leadership' },
   { href: '/partners', label: 'Partners' },
   { href: '/investors', label: 'Investors' },
-  { href: '/insights', label: 'Insights' },
   { href: '/contact', label: 'Contact' },
+];
+
+const resourceLinks = [
+  { href: '/market', label: 'Market' },
+  { href: '/track-record', label: 'Track Record' },
+  { href: '/insights', label: 'Insights' },
+  { href: '/our-process', label: 'Our Process' },
 ];
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isResourceActive = pathname.startsWith('/market')
+    || pathname.startsWith('/track-record')
+    || pathname.startsWith('/insights')
+    || pathname.startsWith('/our-process');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,9 +62,9 @@ export const Navbar = () => {
       )}
     >
       <div className="container-focus">
-        <nav className="flex items-center justify-between h-16 sm:h-20">
+        <nav className="flex items-center justify-between h-16 sm:h-20 gap-4 xl:gap-6">
           {/* Logo */}
-          <Link href="/" aria-label="Focus Health home" className="group">
+          <Link href="/" aria-label="Focus Health home" className="group shrink-0">
             <div className="flex items-center gap-2 sm:gap-3">
               <Image
                 src="/focus-health-icon.png"
@@ -75,7 +89,8 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex flex-1 items-center justify-center px-6 xl:px-10">
+            <div className="flex items-center gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -88,10 +103,31 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  'nav-link font-bold text-sm inline-flex items-center gap-1 outline-none',
+                  isResourceActive && 'active text-foreground'
+                )}
+              >
+                Resources
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-56">
+                {resourceLinks.map((resource) => (
+                  <DropdownMenuItem key={resource.href} asChild>
+                    <Link href={resource.href} className="w-full">
+                      {resource.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            </div>
           </div>
 
           {/* CTA Button */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4 shrink-0">
             <Button variant="hero" size="default" asChild>
               <Link href="/partners#opportunity-form">Partner With Us</Link>
             </Button>
@@ -130,6 +166,25 @@ export const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          <div className="mt-2 border-t border-border pt-4">
+            <p className="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resources</p>
+            <div className="flex flex-col gap-2">
+              {resourceLinks.map((resource) => (
+                <Link
+                  key={resource.href}
+                  href={resource.href}
+                  className={cn(
+                    'py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors',
+                    pathname === resource.href
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  )}
+                >
+                  {resource.label}
+                </Link>
+              ))}
+            </div>
+          </div>
           <Button variant="hero" className="mt-4" asChild>
             <Link href="/partners#opportunity-form">Partner With Us</Link>
           </Button>

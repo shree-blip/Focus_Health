@@ -15,24 +15,41 @@ function NewsletterCapture() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Please enter a valid email address.');
       return;
     }
+
+    setIsSubmitting(true);
+
     try {
+      const response = await fetch('/api/submissions/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || 'Subscription failed');
+      }
+
       const existing = JSON.parse(localStorage.getItem(NEWSLETTER_STORE_KEY) || '[]') as string[];
       if (!existing.includes(email)) {
         existing.push(email);
         localStorage.setItem(NEWSLETTER_STORE_KEY, JSON.stringify(existing));
       }
+      setSubmitted(true);
+      setError('');
     } catch {
-      // fail silently
+      setError('Failed to subscribe. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-    setSubmitted(true);
-    setError('');
   }, [email]);
 
   if (submitted) {
@@ -55,9 +72,10 @@ function NewsletterCapture() {
       />
       <button
         type="submit"
+        disabled={isSubmitting}
         className="rounded-xl bg-accent px-6 py-3 text-sm font-bold text-white transition hover:bg-accent/90"
       >
-        Subscribe
+        {isSubmitting ? 'Subscribing...' : 'Subscribe'}
       </button>
       {error && <p className="text-red-400 text-xs sm:absolute">{error}</p>}
     </form>

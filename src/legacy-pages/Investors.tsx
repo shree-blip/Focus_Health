@@ -110,11 +110,26 @@ const Investors = () => {
     }
     
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success('Welcome to the waitlist! Check your inbox for the investor deck.');
+    try {
+      const response = await fetch('/api/submissions/investor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || 'Submission failed');
+      }
+
+      setIsSubmitted(true);
+      toast.success('Welcome to the waitlist! Check your inbox for the investor deck.');
+    } catch (error) {
+      console.error('Error submitting investor waitlist:', error);
+      toast.error('Failed to join the waitlist. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
