@@ -120,6 +120,7 @@ const PartnersPage = () => {
 
       console.log('Business opportunity request sent:', payload);
       setIsSubmitted(true);
+      setShowModal(true);
       toast({
         title: "Request Submitted",
         description: "We'll be in touch shortly to discuss investment opportunities."

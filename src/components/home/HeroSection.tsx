@@ -6,7 +6,7 @@ import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Floating particle component
 const FloatingParticle = ({ delay, duration, x, y, size }: { delay: number; duration: number; x: number; y: number; size: number }) => (
@@ -195,8 +195,11 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   );
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
-  const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0);
+  const videoIndexRef = useRef(0);
+  const [heroVideoSrc, setHeroVideoSrc] = useState('');
+  const [heroVideoPoster, setHeroVideoPoster] = useState('');
 
+  // Build playlist based on device
   const heroVideoPlaylist = useMemo(
     () => [
       {
@@ -215,17 +218,23 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
     [isMobile],
   );
 
-  const currentHeroVideo = heroVideoPlaylist[currentHeroVideoIndex];
-
-  const handleHeroVideoEnded = () => {
-    setCurrentHeroVideoIndex((previousIndex) => (previousIndex + 1) % heroVideoPlaylist.length);
-  };
-
+  // Set initial video on mount and when playlist changes
   useEffect(() => {
-    setCurrentHeroVideoIndex(0);
-  }, [isMobile]);
+    videoIndexRef.current = 0;
+    setHeroVideoSrc(heroVideoPlaylist[0].src);
+    setHeroVideoPoster(heroVideoPlaylist[0].poster);
+  }, [heroVideoPlaylist]);
 
-  // Robust autoplay: handles first load, tab focus, back-nav (bfcache), retries
+  // Advance to next video when current one ends
+  const handleHeroVideoEnded = useCallback(() => {
+    const nextIndex = (videoIndexRef.current + 1) % heroVideoPlaylist.length;
+    videoIndexRef.current = nextIndex;
+    const next = heroVideoPlaylist[nextIndex];
+    setHeroVideoSrc(next.src);
+    setHeroVideoPoster(next.poster);
+  }, [heroVideoPlaylist]);
+
+  // Robust autoplay: handles first load, tab focus, back-nav, retries
   useEffect(() => {
     const v = heroVideoRef.current;
     if (!v) return;
@@ -235,24 +244,20 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       if (v.paused) v.play().catch(() => {});
     };
 
-    // Immediate + buffering events
     tryPlay();
     v.addEventListener('canplay', tryPlay);
     v.addEventListener('loadeddata', tryPlay);
 
-    // Tab/window regains focus
     const onVisibility = () => {
       if (document.visibilityState === 'visible') tryPlay();
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    // Back-navigation / bfcache restore — most common repeated-visit failure
     const onPageShow = (e: PageTransitionEvent) => {
       if (e.persisted) tryPlay();
     };
     window.addEventListener('pageshow', onPageShow);
 
-    // Safety-net retries for slow connections
     const t1 = setTimeout(tryPlay, 300);
     const t2 = setTimeout(tryPlay, 1000);
     const t3 = setTimeout(tryPlay, 2500);
@@ -266,21 +271,21 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [currentHeroVideo.src]);
+  }, [heroVideoSrc]);
 
   return (
     <section className="relative -mt-[100px] min-h-[calc(100vh+200px)] flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
-          key={currentHeroVideo.src}
+          key={heroVideoSrc}
           ref={heroVideoRef}
-          src={currentHeroVideo.src}
+          src={heroVideoSrc}
           autoPlay
           muted
           playsInline
-          preload="metadata"
-          poster={currentHeroVideo.poster}
+          preload="auto"
+          poster={heroVideoPoster}
           onEnded={handleHeroVideoEnded}
           aria-hidden="true"
           className="w-full h-full object-cover"

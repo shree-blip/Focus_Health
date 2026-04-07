@@ -12,20 +12,25 @@ export async function POST(req: NextRequest) {
 
     const submittedAt = new Date().toISOString();
 
-    await sendSubmissionEmails({
-      formName: "Investor Waitlist",
-      userName: name,
-      userEmail: email,
-      userSubject: "You are on the Focus Health investor waitlist",
-      userIntro:
-        "Thank you for joining our investor waitlist. We will send your investor deck and next steps from our investor relations team shortly.",
-      adminSubject: `New investor waitlist submission from ${name}`,
-      fields: [
-        { label: "Name", value: name },
-        { label: "Email", value: email },
-        { label: "Submitted At", value: submittedAt },
-      ],
-    });
+    // Send emails (best-effort — submission succeeds regardless)
+    try {
+      await sendSubmissionEmails({
+        formName: "Investor Waitlist",
+        userName: name,
+        userEmail: email,
+        userSubject: "You are on the Focus Health investor waitlist",
+        userIntro:
+          "Thank you for joining our investor waitlist. We will send your investor deck and next steps from our investor relations team shortly.",
+        adminSubject: `New investor waitlist submission from ${name}`,
+        fields: [
+          { label: "Name", value: name },
+          { label: "Email", value: email },
+          { label: "Submitted At", value: submittedAt },
+        ],
+      });
+    } catch (emailError) {
+      console.error("Email send failed (non-blocking):", emailError);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

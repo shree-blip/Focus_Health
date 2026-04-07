@@ -24,24 +24,29 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
-    await sendSubmissionEmails({
-      formName: "Partner Opportunity Form",
-      userName: name,
-      userEmail: email,
-      userSubject: "Your partnership request was received",
-      userIntro: "Thanks for your interest in partnering with Focus Health. We will review your details and follow up shortly.",
-      adminSubject: `New partner request from ${name}`,
-      fields: [
-        { label: "Name", value: name },
-        { label: "Email", value: email },
-        { label: "Phone", value: phone || "Not provided" },
-        { label: "Market Interest", value: marketInterest || "Not provided" },
-        { label: "Cash To Invest", value: cashToInvest || "Not provided" },
-        { label: "Partner Type", value: partnerType || "Not provided" },
-        { label: "Additional Info", value: additionalInfo || "Not provided" },
-        { label: "Submitted At", value: submission.createdAt },
-      ],
-    });
+    // Send emails (best-effort — submission succeeds regardless)
+    try {
+      await sendSubmissionEmails({
+        formName: "Partner Opportunity Form",
+        userName: name,
+        userEmail: email,
+        userSubject: "Your partnership request was received",
+        userIntro: "Thanks for your interest in partnering with Focus Health. We will review your details and follow up shortly.",
+        adminSubject: `New partner request from ${name}`,
+        fields: [
+          { label: "Name", value: name },
+          { label: "Email", value: email },
+          { label: "Phone", value: phone || "Not provided" },
+          { label: "Market Interest", value: marketInterest || "Not provided" },
+          { label: "Cash To Invest", value: cashToInvest || "Not provided" },
+          { label: "Partner Type", value: partnerType || "Not provided" },
+          { label: "Additional Info", value: additionalInfo || "Not provided" },
+          { label: "Submitted At", value: submission.createdAt },
+        ],
+      });
+    } catch (emailError) {
+      console.error("Email send failed (non-blocking):", emailError);
+    }
 
     // Optionally forward to Supabase Edge Function (best-effort)
     try {

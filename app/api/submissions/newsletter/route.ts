@@ -13,19 +13,24 @@ export async function POST(req: NextRequest) {
     const inferredName = String(email).split("@")[0] || "Subscriber";
     const submittedAt = new Date().toISOString();
 
-    await sendSubmissionEmails({
-      formName: "Newsletter Subscription",
-      userName: inferredName,
-      userEmail: email,
-      userSubject: "You are subscribed to Focus Health insights",
-      userIntro:
-        "Thanks for subscribing. You will receive updates on healthcare infrastructure trends, facility launches, and investor education content.",
-      adminSubject: `New newsletter subscription: ${email}`,
-      fields: [
-        { label: "Email", value: email },
-        { label: "Submitted At", value: submittedAt },
-      ],
-    });
+    // Send emails (best-effort — submission succeeds regardless)
+    try {
+      await sendSubmissionEmails({
+        formName: "Newsletter Subscription",
+        userName: inferredName,
+        userEmail: email,
+        userSubject: "You are subscribed to Focus Health insights",
+        userIntro:
+          "Thanks for subscribing. You will receive updates on healthcare infrastructure trends, facility launches, and investor education content.",
+        adminSubject: `New newsletter subscription: ${email}`,
+        fields: [
+          { label: "Email", value: email },
+          { label: "Submitted At", value: submittedAt },
+        ],
+      });
+    } catch (emailError) {
+      console.error("Email send failed (non-blocking):", emailError);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
