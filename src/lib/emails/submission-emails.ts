@@ -115,10 +115,6 @@ function buildFooter(): string {
           <span style="margin:0 6px;color:${BRAND.muted};">•</span>
           <a href="${siteConfig.url}/privacy" style="color:${BRAND.text};text-decoration:none;">Privacy Policy</a>
         </p>
-
-        <p style="margin:0;font-size:12px;color:${BRAND.muted};">
-          Disclaimer: This email is for informational purposes and is not medical advice.
-        </p>
       </td>
     </tr>
 
