@@ -75,12 +75,10 @@ function buildFieldsTable(fields: EmailField[]): string {
   `;
 }
 
-/* ── Contact Row (phone + email, centered) ───────────────── */
+/* ── Contact Row (email only, centered) ──────────────────── */
 function buildContactRow(): string {
   return `
     <div style="text-align:center;padding:24px 0 0 0;">
-      <span style="font-size:15px;color:${BRAND.text};">&#9742;&nbsp; (972) 891-8650</span>
-      <span style="color:${BRAND.muted};margin:0 8px;">|</span>
       <span style="font-size:15px;">&#9993;&nbsp;<a href="mailto:info@getfocushealth.com" style="color:${BRAND.text};text-decoration:underline;">info@getfocushealth.com</a></span>
     </div>
   `;
