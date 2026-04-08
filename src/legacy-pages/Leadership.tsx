@@ -96,9 +96,15 @@ const teamMembers = [
 const accountingTeam = [
   {
     name: "Ganesh Dahal",
-    role: "Tax",
+    role: "Senior Manager",
     category: "Accounting & Billing",
     photo: ganeshHeadshot,
+  },
+  {
+    name: "Salmon",
+    role: "Sr. Accounting Officer",
+    category: "Accounting & Billing",
+    photo: salmonHeadshot,
   },
   {
     name: "Kalash Shrestha",
@@ -113,6 +119,18 @@ const accountingTeam = [
     photo: guinnessHeadshot,
   },
   {
+    name: "Bipul Maharjan",
+    role: "Sr. Accounting Officer",
+    category: "Accounting & Billing",
+    photo: bipulHeadshot,
+  },
+  {
+    name: "Sambridhi",
+    role: "Accountant",
+    category: "Accounting & Billing",
+    photo: samriddhiHeadshot,
+  },
+  {
     name: "Bhaskar Rokka",
     role: "Staff Accountant",
     category: "Accounting & Billing",
@@ -125,28 +143,16 @@ const accountingTeam = [
     photo: tikaHeadshot,
   },
   {
-    name: "Bipul Maharjan",
-    role: "Sr. Accounting Officer",
-    category: "Accounting & Billing",
-    photo: bipulHeadshot,
-  },
-  {
-    name: "Salmon",
-    role: "Sr. Accounting Officer",
-    category: "Accounting & Billing",
-    photo: salmonHeadshot,
-  },
-  {
-    name: "Sambridhi",
-    role: "Accountant",
-    category: "Accounting & Billing",
-    photo: samriddhiHeadshot,
-  },
-  {
     name: "Mandeep",
     role: "Staff Accountant",
     category: "Accounting & Billing",
     photo: mandeepHeadshot,
+  },
+  {
+    name: "Mohit Luitel",
+    role: "Staff Accountant",
+    category: "Accounting & Billing",
+    photo: "",
   },
 ];
 const rickProfile = {
@@ -667,28 +673,10 @@ const LeadershipPage = () => {
       <section className="section-padding bg-card">
         <div className="container-focus">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Photo (left) */}
-            <ScrollReveal>
-              <motion.div
-                whileHover={{
-                  scale: 1.02,
-                }}
-                className="relative"
-              >
-                <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
-                  <img
-                    src={joelProfile.photo}
-                    alt={joelProfile.name}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
-              </motion.div>
-            </ScrollReveal>
-
-            {/* Content (right) */}
-            <ScrollReveal direction="left">
-              <div>
+            {/* Content (left) */}
+            <div className="order-2 lg:order-1">
+              <ScrollReveal direction="left">
+                <div>
                 <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-6">
                   {joelProfile.category}
                 </span>
@@ -736,8 +724,30 @@ const LeadershipPage = () => {
                     <Share2 size={18} />
                   </Button>
                 </div>
-              </div>
-            </ScrollReveal>
+                </div>
+              </ScrollReveal>
+            </div>
+
+            {/* Photo (right) */}
+            <div className="order-1 lg:order-2">
+              <ScrollReveal>
+                <motion.div
+                  whileHover={{
+                    scale: 1.02,
+                  }}
+                  className="relative"
+                >
+                  <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                    <img
+                      src={joelProfile.photo}
+                      alt={joelProfile.name}
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                  <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />
+                </motion.div>
+              </ScrollReveal>
+            </div>
           </div>
         </div>
       </section>
