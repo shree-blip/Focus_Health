@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, MapPin, Building, Users, ArrowRight } from 'lucide-react';
+import { TrendingUp, MapPin, Building, Users, ArrowRight, BarChart3, Activity, DollarSign, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -121,7 +121,7 @@ const MarketPage = () => {
                   Strategic Texas Markets
                 </h2>
                 <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                  We focus on high-growth corridors in the DFW metroplex, Houston suburbs, Austin-San Antonio corridor, and other emerging Texas markets with demonstrated population influx and healthcare access gaps.
+                  We focus on high-growth corridors in the DFW metroplex, Houston suburbs, Austin-San Antonio corridor, and other emerging Texas markets with demonstrated population influx and healthcare access gaps. <Link href="/facilities/er-of-irving" className="text-primary hover:underline font-medium">See our Irving facility</Link> as an example of this strategy in action.
                 </p>
                 <div className="space-y-4">
                   {strategicMarkets.map((market, i) => (
@@ -211,6 +211,92 @@ const MarketPage = () => {
                 )}
               </div>
             </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Texas Market Data */}
+      <section className="section-padding bg-card">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
+                Texas Freestanding ER Market by the Numbers
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Data points that underpin our market conviction
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {[
+              { icon: Building, value: '700+', label: 'Freestanding ERs in Texas', desc: 'Largest FSER market in the US' },
+              { icon: TrendingUp, value: '~8%', label: 'Annual Growth Rate', desc: 'Outpacing traditional hospital ER expansion' },
+              { icon: Users, value: '30M+', label: 'State Population', desc: 'Texas added 470,000+ residents in 2024' },
+              { icon: Activity, value: '3–5 hr', label: 'Avg. Hospital ER Wait', desc: 'Creating demand for faster alternatives' },
+            ].map((stat, index) => (
+              <ScrollReveal key={stat.label} delay={index * 0.1}>
+                <div className="p-6 rounded-xl bg-background border border-border text-center">
+                  <stat.icon size={28} className="text-primary mx-auto mb-3" />
+                  <div className="text-2xl sm:text-3xl font-heading font-bold text-primary mb-1">{stat.value}</div>
+                  <p className="font-medium text-sm mb-1">{stat.label}</p>
+                  <p className="text-muted-foreground text-xs">{stat.desc}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          <ScrollReveal>
+            <div className="max-w-3xl mx-auto space-y-4 text-muted-foreground leading-relaxed">
+              <p>
+                Texas is home to more freestanding emergency rooms than any other US state, driven by a regulatory environment that supports independent ER licensure and a population that increasingly values convenience, speed, and proximity in emergency care. With suburban corridors expanding rapidly, the gap between new residential development and available emergency infrastructure continues to widen.
+              </p>
+              <p>
+                The DFW metroplex alone is projected to add over one million residents by 2030, with Houston, Austin, and San Antonio following similar trajectories. For healthcare infrastructure investors evaluating where to deploy capital, Texas offers an unmatched combination of demand, regulatory clarity, and operational potential. <Link href="/insights/texas-prime-market-for-fsers" className="text-primary hover:underline font-medium">Read why Texas leads in freestanding ER growth</Link> and explore our <Link href="/insights/focus-health-market-evaluation-expansion-playbook" className="text-primary hover:underline font-medium">market evaluation playbook</Link>.
+              </p>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Related Insights */}
+      <section className="section-padding bg-background">
+        <div className="container-focus">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-heading font-bold mb-4">Market Intelligence Insights</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Deep dives into the data behind our market strategy
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              { title: 'Why Texas Is a Prime Market for FSERs', href: '/insights/texas-prime-market-for-fsers', desc: 'Population tailwinds, policy environment, and the operational model advantages driving FSER demand.' },
+              { title: 'How We Evaluate New Healthcare Markets', href: '/insights/focus-health-market-evaluation-expansion-playbook', desc: 'Access gaps, local economics, and the discipline behind our expansion decisions.' },
+              { title: 'Growth Update: 2026 Pipeline', href: '/insights/focus-health-growth-update-2026-pipeline', desc: 'A focused pipeline rooted in demand, execution readiness, and partner alignment.' },
+            ].map((article, index) => (
+              <ScrollReveal key={article.href} delay={index * 0.1}>
+                <Link href={article.href} className="block p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all group h-full">
+                  <BookOpen size={20} className="text-primary mb-3" />
+                  <h3 className="font-heading font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{article.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{article.desc}</p>
+                  <span className="inline-flex items-center gap-1 mt-3 text-sm text-primary font-medium">
+                    Read More <ArrowRight size={14} />
+                  </span>
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Button variant="outline" asChild>
+              <Link href="/insights" className="gap-2">
+                Browse all market insights <ArrowRight size={16} />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

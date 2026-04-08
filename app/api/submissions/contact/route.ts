@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendSubmissionEmails } from "@/lib/emails/submission-emails";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,6 +20,27 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
+    // Send emails (best-effort — submission succeeds regardless)
+    try {
+      await sendSubmissionEmails({
+        formName: "Contact Form",
+        userName: name,
+        userEmail: email,
+        userSubject: "We received your Focus Health message",
+        userIntro: "Thank you for contacting Focus Health. Our team will review your message and reply shortly.",
+        adminSubject: `New contact form submission from ${name}`,
+        fields: [
+          { label: "Name", value: name },
+          { label: "Email", value: email },
+          { label: "Role", value: role || "Not provided" },
+          { label: "Message", value: message },
+          { label: "Submitted At", value: submission.createdAt },
+        ],
+      });
+    } catch (emailError) {
+      console.error("Email send failed (non-blocking):", emailError);
+    }
+
     // Optionally forward to Supabase Edge Function (best-effort)
     try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -38,7 +60,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, submission });
-  } catch {
+  } catch (error) {
+    console.error("Contact submission error:", error);
     return NextResponse.json({ error: "Failed to process submission" }, { status: 500 });
   }
 }

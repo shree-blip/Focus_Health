@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",
-    apple: "/favicon.png",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     type: "website",
@@ -85,6 +85,9 @@ export const metadata: Metadata = {
     "geo.placename": "Texas",
     "ai-content-declaration": "human-created",
     generator: "Focus Health Platform",
+  },
+  verification: {
+    google: "kVTMKF1yXhHI2kXP5GGaNjc7felwVeI9NxWVsGGU8bQ",
   },
   alternates: {
     canonical: siteConfig.url,

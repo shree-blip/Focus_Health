@@ -27,8 +27,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { toast } from 'sonner';
-const heroInvestors = "/recent-event-hero.webp";
-const ribbonCutting = "/ERofIrving-GrandOpening.mp4";
+import { SubmissionSuccessModal } from '@/components/ui/SubmissionSuccessModal';
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
+
+const heroInvestors = lufkinGrandOpeningMedia.heroDesktop;
+const heroInvestorsMobile = lufkinGrandOpeningMedia.heroMobile;
+const ribbonCutting = lufkinGrandOpeningMedia.videoDesktop;
 
 const valueProps = [
   {
@@ -98,6 +102,7 @@ const Investors = () => {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,19 +112,46 @@ const Investors = () => {
     }
     
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success('Welcome to the waitlist! Check your inbox for the investor deck.');
+    try {
+      const response = await fetch('/api/submissions/investor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || 'Submission failed');
+      }
+
+      setIsSubmitted(true);
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error submitting investor waitlist:', error);
+      toast.error('Failed to join the waitlist. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <>
+      <SubmissionSuccessModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="You're on the List!"
+        message="Welcome to the Focus Health investor waitlist. We'll send your investor deck and be in touch with exclusive updates."
+        email={formData.email}
+      />
+
       {/* Hero Section */}
       <section className="relative -mt-[100px] min-h-[calc(90vh+200px)] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat sm:hidden"
+          style={{ backgroundImage: `url(${heroInvestorsMobile})` }}
+        />
+        <div 
+          className="absolute inset-0 hidden bg-cover bg-center bg-no-repeat sm:block"
           style={{ backgroundImage: `url(${heroInvestors})` }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background/95" />
@@ -305,7 +337,7 @@ const Investors = () => {
                   Our leadership team has managed <strong className="text-foreground">24+ medical locations</strong> across Texas. 
                   We bring deep operational expertise in emergency medicine, facility development, 
                   and healthcare finance—experience that translates to disciplined execution and 
-                  strong outcomes.
+                  strong outcomes. <Link href="/track-record" className="text-primary hover:underline font-medium">View our complete facility portfolio</Link>.
                 </p>
                 
                 <div className="grid grid-cols-2 gap-6 mb-8">
@@ -364,7 +396,7 @@ const Investors = () => {
                 Market Opportunity
               </h2>
               <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto">
-                Texas leads the nation in freestanding ER growth—and demand continues to accelerate
+                Texas leads the nation in freestanding ER growth—and demand continues to accelerate. <Link href="/market" className="text-accent hover:underline font-medium">See our market analysis</Link>.
               </p>
             </div>
           </ScrollReveal>
@@ -437,7 +469,7 @@ const Investors = () => {
                 <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
                   Focus Health offers accredited investors a compelling opportunity to participate 
                   in Texas's growing freestanding emergency room market—backed by experienced 
-                  operators and a proven development model.
+                  operators and a proven development model. <Link href="/insights/focus-health-build-fund-operate-platform" className="text-primary hover:underline font-medium">Understand our platform model</Link>.
                 </p>
                 
                 <div className="space-y-4 mb-8">
@@ -620,6 +652,43 @@ const Investors = () => {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="section-padding bg-background" id="faq">
+        <div className="container-focus max-w-4xl">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">FAQ</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-4">
+                Investor FAQ
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Answers to common questions from accredited investors evaluating healthcare infrastructure opportunities
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="space-y-6">
+            {[
+              { q: 'Who qualifies as an accredited investor?', a: 'Under SEC regulations, accredited investors include individuals with a net worth exceeding $1 million (excluding primary residence) or annual income exceeding $200,000 ($300,000 with a spouse) for the last two years. Qualified institutional buyers and entities with $5 million+ in assets also qualify.' },
+              { q: 'What is the minimum investment to participate?', a: 'Minimum investment amounts vary by opportunity and deal structure. Typical minimums range from $250,000 to $500,000 per facility investment. We work with investors to find the right fit for their portfolio.' },
+              { q: 'How is investor capital deployed?', a: 'Capital is deployed towards facility acquisition, build-out, equipment, licensing, and initial operating costs. Focus Health manages the end-to-end process—from site selection through grand opening—so investors benefit from a fully managed deployment timeline.' },
+              { q: 'What returns can investors expect?', a: 'Historical returns vary by market and facility type. Freestanding ERs typically generate strong cash-on-cash returns driven by 24/7 patient volume and favourable reimbursement rates. Specific projections are shared under NDA during the due-diligence process.' },
+              { q: 'How does Focus Health report to investors?', a: 'Investors receive quarterly financial reports, monthly operational dashboards, and annual performance summaries. Our investor relations team is available for ad-hoc questions and provides transparent, auditable documentation.' },
+              { q: 'What is the typical holding period?', a: 'Most investments are structured with a 5–7 year holding horizon, though liquidity events can occur earlier depending on market conditions and portfolio strategy. Exit mechanisms include facility sale, recapitalisation, or portfolio roll-up.' },
+              { q: 'How does Focus Health mitigate investment risk?', a: 'Our Build-Fund-Operate model reduces risk through proven site-selection analytics, conservative underwriting, diversified market positioning, and full operational control. Each facility is backed by licensed clinical teams and 24/7 management infrastructure.' },
+              { q: 'How do I start the due-diligence process?', a: 'Join the waitlist above to request our investor deck. Our team will schedule an introductory call, share detailed financials under NDA, and guide you through the full due-diligence process.' },
+            ].map((faq, index) => (
+              <ScrollReveal key={index} delay={index * 0.08}>
+                <div className="p-6 rounded-2xl bg-card border border-border">
+                  <h3 className="font-heading font-bold text-lg mb-2">{faq.q}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{faq.a}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA & Form Section */}
       <section id="waitlist" className="section-padding bg-gradient-to-b from-primary to-primary/90 text-primary-foreground">
         <div className="container-focus">
@@ -704,7 +773,7 @@ const Investors = () => {
                 Due Diligence Resources
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Learn more about our proven platform, market opportunity, and the team behind Focus Health
+                Learn more about our proven platform, market opportunity, and the team behind Focus Health. <Link href="/insights/investor-checklist-healthcare-infrastructure-operators" className="text-primary hover:underline font-medium">Read the investor checklist</Link>.
               </p>
             </div>
           </ScrollReveal>

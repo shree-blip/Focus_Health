@@ -3,7 +3,7 @@ import Script from 'next/script';
 import { generateSEOMetadata } from '@/lib/metadata';
 import { BLOG_POSTS, getBlogPostBySlug } from '@/lib/blog-posts';
 import { WebPageStructuredData } from '@/components/seo/WebPageStructuredData';
-import { getArticleSchema, jsonLdScriptProps } from '@/lib/structuredData';
+import { getArticleSchema, getBreadcrumbSchema, jsonLdScriptProps } from '@/lib/structuredData';
 import BlogArticleContent from '@/components/blog/BlogArticleContent';
 
 export function generateStaticParams() {
@@ -57,6 +57,17 @@ export default async function InsightPostPage({ params }: { params: Promise<{ sl
             description={post.excerpt}
           />
           <Script id={`structured-data-insight-${post.slug}`} strategy="beforeInteractive" {...jsonLdScriptProps(articleSchema!)} />
+          <Script
+            id={`structured-data-breadcrumb-${post.slug}`}
+            strategy="beforeInteractive"
+            {...jsonLdScriptProps(
+              getBreadcrumbSchema([
+                { name: 'Home', path: '/' },
+                { name: 'Insights', path: '/insights' },
+                { name: post.title, path: `/insights/${post.slug}` },
+              ])
+            )}
+          />
         </>
       )}
 

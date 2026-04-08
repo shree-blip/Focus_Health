@@ -27,4 +27,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env*.local
+
+# Local raw media exports used to generate optimized Lufkin assets
+public/ErOfLufkin-Event-4k.mov
+public/ErOfLufkin-Event-Vertical.mov
+public/ErofLufkin-FraceMedia*.png
+public/ErOfLufkin-Event1.1 | Videos & Movies on Vimeo.html

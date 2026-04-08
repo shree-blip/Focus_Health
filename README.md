@@ -71,3 +71,23 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Form email setup (Resend)
+
+All public website forms are configured to send:
+
+- one confirmation email to the user
+- one notification email to your internal info inbox
+
+Set the following environment variables:
+
+```sh
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL="Focus Health <no-reply@yourdomain.com>"
+RESEND_INFO_EMAIL="info@getfocushealth.com"
+```
+
+Notes:
+
+- `RESEND_FROM_EMAIL` must use a sender domain verified in Resend.
+- If `RESEND_INFO_EMAIL` is not set, the fallback recipient is `info@getfocushealth.com`.

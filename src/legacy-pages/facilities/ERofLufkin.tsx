@@ -1,8 +1,10 @@
 "use client";
 
 import { PageHero } from '@/components/ui/PageHero';
+import { FullscreenVideoCard } from '@/components/ui/FullscreenVideoCard';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { motion } from 'framer-motion';
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
 import Link from 'next/link';
 import {
   Clock, Shield, Stethoscope, Heart, Activity, Baby,
@@ -11,7 +13,9 @@ import {
   HeartPulse, Pill, Microscope, Zap, ExternalLink
 } from 'lucide-react';
 const facilityImage = "/facility-er-lufkin-real.webp";
-const lufkinGrandOpeningEmbedUrl = "https://player.vimeo.com/video/1178939041?h=47ffc8be30";
+const heroImage = lufkinGrandOpeningMedia.heroDesktop;
+const heroImageMobile = lufkinGrandOpeningMedia.heroMobile;
+const grandOpeningGallery = lufkinGrandOpeningMedia.galleryImages;
 
 const BASE_URL = 'https://getfocushealth.com';
 
@@ -142,8 +146,7 @@ const erOfLufkinSchema = {
   "alternateName": "ER of Lufkin – Freestanding Emergency Room",
   "description": "ER of Lufkin is a 24/7 freestanding emergency room in Lufkin, Texas providing board-certified emergency physicians, on-site CT scan, X-ray, ultrasound, in-house laboratory, and comprehensive emergency care for all ages. Serving Angelina County, Nacogdoches, and East Texas.",
   "url": "https://getfocushealth.com/facilities/er-of-lufkin",
-  "telephone": "+1-936-000-0000",
-  "image": `${BASE_URL}/assets/facility-er-lufkin-real.webp`,
+  "image": `${BASE_URL}${heroImage}`,
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "501 N Brentwood Dr",
@@ -202,32 +205,6 @@ const faqSchema = {
   }))
 };
 
-const GrandOpeningEmbedCard = ({
-  src,
-  title,
-}: {
-  src: string;
-  title: string;
-}) => {
-  return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-base font-semibold text-center text-foreground/80 tracking-wide">{title}</h3>
-      <div className="relative rounded-2xl overflow-hidden border border-border shadow-lg aspect-video bg-muted">
-        <iframe
-          title={title}
-          src={src}
-          loading="lazy"
-          frameBorder={0}
-          referrerPolicy="strict-origin-when-cross-origin"
-          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-          allowFullScreen
-          className="h-full w-full"
-        />
-      </div>
-    </div>
-  );
-};
-
 const GrandOpeningSection = () => (
   <section className="w-full bg-background py-10 md:py-14">
     <div className="container-focus">
@@ -240,11 +217,39 @@ const GrandOpeningSection = () => (
         </h2>
       </div>
 
-      <div className="max-w-4xl mx-auto">
-        <GrandOpeningEmbedCard
-          src={lufkinGrandOpeningEmbedUrl}
+      <div className="max-w-6xl mx-auto">
+        <FullscreenVideoCard
+          desktopSrc={lufkinGrandOpeningMedia.videoDesktop}
+          mobileSrc={lufkinGrandOpeningMedia.videoMobile}
+          poster={heroImage}
+          mobilePoster={heroImageMobile}
           title="ER of Lufkin — Grand Opening"
+          ariaLabel="ER of Lufkin grand opening event highlight video"
+          previewContainerClassName="mx-auto max-w-sm sm:max-w-none"
+          previewAspectClassName="aspect-[9/16] sm:aspect-video"
         />
+      </div>
+
+      <div className="max-w-6xl mx-auto mt-10 sm:mt-14">
+        <div className="text-center mb-8">
+          <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Opening Day Gallery</p>
+          <p className="text-muted-foreground max-w-3xl mx-auto">
+            A look at the ribbon cutting, the community turnout, and the team that opened ER of Lufkin to East Texas.
+          </p>
+        </div>
+
+        <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
+          {grandOpeningGallery.map((image, index) => (
+            <div key={image} className="mb-4 break-inside-avoid overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+              <img
+                src={image}
+                alt={`ER of Lufkin grand opening photo ${index + 1}`}
+                loading="lazy"
+                className="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </section>
@@ -257,7 +262,8 @@ const ERofLufkin = () => {
       <PageHero
         title="ER of Lufkin"
         description="24/7 freestanding emergency room in Lufkin, Texas — board-certified physicians, on-site imaging, and minimal wait times serving Angelina County and East Texas."
-        backgroundImage={facilityImage}
+        backgroundImage={heroImage}
+        mobileBackgroundImage={heroImageMobile}
         primaryCta={{ text: "View All Facilities", link: "/track-record" }}
         secondaryCta={{ text: "Contact Us", link: "/contact" }}
       />

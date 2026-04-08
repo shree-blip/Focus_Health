@@ -11,6 +11,7 @@ interface PageHeroProps {
   title: string;
   description: string;
   backgroundImage: string;
+  mobileBackgroundImage?: string;
   primaryCta?: {
     text: string;
     link: string;
@@ -26,12 +27,14 @@ export const PageHero = ({
   title, 
   description, 
   backgroundImage, 
+  mobileBackgroundImage,
   primaryCta,
   secondaryCta,
 }: PageHeroProps) => {
   const router = useRouter();
-  const sharedHeroBackground = "/recent-event-hero.webp";
+  const sharedHeroBackground = "/lufkin-grand-opening/lufkin-hero-desktop.webp";
   const heroBackground = backgroundImage || sharedHeroBackground;
+  const heroBackgroundMobile = mobileBackgroundImage || heroBackground;
   const ctas = [primaryCta, secondaryCta].filter(
     (cta): cta is NonNullable<PageHeroProps['primaryCta']> => Boolean(cta)
   );
@@ -54,7 +57,14 @@ export const PageHero = ({
     <section className="relative -mt-[100px] h-[calc(50vh+200px)] sm:h-[calc(60vh+200px)] min-h-[550px] sm:min-h-[650px] max-h-[850px] flex items-center justify-center overflow-hidden">
       {/* Background Image with blur effect */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 sm:hidden"
+        style={{ 
+          backgroundImage: `url(${heroBackgroundMobile})`,
+          filter: 'blur(2px)',
+        }}
+      />
+      <div 
+        className="absolute inset-0 hidden bg-cover bg-center bg-no-repeat scale-105 sm:block"
         style={{ 
           backgroundImage: `url(${heroBackground})`,
           filter: 'blur(2px)',

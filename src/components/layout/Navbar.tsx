@@ -4,25 +4,40 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/platform', label: 'Platform' },
-  { href: '/market', label: 'Market' },
-  { href: '/track-record', label: 'Track Record' },
   { href: '/leadership', label: 'Leadership' },
   { href: '/partners', label: 'Partners' },
-  { href: '/insights', label: 'Insights' },
+  { href: '/investors', label: 'Investors' },
   { href: '/contact', label: 'Contact' },
+];
+
+const resourceLinks = [
+  { href: '/market', label: 'Market' },
+  { href: '/track-record', label: 'Track Record' },
+  { href: '/insights', label: 'Insights' },
+  { href: '/our-process', label: 'Our Process' },
 ];
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isResourceActive = pathname.startsWith('/market')
+    || pathname.startsWith('/track-record')
+    || pathname.startsWith('/insights')
+    || pathname.startsWith('/our-process');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,10 +62,10 @@ export const Navbar = () => {
       )}
     >
       <div className="container-focus">
-        <nav className="flex items-center justify-between h-16 sm:h-20">
+        <nav className="flex items-center justify-between h-16 sm:h-20 gap-4 xl:gap-6">
           {/* Logo */}
-          <Link href="/" aria-label="Focus Health home" className="flex flex-col gap-0.5 group">
-            <div className="flex items-center gap-3">
+          <Link href="/" aria-label="Focus Health home" className="group shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Image
                 src="/focus-health-icon.png"
                 alt="Focus Health Logo"
@@ -59,12 +74,12 @@ export const Navbar = () => {
                 priority
                 className="h-12 sm:h-16 w-auto group-hover:scale-105 transition-transform"
               />
-              <div className="hidden sm:flex flex-col gap-0.5">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading font-bold text-xl sm:text-2xl text-primary">Focus</span>
-                  <span className="font-heading font-bold text-xl sm:text-2xl text-secondary">Health</span>
+              <div className="flex flex-col gap-0.5 max-w-[140px] sm:max-w-none">
+                <div className="flex items-baseline gap-1 leading-none sm:gap-1.5">
+                  <span className="font-heading font-bold text-sm sm:text-xl lg:text-2xl text-primary whitespace-nowrap">Focus</span>
+                  <span className="font-heading font-bold text-sm sm:text-xl lg:text-2xl text-secondary whitespace-nowrap">Health</span>
                 </div>
-                <div className="text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest text-accent leading-tight">
+                <div className="text-[6px] sm:text-[9px] lg:text-[10px] font-semibold uppercase tracking-widest text-accent leading-tight">
                   Dallas&nbsp;|&nbsp;Houston&nbsp;|&nbsp;Austin
                   <br />
                   Fort Worth&nbsp;|&nbsp;San Antonio
@@ -74,7 +89,8 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex flex-1 items-center justify-center px-6 xl:px-10">
+            <div className="flex items-center gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -87,10 +103,31 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  'nav-link font-bold text-sm inline-flex items-center gap-1 outline-none',
+                  isResourceActive && 'active text-foreground'
+                )}
+              >
+                Resources
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-56">
+                {resourceLinks.map((resource) => (
+                  <DropdownMenuItem key={resource.href} asChild>
+                    <Link href={resource.href} className="w-full">
+                      {resource.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            </div>
           </div>
 
           {/* CTA Button */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4 shrink-0">
             <Button variant="hero" size="default" asChild>
               <Link href="/partners#opportunity-form">Partner With Us</Link>
             </Button>
@@ -111,7 +148,7 @@ export const Navbar = () => {
       <div
         className={cn(
           'lg:hidden bg-card border-t border-border overflow-hidden transition-all duration-300',
-          isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+          isMobileMenuOpen ? 'max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0'
         )}
       >
         <div className="container-focus py-6 flex flex-col gap-4">
@@ -129,6 +166,25 @@ export const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          <div className="mt-2 border-t border-border pt-4">
+            <p className="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resources</p>
+            <div className="flex flex-col gap-2">
+              {resourceLinks.map((resource) => (
+                <Link
+                  key={resource.href}
+                  href={resource.href}
+                  className={cn(
+                    'py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors',
+                    pathname === resource.href
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  )}
+                >
+                  {resource.label}
+                </Link>
+              ))}
+            </div>
+          </div>
           <Button variant="hero" className="mt-4" asChild>
             <Link href="/partners#opportunity-form">Partner With Us</Link>
           </Button>

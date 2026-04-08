@@ -4,10 +4,16 @@ import Leadership from "@/legacy-pages/Leadership";
 import { WebPageStructuredData } from "@/components/seo/WebPageStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Leadership",
+  title: "Leadership Team | Healthcare Infrastructure Experts | Focus Health",
   description:
-    "Meet Focus Health's experienced leadership team managing $100M+ in healthcare revenue: proven operators of 24+ facilities with expertise in emergency care infrastructure development and operations.",
-  canonicalUrl: "/leadership"
+    "Meet the Focus Health leadership team with 65+ years of combined experience in healthcare infrastructure, operations, and investment.",
+  canonicalUrl: "/leadership",
+  keywords: [
+    "Focus Health leadership",
+    "healthcare infrastructure team",
+    "ER operations leadership",
+    "healthcare management team",
+  ],
 });
 
 export default function LeadershipPage() {
@@ -15,8 +21,8 @@ export default function LeadershipPage() {
     <>
       <WebPageStructuredData
         path="/leadership"
-        title="Leadership | Focus Health"
-        description="Meet Focus Health's experienced leadership team managing $100M+ in healthcare revenue: proven operators of 24+ facilities with expertise in emergency care infrastructure development and operations."
+        title="Leadership Team | Healthcare Infrastructure Experts | Focus Health"
+        description="Meet the Focus Health leadership team with 65+ years of combined experience in healthcare infrastructure, operations, and investment."
       />
       <Leadership />
     </>

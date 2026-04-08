@@ -4,10 +4,16 @@ import TrackRecord from "@/legacy-pages/TrackRecord";
 import { WebPageStructuredData } from "@/components/seo/WebPageStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Track Record",
+  title: "Healthcare Facility Portfolio | 24+ Emergency Rooms & Clinics | Focus Health",
   description:
-    "See Focus Health's operational excellence: 24+ successfully managed emergency rooms and wellness clinics in Texas with transparent metrics, proven outcomes, and strong financial performance.",
-  canonicalUrl: "/track-record"
+    "View Focus Health's portfolio of 24+ freestanding emergency rooms and wellness clinics across Texas, Illinois, and Colorado.",
+  canonicalUrl: "/track-record",
+  keywords: [
+    "healthcare facility portfolio",
+    "freestanding emergency room portfolio",
+    "ER track record",
+    "healthcare operations track record",
+  ],
 });
 
 export default function TrackRecordPage() {
@@ -15,8 +21,8 @@ export default function TrackRecordPage() {
     <>
       <WebPageStructuredData
         path="/track-record"
-        title="Track Record | Focus Health"
-        description="See Focus Health's operational excellence: 24+ successfully managed emergency rooms and wellness clinics in Texas with transparent metrics, proven outcomes, and strong financial performance."
+        title="Healthcare Facility Portfolio | 24+ Emergency Rooms & Clinics | Focus Health"
+        description="View Focus Health's portfolio of 24+ freestanding emergency rooms and wellness clinics across Texas, Illinois, and Colorado."
       />
       <TrackRecord />
     </>

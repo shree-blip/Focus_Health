@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { generateSEOMetadata } from "@/lib/metadata";
 import ERofIrving from "@/legacy-pages/facilities/ERofIrving";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
+import { getBreadcrumbSchema, jsonLdScriptProps } from "@/lib/structuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "ER of Irving | 24/7 Emergency Room in Irving, TX",
@@ -35,6 +37,7 @@ export default function ERofIrvingPage() {
         openingHours="Mo-Su 00:00-23:59"
         serviceArea={["Irving", "Las Colinas", "Valley Ranch", "Coppell", "Grapevine", "Euless", "Bedford", "Grand Prairie", "Arlington", "Dallas"]}
       />
+      <Script id="structured-data-breadcrumb-er-irving" strategy="beforeInteractive" {...jsonLdScriptProps(getBreadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Facilities', path: '/track-record' }, { name: 'ER of Irving', path: '/facilities/er-of-irving' }]))} />
       <ERofIrving />
     </>
   );

@@ -248,7 +248,7 @@ const TrackRecordPage = () => {
                 Our Process
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                A proven methodology refined through years of operational experience
+                <Link href="/platform" className="text-primary hover:underline font-medium">Built on our healthcare infrastructure platform</Link> — a proven methodology refined through years of operational experience
               </p>
             </div>
           </ScrollReveal>
@@ -462,13 +462,18 @@ const TrackRecordPage = () => {
                   Ready to Partner?
                 </h2>
                 <p className="text-muted-foreground text-lg mb-8">
-                  Our track record speaks for itself. Partner with us to build healthcare infrastructure and generate strong returns through our proven platform and experienced team.
+                  Our track record speaks for itself. Partner with us to build healthcare infrastructure and generate strong returns through our proven platform and experienced team. <Link href="/insights" className="text-primary hover:underline font-medium">Read about our operational approach</Link>.
                 </p>
                 <div className="flex gap-4 flex-wrap">
                   <Button variant="hero" size="lg" asChild>
                     <Link href="/partners" className="flex items-center">
                       Explore Partnership
                       <ArrowRight size={18} className="ml-2" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild>
+                    <Link href="/investors">
+                      Explore Investment Opportunities
                     </Link>
                   </Button>
                   <Button variant="outline" size="lg" asChild>

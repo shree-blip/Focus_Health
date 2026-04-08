@@ -4,10 +4,16 @@ import Market from "@/legacy-pages/Market";
 import { WebPageStructuredData } from "@/components/seo/WebPageStructuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Market",
+  title: "Texas Healthcare Market Opportunity | Freestanding ER Expansion | Focus Health",
   description:
-    "Explore Texas's freestanding emergency room market opportunity: rapid population growth, geographic gaps, and proven demand for accessible emergency care infrastructure investment.",
-  canonicalUrl: "/market"
+    "Explore the $38B Texas freestanding ER market. Focus Health targets high-growth corridors in DFW, Houston, and Austin\u2013San Antonio.",
+  canonicalUrl: "/market",
+  keywords: [
+    "Texas freestanding ER market",
+    "healthcare market opportunity Texas",
+    "freestanding emergency room expansion",
+    "DFW healthcare market",
+  ],
 });
 
 export default function MarketPage() {
@@ -15,8 +21,8 @@ export default function MarketPage() {
     <>
       <WebPageStructuredData
         path="/market"
-        title="Market | Focus Health"
-        description="Explore Texas's freestanding emergency room market opportunity: rapid population growth, geographic gaps, and proven demand for accessible emergency care infrastructure investment."
+        title="Texas Healthcare Market Opportunity | Freestanding ER Expansion | Focus Health"
+        description="Explore the $38B Texas freestanding ER market. Focus Health targets high-growth corridors in DFW, Houston, and Austin\u2013San Antonio."
       />
       <Market />
     </>

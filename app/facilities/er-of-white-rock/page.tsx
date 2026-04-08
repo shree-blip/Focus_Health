@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { generateSEOMetadata } from "@/lib/metadata";
 import ERofWhiteRock from "@/legacy-pages/facilities/ERofWhiteRock";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
+import { getBreadcrumbSchema, jsonLdScriptProps } from "@/lib/structuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "ER of White Rock | 24/7 Emergency Room in Dallas, TX",
@@ -35,6 +37,7 @@ export default function ERofWhiteRockPage() {
         openingHours="Mo-Su 00:00-23:59"
         serviceArea={["Dallas", "White Rock Lake", "Lakewood", "Casa Linda", "Lake Highlands", "East Dallas", "Garland", "Mesquite", "Richardson", "Rowlett"]}
       />
+      <Script id="structured-data-breadcrumb-er-white-rock" strategy="beforeInteractive" {...jsonLdScriptProps(getBreadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Facilities', path: '/track-record' }, { name: 'ER of White Rock', path: '/facilities/er-of-white-rock' }]))} />
       <ERofWhiteRock />
     </>
   );

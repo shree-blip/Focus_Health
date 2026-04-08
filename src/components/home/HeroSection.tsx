@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Clock, MapPin, Zap, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Floating particle component
 const FloatingParticle = ({ delay, duration, x, y, size }: { delay: number; duration: number; x: number; y: number; size: number }) => (
@@ -156,6 +158,7 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   const { mouseX, mouseY } = useMousePosition();
+  const isMobile = useIsMobile();
 
   const springConfig = { stiffness: 100, damping: 30 };
   const transformedX = useTransform(mouseX, (x) => {
@@ -192,10 +195,46 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   );
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
-  const heroVideos = ['/Irving_Wellness/IHW-Event-Horizontal.mp4', '/ERofIrving-GrandOpening.mp4'];
-  const [heroVideoIndex, setHeroVideoIndex] = useState(0);
+  const videoIndexRef = useRef(0);
+  const [heroVideoSrc, setHeroVideoSrc] = useState('');
+  const [heroVideoPoster, setHeroVideoPoster] = useState('');
 
-  // Robust autoplay: handles first load, tab focus, back-nav (bfcache), retries
+  // Build playlist based on device
+  const heroVideoPlaylist = useMemo(
+    () => [
+      {
+        src: isMobile ? lufkinGrandOpeningMedia.videoMobile : lufkinGrandOpeningMedia.videoDesktop,
+        poster: isMobile ? lufkinGrandOpeningMedia.heroMobile : lufkinGrandOpeningMedia.heroDesktop,
+      },
+      {
+        src: '/Irving_Wellness/IHW-Event-Horizontal.mp4',
+        poster: isMobile ? lufkinGrandOpeningMedia.heroMobile : lufkinGrandOpeningMedia.heroDesktop,
+      },
+      {
+        src: '/ERofIrving-GrandOpening.mp4',
+        poster: isMobile ? lufkinGrandOpeningMedia.heroMobile : lufkinGrandOpeningMedia.heroDesktop,
+      },
+    ],
+    [isMobile],
+  );
+
+  // Set initial video on mount and when playlist changes
+  useEffect(() => {
+    videoIndexRef.current = 0;
+    setHeroVideoSrc(heroVideoPlaylist[0].src);
+    setHeroVideoPoster(heroVideoPlaylist[0].poster);
+  }, [heroVideoPlaylist]);
+
+  // Advance to next video when current one ends
+  const handleHeroVideoEnded = useCallback(() => {
+    const nextIndex = (videoIndexRef.current + 1) % heroVideoPlaylist.length;
+    videoIndexRef.current = nextIndex;
+    const next = heroVideoPlaylist[nextIndex];
+    setHeroVideoSrc(next.src);
+    setHeroVideoPoster(next.poster);
+  }, [heroVideoPlaylist]);
+
+  // Robust autoplay: handles first load, tab focus, back-nav, retries
   useEffect(() => {
     const v = heroVideoRef.current;
     if (!v) return;
@@ -205,24 +244,20 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       if (v.paused) v.play().catch(() => {});
     };
 
-    // Immediate + buffering events
     tryPlay();
     v.addEventListener('canplay', tryPlay);
     v.addEventListener('loadeddata', tryPlay);
 
-    // Tab/window regains focus
     const onVisibility = () => {
       if (document.visibilityState === 'visible') tryPlay();
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    // Back-navigation / bfcache restore — most common repeated-visit failure
     const onPageShow = (e: PageTransitionEvent) => {
       if (e.persisted) tryPlay();
     };
     window.addEventListener('pageshow', onPageShow);
 
-    // Safety-net retries for slow connections
     const t1 = setTimeout(tryPlay, 300);
     const t2 = setTimeout(tryPlay, 1000);
     const t3 = setTimeout(tryPlay, 2500);
@@ -236,28 +271,21 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, []);
-
-  const handleHeroVideoEnded = () => {
-    setHeroVideoIndex((current) => {
-      if (current < heroVideos.length - 1) return current + 1;
-      return current;
-    });
-  };
+  }, [heroVideoSrc]);
 
   return (
     <section className="relative -mt-[100px] min-h-[calc(100vh+200px)] flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
+          key={heroVideoSrc}
           ref={heroVideoRef}
-          src={heroVideos[heroVideoIndex]}
+          src={heroVideoSrc}
           autoPlay
-          loop={heroVideoIndex === heroVideos.length - 1}
           muted
           playsInline
-          preload="metadata"
-          poster="/recent-event-hero.webp"
+          preload="auto"
+          poster={heroVideoPoster}
           onEnded={handleHeroVideoEnded}
           aria-hidden="true"
           className="w-full h-full object-cover"

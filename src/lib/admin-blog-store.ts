@@ -22,7 +22,7 @@ export type AdminBlogPost = {
 
 const BLOG_STORE_KEY = "focus_admin_blog_posts";
 const BLOG_STORE_VERSION_KEY = "focus_admin_blog_version";
-const CURRENT_VERSION = "3";
+const CURRENT_VERSION = "5";
 
 function getSeedPosts(): AdminBlogPost[] {
   return BLOG_POSTS.map((p) => ({

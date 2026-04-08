@@ -8,11 +8,12 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { PageHero } from '@/components/ui/PageHero';
 import { Button } from '@/components/ui/button';
+import { lufkinGrandOpeningMedia } from '@/lib/lufkin-grand-opening-media';
 const heroProcess = "/hero-process.jpg";
 const facilityIrving = "/facility-er-irving-real.webp";
 const facilityLufkin = "/facility-er-lufkin-real.webp";
 const facilityWellness = "/facility-wellness-clinic.jpg";
-const grandOpeningVideo = "/ERofIrving-GrandOpening.mp4";
+const grandOpeningVideo = lufkinGrandOpeningMedia.videoDesktop;
 const facilityErWhiterock = "/facility-er-whiterock.webp";
 const irvingWellness1 = "/irving-wellness-1.jpg";
 const irvingWellness2 = "/irving-wellness-2.jpg";
@@ -171,7 +172,7 @@ const OurProcessPage = () => {
       {/* Hero */}
       <PageHero
         title="Our Process"
-        description="From site selection to operational excellence — see how we build and operate world-class healthcare facilities."
+        description="From site selection to operational excellence — see how we build and operate world-class healthcare facilities. Built on our infrastructure platform."
         backgroundImage={heroProcess}
         primaryCta={{ text: "View Our Facilities", link: "#facilities" }}
         secondaryCta={{ text: "Meet Our Team", link: "/leadership" }}
@@ -215,7 +216,7 @@ const OurProcessPage = () => {
                 Our Turnkey Process
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                A proven methodology refined through years of operational experience
+                <Link href="/platform" className="text-primary hover:underline font-medium">Built on our infrastructure platform</Link> — a proven methodology refined through years of operational experience. <Link href="/track-record" className="text-primary hover:underline font-medium">See completed projects</Link>.
               </p>
             </div>
           </ScrollReveal>
@@ -451,11 +452,11 @@ const OurProcessPage = () => {
               Ready to Partner With Us?
             </h2>
             <p className="text-primary-foreground/80 text-lg max-w-2xl mx-auto mb-8">
-              Learn how our proven process can help you build and operate successful healthcare facilities.
+              Learn how our proven process can help you build and operate successful healthcare facilities. <Link href="/insights/operational-readiness-90-days-before-facility-opening" className="text-accent hover:underline font-medium">Read our operational readiness guide</Link>.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button asChild size="lg" variant="secondary">
-                <a href="/investors">Investment Opportunities</a>
+                <a href="/partners">Start a Project With Us</a>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
                 <a href="/contact">Contact Us</a>

@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { generateSEOMetadata } from "@/lib/metadata";
+import { lufkinGrandOpeningMedia } from "@/lib/lufkin-grand-opening-media";
 import ERofLufkin from "@/legacy-pages/facilities/ERofLufkin";
 import { FacilityStructuredData } from "@/components/seo/FacilityStructuredData";
+import { getBreadcrumbSchema, jsonLdScriptProps } from "@/lib/structuredData";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "ER of Lufkin | 24/7 Emergency Room in Lufkin, TX",
   description:
     "24/7 freestanding emergency room at 501 N Brentwood Dr, Lufkin, TX 75904. Board-certified ER physicians, on-site CT scan, X-ray, lab & pharmacy. Minimal wait times serving Angelina County, Nacogdoches & East Texas.",
   canonicalUrl: "/facilities/er-of-lufkin",
-  ogImage: "/facility-er-lufkin-real.webp",
+  ogImage: lufkinGrandOpeningMedia.heroDesktop,
   keywords: [
     "ER of Lufkin", "Lufkin emergency room", "24/7 ER Lufkin TX",
     "freestanding ER East Texas", "emergency room Lufkin Texas",
@@ -35,6 +38,7 @@ export default function ERofLufkinPage() {
         openingHours="Mo-Su 00:00-23:59"
         serviceArea={["Lufkin", "Nacogdoches", "Livingston", "Jasper", "Crockett", "Center", "Diboll", "Hudson", "Huntington", "Angelina County"]}
       />
+      <Script id="structured-data-breadcrumb-er-lufkin" strategy="beforeInteractive" {...jsonLdScriptProps(getBreadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Facilities', path: '/track-record' }, { name: 'ER of Lufkin', path: '/facilities/er-of-lufkin' }]))} />
       <ERofLufkin />
     </>
   );

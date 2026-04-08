@@ -1,0 +1,20 @@
+export const lufkinGrandOpeningMedia = {
+  heroDesktop: "/lufkin-grand-opening/lufkin-hero-desktop.webp",
+  heroMobile: "/lufkin-grand-opening/lufkin-hero-mobile.webp",
+  videoDesktop: "/lufkin-grand-opening/lufkin-grand-opening-desktop.mp4",
+  videoMobile: "/lufkin-grand-opening/lufkin-grand-opening-mobile.mp4",
+  galleryImages: [
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia1.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia4.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia7.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia23.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia34.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia38.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia42.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia70.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia71.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia82.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia83.webp",
+    "/lufkin-grand-opening/gallery/ErofLufkin-FraceMedia84.webp",
+  ],
+} as const;

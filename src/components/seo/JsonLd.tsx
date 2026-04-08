@@ -11,9 +11,10 @@ const organizationSchema = {
     "Institutional-grade healthcare infrastructure company specializing in building and operating high-performance freestanding emergency rooms across Texas.",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Dexperts",
-    addressLocality: "Texas",
+    streetAddress: "3001 Skyway Cir N",
+    addressLocality: "Irving",
     addressRegion: "TX",
+    postalCode: "75038",
     addressCountry: "US",
   },
   email: "info@getfocushealth.com",

@@ -4,9 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node -e \"require('node:fs').rmSync('.next/cache/webpack', { recursive: true, force: true })\"",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "clean:next": "node -e \"require('node:fs').rmSync('.next', { recursive: true, force: true })\"",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -72,6 +74,7 @@
     "lucide-react": "^0.462.0",
     "next": "^15.3.5",
     "next-themes": "^0.3.0",
+    "nodemailer": "^8.0.4",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
@@ -90,6 +93,7 @@
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.16.5",
+    "@types/nodemailer": "^8.0.0",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "autoprefixer": "^10.4.21",
