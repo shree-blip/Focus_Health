@@ -17,18 +17,20 @@ function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const { error: authError } = await lopClient.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/lop/auth/callback?redirect=${encodeURIComponent(redirect)}`,
-        queryParams: {
-          hd: "getfocushealth.com", // Google Workspace domain hint
+    try {
+      const { error: authError } = await lopClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/lop/auth/callback?redirect=${encodeURIComponent(redirect)}`,
         },
-      },
-    });
+      });
 
-    if (authError) {
-      setError(authError.message);
+      if (authError) {
+        setError(authError.message);
+        setLoading(false);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start sign-in. Please try again.");
       setLoading(false);
     }
   };
@@ -94,8 +96,7 @@ function LoginForm() {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-slate-400">
-              Authorized domains: getfocushealth.com, erofwhiterock.com,
-              erofirving.com, eroflufkin.com
+              Sign in with your organization email
             </p>
           </div>
         </div>

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     // Optionally forward to Supabase Edge Function (best-effort)
     try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
       if (supabaseUrl && supabaseKey) {
         await fetch(`${supabaseUrl}/functions/v1/send-investor-request`, {
           method: "POST",
