@@ -9,12 +9,15 @@ import type { LopCaseStatus } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { hasPermission } from "@/lib/lop/permissions";
+import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SchedulingPage() {
   const { lopUser, activeFacilityId, facilities } = useLopAuth();
   const [patients, setPatients] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [markingArrived, setMarkingArrived] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -65,6 +68,47 @@ export default function SchedulingPage() {
     }
     return Object.entries(slots).sort(([a], [b]) => a.localeCompare(b));
   }, [patients]);
+
+  const canEdit = hasPermission(lopUser, "patient:update");
+
+  const handleMarkArrived = async (
+    e: React.MouseEvent,
+    patientId: string,
+    facilityId: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMarkingArrived(patientId);
+    try {
+      const { error } = await lopClient
+        .from("lop_patients")
+        .update({ case_status: "arrived" })
+        .eq("id", patientId);
+      if (error) throw error;
+
+      await lopClient.from("lop_audit_log").insert({
+        user_id: lopUser?.id,
+        action: "status_changed",
+        entity_type: "patient",
+        entity_id: patientId,
+        facility_id: facilityId,
+        old_values: { case_status: "scheduled" },
+        new_values: { case_status: "arrived" },
+      });
+
+      setPatients((prev) =>
+        prev.map((p) =>
+          p.id === patientId ? { ...p, case_status: "arrived" } : p
+        )
+      );
+      toast.success("Patient marked as arrived.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status.");
+    } finally {
+      setMarkingArrived(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -194,13 +238,35 @@ export default function SchedulingPage() {
                               : ""}
                           </p>
                         </div>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            CASE_STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {CASE_STATUS_LABELS[status] ?? status}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {canEdit && status === "scheduled" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 text-green-700 border-green-200 hover:bg-green-50"
+                              disabled={markingArrived === (p.id as string)}
+                              onClick={(e) =>
+                                handleMarkArrived(
+                                  e,
+                                  p.id as string,
+                                  p.facility_id as string
+                                )
+                              }
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                              {markingArrived === (p.id as string)
+                                ? "Updating..."
+                                : "Mark Arrived"}
+                            </Button>
+                          )}
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              CASE_STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {CASE_STATUS_LABELS[status] ?? status}
+                          </span>
+                        </div>
                       </Link>
                     );
                   })}

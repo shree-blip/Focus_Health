@@ -236,6 +236,42 @@ export default function LopDashboardPage() {
         </Card>
       </div>
 
+      {/* Case Status Breakdown */}
+      {stats?.statusBreakdown && Object.keys(stats.statusBreakdown).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Activity className="h-5 w-5 text-slate-500" />
+              Case Status Breakdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {Object.entries(stats.statusBreakdown)
+                .sort(([, a], [, b]) => b - a)
+                .map(([status, count]) => (
+                  <div
+                    key={status}
+                    className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg"
+                  >
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        CASE_STATUS_COLORS[status as LopCaseStatus] ??
+                        "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                    <span className="text-xs text-slate-600">
+                      {CASE_STATUS_LABELS[status as LopCaseStatus] ?? status}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Recent Patients */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

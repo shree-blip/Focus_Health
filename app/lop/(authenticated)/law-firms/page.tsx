@@ -24,6 +24,9 @@ import { toast } from "sonner";
 export default function LawFirmsPage() {
   const { lopUser } = useLopAuth();
   const [firms, setFirms] = useState<LopLawFirm[]>([]);
+  const [firmMetrics, setFirmMetrics] = useState<
+    Record<string, { count: number; avg_collected: number }>
+  >({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -41,11 +44,32 @@ export default function LawFirmsPage() {
   });
 
   const loadFirms = async () => {
-    const { data } = await lopClient
-      .from("lop_law_firms")
-      .select("*")
-      .order("name");
-    setFirms((data as unknown as LopLawFirm[]) ?? []);
+    const [firmsRes, patientsRes] = await Promise.all([
+      lopClient.from("lop_law_firms").select("*").order("name"),
+      lopClient
+        .from("lop_patients")
+        .select("law_firm_id, amount_collected")
+        .not("law_firm_id", "is", null),
+    ]);
+    setFirms((firmsRes.data as unknown as LopLawFirm[]) ?? []);
+
+    // Compute per-firm metrics
+    const metrics: Record<string, { count: number; total: number }> = {};
+    for (const p of (patientsRes.data ?? []) as Record<string, unknown>[]) {
+      const fid = p.law_firm_id as string;
+      if (!fid) continue;
+      if (!metrics[fid]) metrics[fid] = { count: 0, total: 0 };
+      metrics[fid].count += 1;
+      metrics[fid].total += parseFloat((p.amount_collected as string) ?? "0") || 0;
+    }
+    const computed: Record<string, { count: number; avg_collected: number }> = {};
+    for (const [fid, m] of Object.entries(metrics)) {
+      computed[fid] = {
+        count: m.count,
+        avg_collected: m.count > 0 ? m.total / m.count : 0,
+      };
+    }
+    setFirmMetrics(computed);
     setLoading(false);
   };
 
@@ -105,19 +129,50 @@ export default function LawFirmsPage() {
           .eq("id", editingFirm.id);
 
         if (error) throw error;
+
+        // Audit log for update
+        await lopClient.from("lop_audit_log").insert({
+          user_id: lopUser?.id,
+          action: "law_firm_updated",
+          entity_type: "law_firm",
+          entity_id: editingFirm.id,
+          old_values: {
+            name: editingFirm.name,
+            intake_email: editingFirm.intake_email,
+            is_active: editingFirm.is_active,
+          },
+          new_values: {
+            name: form.name.trim(),
+            intake_email: form.intake_email || null,
+            is_active: form.is_active,
+          },
+        });
         toast.success("Law firm updated.");
       } else {
-        const { error } = await lopClient.from("lop_law_firms").insert({
-          name: form.name.trim(),
-          intake_email: form.intake_email || null,
-          escalation_email: form.escalation_email || null,
-          primary_contact: form.primary_contact || null,
-          primary_phone: form.primary_phone || null,
-          notes: form.notes || null,
-          is_active: form.is_active,
-        });
+        const { data: newFirm, error } = await lopClient
+          .from("lop_law_firms")
+          .insert({
+            name: form.name.trim(),
+            intake_email: form.intake_email || null,
+            escalation_email: form.escalation_email || null,
+            primary_contact: form.primary_contact || null,
+            primary_phone: form.primary_phone || null,
+            notes: form.notes || null,
+            is_active: form.is_active,
+          })
+          .select("id")
+          .single();
 
         if (error) throw error;
+
+        // Audit log for create
+        await lopClient.from("lop_audit_log").insert({
+          user_id: lopUser?.id,
+          action: "law_firm_created",
+          entity_type: "law_firm",
+          entity_id: newFirm?.id,
+          new_values: { name: form.name.trim() },
+        });
         toast.success("Law firm added.");
       }
 
@@ -211,6 +266,21 @@ export default function LawFirmsPage() {
                 )}
               </CardHeader>
               <CardContent className="space-y-1.5 text-sm">
+                {/* Metrics */}
+                <div className="flex gap-4 pb-2 mb-2 border-b border-slate-100">
+                  <div>
+                    <p className="text-xs text-slate-400">Patients</p>
+                    <p className="font-semibold text-slate-900">
+                      {firmMetrics[firm.id]?.count ?? 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">Avg Collected</p>
+                    <p className="font-semibold text-slate-900">
+                      ${(firmMetrics[firm.id]?.avg_collected ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </p>
+                  </div>
+                </div>
                 {firm.primary_contact && (
                   <p className="text-slate-600">
                     <span className="text-slate-400">Contact:</span>{" "}

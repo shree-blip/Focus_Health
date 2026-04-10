@@ -394,22 +394,65 @@ function UsersTab() {
 function FacilitiesTab() {
   const [facilities, setFacilities] = useState<LopFacility[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    slug: "",
+    type: "er" as string,
+    address: "",
+    is_active: true,
+  });
+
+  const loadFacilities = async () => {
+    const { data } = await lopClient
+      .from("lop_facilities")
+      .select("*")
+      .order("name");
+    setFacilities((data as unknown as LopFacility[]) ?? []);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const load = async () => {
-      const { data } = await lopClient
-        .from("lop_facilities")
-        .select("*")
-        .order("name");
-      setFacilities((data as unknown as LopFacility[]) ?? []);
-      setLoading(false);
-    };
-    load();
+    loadFacilities();
   }, []);
+
+  const handleAddFacility = async () => {
+    if (!form.name.trim() || !form.slug.trim()) {
+      toast.error("Name and slug are required.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await lopClient.from("lop_facilities").insert({
+        name: form.name.trim(),
+        slug: form.slug.trim(),
+        type: form.type,
+        address: form.address || null,
+        is_active: form.is_active,
+      });
+      if (error) throw error;
+      toast.success("Facility added.");
+      setDialogOpen(false);
+      setForm({ name: "", slug: "", type: "er", address: "", is_active: true });
+      loadFacilities();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add facility.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-500">{facilities.length} facilities</p>
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-slate-500">{facilities.length} facilities</p>
+        <Button onClick={() => setDialogOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Facility
+        </Button>
+      </div>
       {loading ? (
         <div className="py-12 text-center text-slate-400 animate-pulse">
           Loading…
@@ -441,6 +484,77 @@ function FacilitiesTab() {
           ))}
         </div>
       )}
+
+      {/* Add Facility Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Facility</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <Label>Facility Name *</Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Slug *</Label>
+              <Input
+                value={form.slug}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+                  }))
+                }
+                placeholder="e.g. er-of-dallas"
+              />
+            </div>
+            <div>
+              <Label>Type</Label>
+              <Select
+                value={form.type}
+                onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="er">ER</SelectItem>
+                  <SelectItem value="clinic">Clinic</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Address</Label>
+              <Input
+                value={form.address}
+                onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={(checked) =>
+                  setForm((f) => ({ ...f, is_active: checked }))
+                }
+              />
+              <Label>Active</Label>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddFacility} disabled={saving}>
+                {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                Add Facility
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -609,11 +723,12 @@ function AuditTab() {
                   <th className="px-4 py-3 font-medium text-slate-500">User</th>
                   <th className="px-4 py-3 font-medium text-slate-500">Action</th>
                   <th className="px-4 py-3 font-medium text-slate-500">Entity</th>
+                  <th className="px-4 py-3 font-medium text-slate-500">Changes</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {logs.map((l) => (
-                  <tr key={l.id as string} className="hover:bg-slate-50">
+                  <tr key={l.id as string} className="hover:bg-slate-50 align-top">
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {new Date(l.created_at as string).toLocaleString()}
                     </td>
@@ -627,7 +742,28 @@ function AuditTab() {
                     </td>
                     <td className="px-4 py-3 text-slate-600 text-xs">
                       {l.entity_type as string}
-                      {l.entity_id ? ` · ${(l.entity_id as string).slice(0, 8)}…` : ""}
+                      {l.entity_id ? ` \u00B7 ${(l.entity_id as string).slice(0, 8)}\u2026` : ""}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-slate-500 max-w-xs">
+                      {l.old_values && (
+                        <div>
+                          <span className="text-red-500 font-medium">Old: </span>
+                          <code className="bg-red-50 px-1 rounded">
+                            {JSON.stringify(l.old_values)}
+                          </code>
+                        </div>
+                      )}
+                      {l.new_values && (
+                        <div className="mt-0.5">
+                          <span className="text-green-600 font-medium">New: </span>
+                          <code className="bg-green-50 px-1 rounded">
+                            {JSON.stringify(l.new_values)}
+                          </code>
+                        </div>
+                      )}
+                      {!l.old_values && !l.new_values && (
+                        <span className="text-slate-300">&mdash;</span>
+                      )}
                     </td>
                   </tr>
                 ))}

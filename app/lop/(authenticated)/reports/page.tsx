@@ -76,7 +76,21 @@ export default function ReportsPage() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [facilityFilter, setFacilityFilter] = useState<string>("all");
+  const [nameFilter, setNameFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [lowThreshold, setLowThreshold] = useState(3000);
+
+  // Load config threshold on mount
+  useEffect(() => {
+    lopClient
+      .from("lop_config")
+      .select("value")
+      .eq("key", "low_collection_threshold")
+      .single()
+      .then(({ data }) => {
+        if (data?.value) setLowThreshold(Number(data.value) || 3000);
+      });
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -105,24 +119,40 @@ export default function ReportsPage() {
   }, [datePreset, customFrom, customTo, activeFacilityId, facilityFilter]);
 
   // Compute metrics
+  const filteredPatients = useMemo(() => {
+    let result = patients;
+    if (nameFilter.trim()) {
+      const q = nameFilter.toLowerCase();
+      result = result.filter(
+        (p) =>
+          ((p.first_name as string) ?? "").toLowerCase().includes(q) ||
+          ((p.last_name as string) ?? "").toLowerCase().includes(q)
+      );
+    }
+    if (statusFilter !== "all") {
+      result = result.filter((p) => p.case_status === statusFilter);
+    }
+    return result;
+  }, [patients, nameFilter, statusFilter]);
+
   const metrics = useMemo(() => {
-    const totalPatients = patients.length;
-    const totalBilled = patients.reduce((s, p) => s + (Number(p.bill_charges) || 0), 0);
-    const totalCollected = patients.reduce((s, p) => s + (Number(p.amount_collected) || 0), 0);
+    const totalPatients = filteredPatients.length;
+    const totalBilled = filteredPatients.reduce((s, p) => s + (Number(p.bill_charges) || 0), 0);
+    const totalCollected = filteredPatients.reduce((s, p) => s + (Number(p.amount_collected) || 0), 0);
     const avgBilled = totalPatients > 0 ? totalBilled / totalPatients : 0;
     const avgCollected = totalPatients > 0 ? totalCollected / totalPatients : 0;
 
-    const openFollowUps = patients.filter((p) => p.case_status === "follow_up_needed").length;
-    const droppedCases = patients.filter(
+    const openFollowUps = filteredPatients.filter((p) => p.case_status === "follow_up_needed").length;
+    const droppedCases = filteredPatients.filter(
       (p) => p.case_status === "case_dropped" || p.case_status === "closed_no_recovery"
     ).length;
-    const missingLop = patients.filter(
+    const missingLop = filteredPatients.filter(
       (p) => p.lop_letter_status === "requested" || p.lop_letter_status === "missing"
     ).length;
 
     // By law firm
     const firmMap: Record<string, LawFirmMetric> = {};
-    for (const p of patients) {
+    for (const p of filteredPatients) {
       const firm = p.lop_law_firms as Record<string, unknown> | null;
       if (!firm?.id) continue;
       const fid = firm.id as string;
@@ -156,7 +186,7 @@ export default function ReportsPage() {
 
     // By facility
     const facMap: Record<string, { name: string; count: number; billed: number; collected: number }> = {};
-    for (const p of patients) {
+    for (const p of filteredPatients) {
       const fac = p.lop_facilities as Record<string, unknown> | null;
       const fid = p.facility_id as string;
       if (!facMap[fid]) {
@@ -185,7 +215,7 @@ export default function ReportsPage() {
       firmMetrics,
       facilityMetrics,
     };
-  }, [patients, lowThreshold]);
+  }, [filteredPatients, lowThreshold]);
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", {
@@ -196,6 +226,39 @@ export default function ReportsPage() {
 
   const alertFirms = metrics.firmMetrics.filter((f) => f.belowThreshold);
 
+  const handleExportCsv = () => {
+    const rows = filteredPatients.map((p) => ({
+      first_name: p.first_name ?? "",
+      last_name: p.last_name ?? "",
+      facility: (p.lop_facilities as Record<string, unknown>)?.name ?? "",
+      law_firm: (p.lop_law_firms as Record<string, unknown>)?.name ?? "",
+      case_status: p.case_status ?? "",
+      lop_letter_status: p.lop_letter_status ?? "",
+      bill_charges: p.bill_charges ?? "",
+      amount_collected: p.amount_collected ?? "",
+      date_of_accident: p.date_of_accident ?? "",
+      created_at: p.created_at ?? "",
+    }));
+    const header = Object.keys(rows[0] ?? {}).join(",");
+    const csv =
+      header +
+      "\n" +
+      rows
+        .map((r) =>
+          Object.values(r)
+            .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+            .join(",")
+        )
+        .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lop-report-${datePreset}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -205,6 +268,15 @@ export default function ReportsPage() {
             Financial analytics across all facilities
           </p>
         </div>
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={handleExportCsv}
+          disabled={filteredPatients.length === 0}
+        >
+          <Download className="h-4 w-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Filters */}
@@ -277,6 +349,37 @@ export default function ReportsPage() {
                 </Select>
               </div>
             )}
+
+            <div>
+              <label className="text-xs font-medium text-slate-500 mb-1 block">
+                Patient Name
+              </label>
+              <Input
+                placeholder="Search by name..."
+                value={nameFilter}
+                onChange={(e) => setNameFilter(e.target.value)}
+                className="w-[180px]"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-slate-500 mb-1 block">
+                Case Status
+              </label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  {Object.entries(CASE_STATUS_LABELS).map(([val, label]) => (
+                    <SelectItem key={val} value={val}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
