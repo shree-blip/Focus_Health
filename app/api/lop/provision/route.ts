@@ -1,0 +1,158 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+
+// Service-role client — bypasses RLS
+function getAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
+
+const ALLOWED_DOMAINS = [
+  "getfocushealth.com",
+  "focusyourfinance.com",
+  "erofwhiterock.com",
+  "erofirving.com",
+  "eroflufkin.com",
+];
+
+function isDomainAllowed(email: string): boolean {
+  const domain = email.split("@")[1]?.toLowerCase();
+  return domain ? ALLOWED_DOMAINS.includes(domain) : false;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Verify the caller is actually authenticated
+    const response = NextResponse.next();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY)!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
+          },
+        },
+      },
+    );
+
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    if (!authUser) {
+      return NextResponse.json(
+        { error: "Not authenticated" },
+        { status: 401 },
+      );
+    }
+
+    const { auth_user_id, email, full_name } = await request.json();
+
+    // Validate the request matches the authenticated user
+    if (auth_user_id !== authUser.id) {
+      return NextResponse.json(
+        { error: "User mismatch" },
+        { status: 403 },
+      );
+    }
+
+    const admin = getAdminClient();
+    const normalizedEmail = (email || authUser.email || "").toLowerCase();
+
+    // Step 1: Check by auth_user_id
+    const { data: existingById } = await admin
+      .from("lop_users")
+      .select("*")
+      .eq("auth_user_id", auth_user_id)
+      .single();
+
+    if (existingById) {
+      return NextResponse.json({ user: existingById });
+    }
+
+    // Step 2: Check by email and link auth_user_id
+    if (normalizedEmail) {
+      const { data: existingByEmail } = await admin
+        .from("lop_users")
+        .select("*")
+        .eq("email", normalizedEmail)
+        .single();
+
+      if (existingByEmail) {
+        const { data: linked } = await admin
+          .from("lop_users")
+          .update({ auth_user_id })
+          .eq("id", existingByEmail.id)
+          .select("*")
+          .single();
+
+        return NextResponse.json({ user: linked || existingByEmail });
+      }
+    }
+
+    // Step 3: Auto-provision if domain is allowed
+    if (normalizedEmail && isDomainAllowed(normalizedEmail)) {
+      const { data: newUser, error: insertError } = await admin
+        .from("lop_users")
+        .insert({
+          auth_user_id,
+          email: normalizedEmail,
+          full_name: full_name || normalizedEmail.split("@")[0],
+          role: "front_desk",
+          is_active: true,
+        })
+        .select("*")
+        .single();
+
+      if (insertError) {
+        console.error("Provision insert error:", insertError);
+        return NextResponse.json(
+          { error: "Failed to create account: " + insertError.message },
+          { status: 500 },
+        );
+      }
+
+      // Also assign all active facilities to the new user
+      const { data: facilities } = await admin
+        .from("lop_facilities")
+        .select("id")
+        .eq("is_active", true);
+
+      if (facilities && facilities.length > 0 && newUser) {
+        await admin.from("lop_user_facilities").insert(
+          facilities.map((f: { id: string }) => ({
+            user_id: newUser.id,
+            facility_id: f.id,
+          })),
+        );
+      }
+
+      return NextResponse.json({ user: newUser });
+    }
+
+    // Domain not allowed
+    return NextResponse.json(
+      {
+        error:
+          "Your email domain is not authorized for the LOP Dashboard. Contact your administrator.",
+      },
+      { status: 403 },
+    );
+  } catch (err) {
+    console.error("Provision error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}

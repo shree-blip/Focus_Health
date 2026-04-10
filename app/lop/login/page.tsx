@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { lopClient } from "@/lib/lop/client";
@@ -12,6 +12,15 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/lop";
+
+  // If user already has a session, redirect straight to dashboard
+  useEffect(() => {
+    lopClient.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        window.location.href = redirect;
+      }
+    });
+  }, [redirect]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
