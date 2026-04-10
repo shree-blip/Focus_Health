@@ -151,6 +151,8 @@ export default function PatientDetailPage({
     status: "requested" as string,
   });
   const [docFile, setDocFile] = useState<File | null>(null);
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
 
   // Load data
   const loadData = useCallback(async () => {
@@ -275,6 +277,7 @@ export default function PatientDetailPage({
       toast.error("No law firm assigned to this patient.");
       return;
     }
+    setSendingReminder(true);
     try {
       const { data: firm } = await lopClient
         .from("lop_law_firms")
@@ -317,6 +320,8 @@ export default function PatientDetailPage({
     } catch (err) {
       console.error(err);
       toast.error("Failed to send reminder.");
+    } finally {
+      setSendingReminder(false);
     }
   };
 
@@ -387,6 +392,7 @@ export default function PatientDetailPage({
     storagePath: string | null
   ) => {
     if (!confirm("Delete this document?")) return;
+    setDeletingDocId(docId);
     try {
       if (storagePath) {
         await lopClient.storage.from("lop-documents").remove([storagePath]);
@@ -397,6 +403,8 @@ export default function PatientDetailPage({
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete document.");
+    } finally {
+      setDeletingDocId(null);
     }
   };
 
@@ -464,10 +472,15 @@ export default function PatientDetailPage({
             <Button
               variant="outline"
               onClick={handleSendReminder}
+              disabled={sendingReminder}
               className="gap-2"
             >
-              <Mail className="h-4 w-4" />
-              Send Reminder
+              {sendingReminder ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Mail className="h-4 w-4" />
+              )}
+              {sendingReminder ? "Sending…" : "Send Reminder"}
             </Button>
           )}
           {canEdit && (
@@ -954,6 +967,7 @@ export default function PatientDetailPage({
                           <Button
                             variant="ghost"
                             size="icon"
+                            disabled={deletingDocId === (doc.id as string)}
                             onClick={() =>
                               handleDeleteDoc(
                                 doc.id as string,
@@ -961,7 +975,11 @@ export default function PatientDetailPage({
                               )
                             }
                           >
-                            <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                            {deletingDocId === (doc.id as string) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
+                            )}
                           </Button>
                         )}
                       </div>

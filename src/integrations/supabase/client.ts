@@ -30,6 +30,7 @@ function getSupabase(): SupabaseClient<Database> {
     }
     _supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       auth: {
+        flowType: 'pkce',
         storage: typeof window !== 'undefined' ? window.localStorage : undefined,
         persistSession: typeof window !== 'undefined',
         autoRefreshToken: typeof window !== 'undefined',

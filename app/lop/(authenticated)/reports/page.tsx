@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   Download,
   Filter,
+  Loader2,
 } from "lucide-react";
 
 // Date range presets
@@ -385,8 +386,9 @@ export default function ReportsPage() {
       </Card>
 
       {loading ? (
-        <div className="py-16 text-center text-slate-400 animate-pulse">
-          Loading reports…
+        <div className="py-16 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
+          <p className="text-sm text-slate-400">Loading reports…</p>
         </div>
       ) : (
         <>

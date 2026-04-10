@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { hasPermission } from "@/lib/lop/permissions";
-import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Calendar, Clock, Plus, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SchedulingPage() {
@@ -188,8 +188,9 @@ export default function SchedulingPage() {
 
       {/* Timeline */}
       {loading ? (
-        <div className="py-16 text-center text-slate-400 animate-pulse">
-          Loading schedule…
+        <div className="py-16 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
+          <p className="text-sm text-slate-400">Loading schedule…</p>
         </div>
       ) : patients.length === 0 ? (
         <Card>

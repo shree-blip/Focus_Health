@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Search, Download } from "lucide-react";
+import { Plus, Search, Download, Loader2 } from "lucide-react";
 
 export default function PatientsListPage() {
   const { lopUser, activeFacilityId, facilities } = useLopAuth();
@@ -139,8 +139,9 @@ export default function PatientsListPage() {
       <Card>
         <CardContent className="p-0">
           {loading ? (
-            <div className="py-16 text-center text-slate-400 animate-pulse">
-              Loading patients…
+            <div className="py-16 text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
+              <p className="text-sm text-slate-400">Loading patients…</p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-16 text-center text-slate-400">
