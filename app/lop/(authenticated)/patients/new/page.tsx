@@ -26,6 +26,11 @@ export default function NewPatientPage() {
   const { lopUser, facilities, activeFacilityId } = useLopAuth();
   const [lawFirms, setLawFirms] = useState<LopLawFirm[]>([]);
   const [saving, setSaving] = useState(false);
+  const [mandatoryFields, setMandatoryFields] = useState<string[]>([
+    "first_name",
+    "last_name",
+    "facility_id",
+  ]);
 
   const [form, setForm] = useState({
     facility_id: activeFacilityId ?? "",
@@ -53,7 +58,27 @@ export default function NewPatientPage() {
       });
       setLawFirms((data as unknown as LopLawFirm[]) ?? []);
     };
+
+    const loadMandatoryFields = async () => {
+      try {
+        const { data } = await lopDb.select("lop_config", {
+          filters: [{ column: "key", op: "eq", value: "mandatory_intake_fields" }],
+          single: true,
+        });
+        if (data && (data as Record<string, unknown>).value) {
+          const val = (data as Record<string, unknown>).value;
+          const fields = typeof val === "string" ? JSON.parse(val) : val;
+          if (Array.isArray(fields) && fields.length > 0) {
+            setMandatoryFields(fields);
+          }
+        }
+      } catch {
+        // Fallback to defaults if config not available
+      }
+    };
+
     loadFirms();
+    loadMandatoryFields();
   }, []);
 
   useEffect(() => {
@@ -66,10 +91,31 @@ export default function NewPatientPage() {
   const update = (field: string, value: string) =>
     setForm((f) => ({ ...f, [field]: value }));
 
+  const isRequired = (field: string) => mandatoryFields.includes(field);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.first_name || !form.last_name || !form.facility_id) {
-      toast.error("Patient name and facility are required.");
+
+    // Validate mandatory fields dynamically
+    const fieldLabels: Record<string, string> = {
+      first_name: "First Name",
+      last_name: "Last Name",
+      facility_id: "Facility",
+      law_firm_id: "Law Firm",
+      date_of_accident: "Date of Accident",
+      phone: "Phone",
+      email: "Email",
+      date_of_birth: "Date of Birth",
+      expected_arrival: "Expected Arrival",
+      address_line1: "Address",
+    };
+    const missing = mandatoryFields.filter(
+      (f) => !form[f as keyof typeof form]?.toString().trim(),
+    );
+    if (missing.length > 0) {
+      toast.error(
+        `Required: ${missing.map((f) => fieldLabels[f] || f).join(", ")}`,
+      );
       return;
     }
 
@@ -112,6 +158,20 @@ export default function NewPatientPage() {
         new_values: { first_name: form.first_name, last_name: form.last_name },
       });
 
+      // Send scheduling notifications if patient has expected arrival
+      if (form.expected_arrival) {
+        try {
+          await fetch("/api/lop/schedule-notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ patientId: data.id }),
+          });
+        } catch {
+          // Non-blocking: notification failure shouldn't block patient creation
+          console.warn("Failed to send scheduling notification");
+        }
+      }
+
       toast.success("Patient record created.");
       router.push(`/lop/patients/${data.id}`);
     } catch (err) {
@@ -144,7 +204,7 @@ export default function NewPatientPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label>Facility *</Label>
+              <Label>Facility{isRequired("facility_id") ? " *" : ""}</Label>
               <Select
                 value={form.facility_id}
                 onValueChange={(v) => update("facility_id", v)}
@@ -162,7 +222,7 @@ export default function NewPatientPage() {
               </Select>
             </div>
             <div>
-              <Label>Law Firm</Label>
+              <Label>Law Firm{isRequired("law_firm_id") ? " *" : ""}</Label>
               <Select
                 value={form.law_firm_id}
                 onValueChange={(v) => update("law_firm_id", v)}
@@ -189,23 +249,23 @@ export default function NewPatientPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label>First Name *</Label>
+              <Label>First Name{isRequired("first_name") ? " *" : ""}</Label>
               <Input
                 value={form.first_name}
                 onChange={(e) => update("first_name", e.target.value)}
-                required
+                required={isRequired("first_name")}
               />
             </div>
             <div>
-              <Label>Last Name *</Label>
+              <Label>Last Name{isRequired("last_name") ? " *" : ""}</Label>
               <Input
                 value={form.last_name}
                 onChange={(e) => update("last_name", e.target.value)}
-                required
+                required={isRequired("last_name")}
               />
             </div>
             <div>
-              <Label>Date of Birth</Label>
+              <Label>Date of Birth{isRequired("date_of_birth") ? " *" : ""}</Label>
               <Input
                 type="date"
                 value={form.date_of_birth}
@@ -213,7 +273,7 @@ export default function NewPatientPage() {
               />
             </div>
             <div>
-              <Label>Phone</Label>
+              <Label>Phone{isRequired("phone") ? " *" : ""}</Label>
               <Input
                 type="tel"
                 value={form.phone}
@@ -221,7 +281,7 @@ export default function NewPatientPage() {
               />
             </div>
             <div className="sm:col-span-2">
-              <Label>Email</Label>
+              <Label>Email{isRequired("email") ? " *" : ""}</Label>
               <Input
                 type="email"
                 value={form.email}
@@ -238,7 +298,7 @@ export default function NewPatientPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <Label>Address Line 1</Label>
+              <Label>Address Line 1{isRequired("address_line1") ? " *" : ""}</Label>
               <Input
                 value={form.address_line1}
                 onChange={(e) => update("address_line1", e.target.value)}
@@ -282,7 +342,7 @@ export default function NewPatientPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label>Date of Accident</Label>
+              <Label>Date of Accident{isRequired("date_of_accident") ? " *" : ""}</Label>
               <Input
                 type="date"
                 value={form.date_of_accident}
@@ -290,7 +350,7 @@ export default function NewPatientPage() {
               />
             </div>
             <div>
-              <Label>Expected Arrival</Label>
+              <Label>Expected Arrival{isRequired("expected_arrival") ? " *" : ""}</Label>
               <Input
                 type="datetime-local"
                 value={form.expected_arrival}

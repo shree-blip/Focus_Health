@@ -61,14 +61,15 @@ export default function SchedulingPage() {
 
   const isToday = selectedDate === new Date().toISOString().split("T")[0];
 
-  // Group by time slots
+  // Group by 30-minute time slots
   const timeSlots = useMemo(() => {
     const slots: Record<string, Record<string, unknown>[]> = {};
     for (const p of patients) {
       if (!p.expected_arrival) continue;
       const arrival = new Date(p.expected_arrival as string);
       const hour = arrival.getHours();
-      const slotKey = `${hour.toString().padStart(2, "0")}:00`;
+      const halfHour = arrival.getMinutes() < 30 ? "00" : "30";
+      const slotKey = `${hour.toString().padStart(2, "0")}:${halfHour}`;
       if (!slots[slotKey]) slots[slotKey] = [];
       slots[slotKey].push(p);
     }
@@ -218,7 +219,13 @@ export default function SchedulingPage() {
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-blue-500" />
-                  <CardTitle className="text-base">{time}</CardTitle>
+                  <CardTitle className="text-base">
+                    {time} – {(() => {
+                      const [h, m] = time.split(":").map(Number);
+                      const end = new Date(2000, 0, 1, h, m + 30);
+                      return `${end.getHours().toString().padStart(2, "0")}:${end.getMinutes().toString().padStart(2, "0")}`;
+                    })()}
+                  </CardTitle>
                   <span className="text-xs text-slate-400">
                     ({slotPatients.length} patient{slotPatients.length !== 1 ? "s" : ""})
                   </span>
@@ -239,9 +246,12 @@ export default function SchedulingPage() {
                             {p.first_name as string} {p.last_name as string}
                           </p>
                           <p className="text-xs text-slate-500">
-                            {(p.lop_facilities as Record<string, unknown>)?.name as string ?? ""}{" "}
+                            {new Date(p.expected_arrival as string).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                            {p.arrival_window_min ? ` · ${p.arrival_window_min}min window` : ""}
+                            {" · "}
+                            {(p.lop_facilities as Record<string, unknown>)?.name as string ?? ""}
                             {(p.lop_law_firms as Record<string, unknown>)?.name
-                              ? `· ${(p.lop_law_firms as Record<string, unknown>)?.name}`
+                              ? ` · ${(p.lop_law_firms as Record<string, unknown>)?.name}`
                               : ""}
                           </p>
                         </div>

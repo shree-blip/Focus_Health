@@ -36,6 +36,9 @@ export interface LopFacility {
   slug: string;
   type: string;
   address: string | null;
+  phone: string | null;
+  director_email: string | null;
+  front_desk_email: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;

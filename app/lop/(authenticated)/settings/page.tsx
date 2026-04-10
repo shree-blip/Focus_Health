@@ -438,6 +438,9 @@ function FacilitiesTab() {
     slug: "",
     type: "er" as string,
     address: "",
+    phone: "",
+    director_email: "",
+    front_desk_email: "",
     is_active: true,
   });
 
@@ -461,11 +464,14 @@ function FacilitiesTab() {
         slug: facility.slug,
         type: facility.type,
         address: facility.address ?? "",
+        phone: facility.phone ?? "",
+        director_email: facility.director_email ?? "",
+        front_desk_email: facility.front_desk_email ?? "",
         is_active: facility.is_active,
       });
     } else {
       setEditingFacility(null);
-      setForm({ name: "", slug: "", type: "er", address: "", is_active: true });
+      setForm({ name: "", slug: "", type: "er", address: "", phone: "", director_email: "", front_desk_email: "", is_active: true });
     }
     setDialogOpen(true);
   };
@@ -485,6 +491,9 @@ function FacilitiesTab() {
             slug: form.slug.trim(),
             type: form.type,
             address: form.address || null,
+            phone: form.phone || null,
+            director_email: form.director_email || null,
+            front_desk_email: form.front_desk_email || null,
             is_active: form.is_active,
           },
           { id: editingFacility.id },
@@ -507,6 +516,9 @@ function FacilitiesTab() {
             slug: form.slug.trim(),
             type: form.type,
             address: form.address || null,
+            phone: form.phone || null,
+            director_email: form.director_email || null,
+            front_desk_email: form.front_desk_email || null,
             is_active: form.is_active,
           },
           { select: "id", single: true },
@@ -524,7 +536,7 @@ function FacilitiesTab() {
         toast.success("Facility added.");
       }
       setDialogOpen(false);
-      setForm({ name: "", slug: "", type: "er", address: "", is_active: true });
+      setForm({ name: "", slug: "", type: "er", address: "", phone: "", director_email: "", front_desk_email: "", is_active: true });
       setEditingFacility(null);
       loadFacilities();
     } catch (err) {
@@ -580,6 +592,9 @@ function FacilitiesTab() {
                 <p>Type: {f.type}</p>
                 <p>Slug: {f.slug}</p>
                 {f.address && <p>{f.address}</p>}
+                {f.phone && <p>Phone: {f.phone}</p>}
+                {f.director_email && <p>Director: {f.director_email}</p>}
+                {f.front_desk_email && <p>Front Desk: {f.front_desk_email}</p>}
               </CardContent>
             </Card>
           ))}
@@ -638,6 +653,35 @@ function FacilitiesTab() {
                 value={form.address}
                 onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
               />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <Input
+                type="tel"
+                value={form.phone}
+                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                placeholder="(555) 123-4567"
+              />
+            </div>
+            <div>
+              <Label>Director Email</Label>
+              <Input
+                type="email"
+                value={form.director_email}
+                onChange={(e) => setForm((f) => ({ ...f, director_email: e.target.value }))}
+                placeholder="director@facility.com"
+              />
+              <p className="text-xs text-slate-400 mt-1">Receives scheduling notifications</p>
+            </div>
+            <div>
+              <Label>Front Desk Email</Label>
+              <Input
+                type="email"
+                value={form.front_desk_email}
+                onChange={(e) => setForm((f) => ({ ...f, front_desk_email: e.target.value }))}
+                placeholder="frontdesk@facility.com"
+              />
+              <p className="text-xs text-slate-400 mt-1">Receives scheduling notifications</p>
             </div>
             <div className="flex items-center gap-2">
               <Switch
