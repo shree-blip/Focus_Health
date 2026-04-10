@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,
@@ -36,16 +36,14 @@ export default function PatientsListPage() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      let query = lopClient
-        .from("lop_patients")
-        .select("*, lop_facilities(name, slug), lop_law_firms(name)")
-        .order("created_at", { ascending: false });
-
-      if (activeFacilityId) {
-        query = query.eq("facility_id", activeFacilityId);
-      }
-
-      const { data } = await query;
+      const filters = activeFacilityId
+        ? [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }]
+        : [];
+      const { data } = await lopDb.select("lop_patients", {
+        select: "*, lop_facilities(name, slug), lop_law_firms(name)",
+        order: { column: "created_at", ascending: false },
+        filters,
+      });
       setPatients((data as Record<string, unknown>[]) ?? []);
       setLoading(false);
     };

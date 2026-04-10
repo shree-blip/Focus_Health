@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import type { LopFacility, LopLawFirm } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,11 +47,10 @@ export default function NewPatientPage() {
 
   useEffect(() => {
     const loadFirms = async () => {
-      const { data } = await lopClient
-        .from("lop_law_firms")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
+      const { data } = await lopDb.select("lop_law_firms", {
+        filters: [{ column: "is_active", op: "eq", value: true }],
+        order: { column: "name" },
+      });
       setLawFirms((data as unknown as LopLawFirm[]) ?? []);
     };
     loadFirms();
@@ -76,9 +75,9 @@ export default function NewPatientPage() {
 
     setSaving(true);
     try {
-      const { data, error } = await lopClient
-        .from("lop_patients")
-        .insert({
+      const { data, error } = await lopDb.insert(
+        "lop_patients",
+        {
           facility_id: form.facility_id,
           first_name: form.first_name.trim(),
           last_name: form.last_name.trim(),
@@ -97,14 +96,14 @@ export default function NewPatientPage() {
           case_status: form.expected_arrival ? "scheduled" : "arrived",
           created_by: lopUser?.id ?? null,
           updated_by: lopUser?.id ?? null,
-        })
-        .select("id")
-        .single();
+        },
+        { select: "id", single: true },
+      );
 
       if (error) throw error;
 
       // Audit log
-      await lopClient.from("lop_audit_log").insert({
+      await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
         action: "patient_created",
         entity_type: "patient",

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import { CASE_STATUS_LABELS } from "@/lib/lop/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -83,11 +83,12 @@ export default function ReportsPage() {
 
   // Load config threshold on mount
   useEffect(() => {
-    lopClient
-      .from("lop_config")
-      .select("value")
-      .eq("key", "low_collection_threshold")
-      .single()
+    lopDb
+      .select("lop_config", {
+        select: "value",
+        filters: [{ column: "key", op: "eq", value: "low_collection_threshold" }],
+        single: true,
+      })
       .then(({ data }) => {
         if (data?.value) setLowThreshold(Number(data.value) || 3000);
       });
@@ -101,18 +102,20 @@ export default function ReportsPage() {
           ? { from: customFrom, to: customTo }
           : getDateRange(datePreset);
 
-      let query = lopClient
-        .from("lop_patients")
-        .select("*, lop_facilities(name), lop_law_firms(id, name)")
-        .gte("created_at", range.from)
-        .lte("created_at", range.to + "T23:59:59");
+      const filters: { column: string; op: "eq" | "gte" | "lte"; value: unknown }[] = [
+        { column: "created_at", op: "gte", value: range.from },
+        { column: "created_at", op: "lte", value: range.to + "T23:59:59" },
+      ];
 
       const effectiveFacility = activeFacilityId || (facilityFilter !== "all" ? facilityFilter : null);
       if (effectiveFacility) {
-        query = query.eq("facility_id", effectiveFacility);
+        filters.push({ column: "facility_id", op: "eq", value: effectiveFacility });
       }
 
-      const { data } = await query;
+      const { data } = await lopDb.select("lop_patients", {
+        select: "*, lop_facilities(name), lop_law_firms(id, name)",
+        filters,
+      });
       setPatients((data as Record<string, unknown>[]) ?? []);
       setLoading(false);
     };

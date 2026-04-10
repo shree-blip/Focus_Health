@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import { CASE_STATUS_LABELS, CASE_STATUS_COLORS } from "@/lib/lop/types";
 import type { LopCaseStatus } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
@@ -29,19 +29,25 @@ export default function SchedulingPage() {
       const dayStart = `${selectedDate}T00:00:00`;
       const dayEnd = `${selectedDate}T23:59:59`;
 
-      let query = lopClient
-        .from("lop_patients")
-        .select("*, lop_facilities(name), lop_law_firms(name)")
-        .gte("expected_arrival", dayStart)
-        .lte("expected_arrival", dayEnd)
-        .order("expected_arrival", { ascending: true });
+      const filters: { column: string; op: "eq" | "gte" | "lte"; value: unknown }[] = [
+        { column: "expected_arrival", op: "gte", value: dayStart },
+        { column: "expected_arrival", op: "lte", value: dayEnd },
+      ];
 
       if (activeFacilityId) {
-        query = query.eq("facility_id", activeFacilityId);
+        filters.push({ column: "facility_id", op: "eq", value: activeFacilityId });
       }
 
-      const { data } = await query;
-      setPatients((data as Record<string, unknown>[]) ?? []);
+      try {
+        const { data } = await lopDb.select("lop_patients", {
+          select: "*, lop_facilities(name), lop_law_firms(name)",
+          filters,
+          order: { column: "expected_arrival", ascending: true },
+        });
+        setPatients((data as Record<string, unknown>[]) ?? []);
+      } catch (err) {
+        console.error(err);
+      }
       setLoading(false);
     };
     load();
@@ -80,13 +86,13 @@ export default function SchedulingPage() {
     e.stopPropagation();
     setMarkingArrived(patientId);
     try {
-      const { error } = await lopClient
-        .from("lop_patients")
-        .update({ case_status: "arrived" })
-        .eq("id", patientId);
-      if (error) throw error;
+      await lopDb.update(
+        "lop_patients",
+        { case_status: "arrived" },
+        { id: patientId },
+      );
 
-      await lopClient.from("lop_audit_log").insert({
+      await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
         action: "status_changed",
         entity_type: "patient",

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import { hasPermission } from "@/lib/lop/permissions";
 import type { LopLawFirm } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
@@ -45,11 +45,10 @@ export default function LawFirmsPage() {
 
   const loadFirms = async () => {
     const [firmsRes, patientsRes] = await Promise.all([
-      lopClient.from("lop_law_firms").select("*").order("name"),
-      lopClient
-        .from("lop_patients")
-        .select("law_firm_id, amount_collected")
-        .not("law_firm_id", "is", null),
+      lopDb.select("lop_law_firms", { order: { column: "name" } }),
+      lopDb.select("lop_patients", {
+        select: "law_firm_id, amount_collected",
+      }),
     ]);
     setFirms((firmsRes.data as unknown as LopLawFirm[]) ?? []);
 
@@ -115,9 +114,9 @@ export default function LawFirmsPage() {
     setSaving(true);
     try {
       if (editingFirm) {
-        const { error } = await lopClient
-          .from("lop_law_firms")
-          .update({
+        const { error } = await lopDb.update(
+          "lop_law_firms",
+          {
             name: form.name.trim(),
             intake_email: form.intake_email || null,
             escalation_email: form.escalation_email || null,
@@ -125,13 +124,14 @@ export default function LawFirmsPage() {
             primary_phone: form.primary_phone || null,
             notes: form.notes || null,
             is_active: form.is_active,
-          })
-          .eq("id", editingFirm.id);
+          },
+          { id: editingFirm.id },
+        );
 
         if (error) throw error;
 
         // Audit log for update
-        await lopClient.from("lop_audit_log").insert({
+        await lopDb.insert("lop_audit_log", {
           user_id: lopUser?.id,
           action: "law_firm_updated",
           entity_type: "law_firm",
@@ -149,9 +149,9 @@ export default function LawFirmsPage() {
         });
         toast.success("Law firm updated.");
       } else {
-        const { data: newFirm, error } = await lopClient
-          .from("lop_law_firms")
-          .insert({
+        const { data: newFirm, error } = await lopDb.insert(
+          "lop_law_firms",
+          {
             name: form.name.trim(),
             intake_email: form.intake_email || null,
             escalation_email: form.escalation_email || null,
@@ -159,14 +159,14 @@ export default function LawFirmsPage() {
             primary_phone: form.primary_phone || null,
             notes: form.notes || null,
             is_active: form.is_active,
-          })
-          .select("id")
-          .single();
+          },
+          { select: "id", single: true },
+        );
 
         if (error) throw error;
 
         // Audit log for create
-        await lopClient.from("lop_audit_log").insert({
+        await lopDb.insert("lop_audit_log", {
           user_id: lopUser?.id,
           action: "law_firm_created",
           entity_type: "law_firm",

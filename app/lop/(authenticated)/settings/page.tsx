@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import { ROLE_LABELS } from "@/lib/lop/types";
 import type { LopUser, LopUserRole, LopFacility } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
@@ -106,14 +106,14 @@ function UsersTab() {
 
   const loadUsers = async () => {
     const [usersRes, facsRes] = await Promise.all([
-      lopClient
-        .from("lop_users")
-        .select("*, lop_user_facilities(facility_id, lop_facilities(name))")
-        .order("full_name"),
-      lopClient.from("lop_facilities").select("*").order("name"),
+      lopDb.select("lop_users", {
+        select: "*, lop_user_facilities(facility_id, lop_facilities(name))",
+        order: { column: "full_name" },
+      }),
+      lopDb.select("lop_facilities", { order: { column: "name" } }),
     ]);
     setUsers(usersRes.data ?? []);
-    setAllFacilities((facsRes.data as unknown as LopFacility[]) ?? []);
+    setAllFacilities(((facsRes.data ?? []) as unknown) as LopFacility[]);
     setLoading(false);
   };
 
@@ -156,27 +156,26 @@ function UsersTab() {
     try {
       if (editingUser) {
         // Update user
-        await lopClient
-          .from("lop_users")
-          .update({
+        await lopDb.update(
+          "lop_users",
+          {
             full_name: form.full_name,
             role: form.role,
             is_active: form.is_active,
-          })
-          .eq("id", editingUser.id);
+          },
+          { id: editingUser.id },
+        );
 
         // Update facility assignments
-        await lopClient
-          .from("lop_user_facilities")
-          .delete()
-          .eq("user_id", editingUser.id);
+        await lopDb.remove("lop_user_facilities", { user_id: editingUser.id });
 
         if (form.facility_ids.length > 0) {
-          await lopClient.from("lop_user_facilities").insert(
+          await lopDb.insert(
+            "lop_user_facilities",
             form.facility_ids.map((fid) => ({
               user_id: editingUser.id as string,
               facility_id: fid,
-            }))
+            })),
           );
         }
 
@@ -184,26 +183,27 @@ function UsersTab() {
       } else {
         // For new users, we create a placeholder profile
         // The auth_user_id will be linked when they first sign in via Google
-        const { data, error } = await lopClient
-          .from("lop_users")
-          .insert({
+        const { data } = await lopDb.insert(
+          "lop_users",
+          {
             auth_user_id: crypto.randomUUID(), // placeholder
             email: form.email.trim().toLowerCase(),
             full_name: form.full_name.trim(),
             role: form.role,
             is_active: form.is_active,
-          })
-          .select("id")
-          .single();
+          },
+          { select: "id", single: true },
+        );
 
-        if (error) throw error;
+        if (!data) throw new Error("Insert failed");
 
         if (form.facility_ids.length > 0) {
-          await lopClient.from("lop_user_facilities").insert(
+          await lopDb.insert(
+            "lop_user_facilities",
             form.facility_ids.map((fid) => ({
-              user_id: data.id,
+              user_id: (data as Record<string, unknown>).id as string,
               facility_id: fid,
-            }))
+            })),
           );
         }
 
@@ -405,11 +405,10 @@ function FacilitiesTab() {
   });
 
   const loadFacilities = async () => {
-    const { data } = await lopClient
-      .from("lop_facilities")
-      .select("*")
-      .order("name");
-    setFacilities((data as unknown as LopFacility[]) ?? []);
+    const { data } = await lopDb.select("lop_facilities", {
+      order: { column: "name" },
+    });
+    setFacilities(((data ?? []) as unknown) as LopFacility[]);
     setLoading(false);
   };
 
@@ -424,14 +423,13 @@ function FacilitiesTab() {
     }
     setSaving(true);
     try {
-      const { error } = await lopClient.from("lop_facilities").insert({
+      await lopDb.insert("lop_facilities", {
         name: form.name.trim(),
         slug: form.slug.trim(),
         type: form.type,
         address: form.address || null,
         is_active: form.is_active,
       });
-      if (error) throw error;
       toast.success("Facility added.");
       setDialogOpen(false);
       setForm({ name: "", slug: "", type: "er", address: "", is_active: true });
@@ -568,10 +566,9 @@ function ConfigTab() {
   const [editValue, setEditValue] = useState("");
 
   const loadConfigs = async () => {
-    const { data } = await lopClient
-      .from("lop_config")
-      .select("*")
-      .order("key");
+    const { data } = await lopDb.select("lop_config", {
+      order: { column: "key" },
+    });
     setConfigs(data ?? []);
     setLoading(false);
   };
@@ -589,10 +586,7 @@ function ConfigTab() {
         parsedValue = editValue;
       }
 
-      await lopClient
-        .from("lop_config")
-        .update({ value: parsedValue })
-        .eq("key", key);
+      await lopDb.update("lop_config", { value: parsedValue }, { key });
 
       toast.success(`Config "${key}" updated.`);
       setEditKey(null);
@@ -690,11 +684,11 @@ function AuditTab() {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await lopClient
-        .from("lop_audit_log")
-        .select("*, lop_users(full_name)")
-        .order("created_at", { ascending: false })
-        .limit(100);
+      const { data } = await lopDb.select("lop_audit_log", {
+        select: "*, lop_users(full_name)",
+        order: { column: "created_at", ascending: false },
+        limit: 100,
+      });
       setLogs(data ?? []);
       setLoading(false);
     };

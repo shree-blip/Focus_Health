@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,
@@ -157,26 +158,24 @@ export default function PatientDetailPage({
   // Load data
   const loadData = useCallback(async () => {
     const [patientRes, docsRes, remindersRes, firmsRes] = await Promise.all([
-      lopClient
-        .from("lop_patients")
-        .select("*, lop_facilities(name), lop_law_firms(name)")
-        .eq("id", id)
-        .single(),
-      lopClient
-        .from("lop_patient_documents")
-        .select("*")
-        .eq("patient_id", id)
-        .order("created_at", { ascending: false }),
-      lopClient
-        .from("lop_reminder_emails")
-        .select("*")
-        .eq("patient_id", id)
-        .order("sent_at", { ascending: false }),
-      lopClient
-        .from("lop_law_firms")
-        .select("id, name")
-        .eq("is_active", true)
-        .order("name"),
+      lopDb.select("lop_patients", {
+        select: "*, lop_facilities(name), lop_law_firms(name)",
+        filters: [{ column: "id", op: "eq", value: id }],
+        single: true,
+      }),
+      lopDb.select("lop_patient_documents", {
+        filters: [{ column: "patient_id", op: "eq", value: id }],
+        order: { column: "created_at", ascending: false },
+      }),
+      lopDb.select("lop_reminder_emails", {
+        filters: [{ column: "patient_id", op: "eq", value: id }],
+        order: { column: "sent_at", ascending: false },
+      }),
+      lopDb.select("lop_law_firms", {
+        select: "id, name",
+        filters: [{ column: "is_active", op: "eq", value: true }],
+        order: { column: "name" },
+      }),
     ]);
 
     if (patientRes.data) {
@@ -187,8 +186,8 @@ export default function PatientDetailPage({
         medical_record_tags: patientRes.data.medical_record_tags ?? [],
       });
     }
-    setDocuments(docsRes.data ?? []);
-    setReminders(remindersRes.data ?? []);
+    setDocuments((docsRes.data as unknown[]) ?? []);
+    setReminders((remindersRes.data as unknown[]) ?? []);
     setLawFirms((firmsRes.data as { id: string; name: string }[]) ?? []);
     setLoading(false);
   }, [id]);
@@ -205,9 +204,9 @@ export default function PatientDetailPage({
     setSaving(true);
     try {
       const oldStatus = patient.case_status;
-      const { error } = await lopClient
-        .from("lop_patients")
-        .update({
+      const { error } = await lopDb.update(
+        "lop_patients",
+        {
           first_name: form.first_name,
           last_name: form.last_name,
           date_of_birth: form.date_of_birth || null,
@@ -233,8 +232,9 @@ export default function PatientDetailPage({
           intake_notes: form.intake_notes || null,
           law_firm_id: form.law_firm_id || null,
           updated_by: lopUser?.id,
-        })
-        .eq("id", id);
+        },
+        { id },
+      );
 
       if (error) throw error;
 
@@ -247,7 +247,7 @@ export default function PatientDetailPage({
       if (patient.amount_collected !== form.amount_collected)
         changes.amount_collected = form.amount_collected;
 
-      await lopClient.from("lop_audit_log").insert({
+      await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
         action:
           oldStatus !== form.case_status ? "status_changed" : "patient_updated",
@@ -279,18 +279,18 @@ export default function PatientDetailPage({
     }
     setSendingReminder(true);
     try {
-      const { data: firm } = await lopClient
-        .from("lop_law_firms")
-        .select("intake_email, name")
-        .eq("id", lawFirmId)
-        .single();
+      const { data: firm } = await lopDb.select("lop_law_firms", {
+        select: "intake_email, name",
+        filters: [{ column: "id", op: "eq", value: lawFirmId }],
+        single: true,
+      });
 
       if (!firm?.intake_email) {
         toast.error("Law firm has no intake email configured.");
         return;
       }
 
-      await lopClient.from("lop_reminder_emails").insert({
+      await lopDb.insert("lop_reminder_emails", {
         patient_id: id,
         law_firm_id: lawFirmId,
         recipient_email: firm.intake_email,
@@ -306,7 +306,7 @@ export default function PatientDetailPage({
         body: JSON.stringify({ patientId: id, lawFirmId }),
       });
 
-      await lopClient.from("lop_audit_log").insert({
+      await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
         action: "reminder_sent",
         entity_type: "patient",
@@ -349,7 +349,7 @@ export default function PatientDetailPage({
         fileUrl = urlData?.publicUrl ?? null;
       }
 
-      const { error } = await lopClient.from("lop_patient_documents").insert({
+      const { error } = await lopDb.insert("lop_patient_documents", {
         patient_id: id,
         document_type: docForm.document_type,
         status: docFile ? "received" : (docForm.status as LopDocumentStatus),
@@ -361,7 +361,7 @@ export default function PatientDetailPage({
       });
       if (error) throw error;
 
-      await lopClient.from("lop_audit_log").insert({
+      await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
         action: "document_uploaded",
         entity_type: "document",
@@ -397,7 +397,7 @@ export default function PatientDetailPage({
       if (storagePath) {
         await lopClient.storage.from("lop-documents").remove([storagePath]);
       }
-      await lopClient.from("lop_patient_documents").delete().eq("id", docId);
+      await lopDb.remove("lop_patient_documents", { id: docId });
       toast.success("Document deleted.");
       loadData();
     } catch (err) {

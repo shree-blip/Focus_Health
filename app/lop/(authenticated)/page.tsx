@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+import { lopDb } from "@/lib/lop/db";
 import { CASE_STATUS_LABELS, CASE_STATUS_COLORS } from "@/lib/lop/types";
 import type { LopCaseStatus } from "@/lib/lop/types";
 import {
@@ -41,11 +41,10 @@ export default function LopDashboardPage() {
 
       try {
         // Patients query
-        let query = lopClient.from("lop_patients").select("*");
-        if (activeFacilityId) {
-          query = query.eq("facility_id", activeFacilityId);
-        }
-        const { data: patients } = await query;
+        const filters = activeFacilityId
+          ? [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }]
+          : [];
+        const { data: patients } = await lopDb.select("lop_patients", { filters });
         const all = patients ?? [];
 
         // Today's arrivals
@@ -93,15 +92,15 @@ export default function LopDashboardPage() {
         });
 
         // Recent patients
-        let recentQuery = lopClient
-          .from("lop_patients")
-          .select("*, lop_facilities(name), lop_law_firms(name)")
-          .order("created_at", { ascending: false })
-          .limit(10);
-        if (activeFacilityId) {
-          recentQuery = recentQuery.eq("facility_id", activeFacilityId);
-        }
-        const { data: recent } = await recentQuery;
+        const recentFilters = activeFacilityId
+          ? [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }]
+          : [];
+        const { data: recent } = await lopDb.select("lop_patients", {
+          select: "*, lop_facilities(name), lop_law_firms(name)",
+          order: { column: "created_at", ascending: false },
+          limit: 10,
+          filters: recentFilters,
+        });
         setRecentPatients((recent as Record<string, unknown>[]) ?? []);
       } catch (err) {
         console.error("Dashboard load error:", err);

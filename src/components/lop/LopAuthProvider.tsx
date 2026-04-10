@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { lopClient } from "@/lib/lop/client";
+import { lopDb, setLopDbAuthUser } from "@/lib/lop/db";
 import type { LopUser, LopFacility } from "@/lib/lop/types";
 import type { User } from "@supabase/supabase-js";
 
@@ -55,45 +56,57 @@ export function LopAuthProvider({ children }: { children: ReactNode }) {
         }
 
         setAuthUser(user);
+        // Set auth user ID for the db helper (server-side proxy)
+        setLopDbAuthUser(user.id);
 
-        // Fetch LOP user profile (provisioned by /api/lop/provision during login callback)
-        const { data: lopProfile } = await lopClient
-          .from("lop_users")
-          .select("*")
-          .eq("auth_user_id", user.id)
-          .single();
+        // Fetch LOP user profile via server API (bypasses RLS)
+        const { data: lopProfile } = await lopDb.select("lop_users", {
+          filters: [{ column: "auth_user_id", op: "eq", value: user.id }],
+          single: true,
+        });
 
         if (lopProfile) {
           setLopUser(lopProfile as unknown as LopUser);
 
-          // Fetch assigned facilities
-          const { data: userFacilities } = await lopClient
-            .from("lop_user_facilities")
-            .select("facility_id, lop_facilities(*)")
-            .eq("user_id", lopProfile.id);
+          // Fetch assigned facilities via server API
+          const { data: userFacilities } = await lopDb.select(
+            "lop_user_facilities",
+            {
+              select: "facility_id",
+              filters: [
+                { column: "user_id", op: "eq", value: (lopProfile as Record<string, unknown>).id },
+              ],
+            },
+          );
 
-          if (userFacilities) {
-            const facs = userFacilities
-              .map((uf: Record<string, unknown>) => uf.lop_facilities as unknown as LopFacility)
-              .filter(Boolean);
-            setFacilities(facs);
-            if (facs.length === 1) {
-              setActiveFacilityId(facs[0].id);
-            }
-          }
-
-          // Admin/Accounting get all facilities
           if (
-            lopProfile.role === "admin" ||
-            lopProfile.role === "accounting"
+            (lopProfile as Record<string, unknown>).role === "admin" ||
+            (lopProfile as Record<string, unknown>).role === "accounting"
           ) {
-            const { data: allFacs } = await lopClient
-              .from("lop_facilities")
-              .select("*")
-              .eq("is_active", true)
-              .order("name");
+            // Admin/Accounting get all active facilities
+            const { data: allFacs } = await lopDb.select("lop_facilities", {
+              filters: [{ column: "is_active", op: "eq", value: true }],
+              order: { column: "name" },
+            });
             if (allFacs) {
               setFacilities(allFacs as unknown as LopFacility[]);
+            }
+          } else if (userFacilities && (userFacilities as unknown[]).length > 0) {
+            // Others get only assigned facilities
+            const facIds = (userFacilities as Record<string, unknown>[]).map(
+              (uf) => uf.facility_id as string,
+            );
+            const { data: facs } = await lopDb.select("lop_facilities", {
+              filters: [{ column: "id", op: "in", value: facIds }],
+              order: { column: "name" },
+            });
+            if (facs) {
+              setFacilities(facs as unknown as LopFacility[]);
+              if ((facs as unknown[]).length === 1) {
+                setActiveFacilityId(
+                  ((facs as unknown[])[0] as Record<string, unknown>).id as string,
+                );
+              }
             }
           }
         }
