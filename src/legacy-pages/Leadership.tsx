@@ -19,6 +19,7 @@ const shreeHeadshot = "/Shree Gauli.png";
 const salmonHeadshot = "/salmon.png";
 const samriddhiHeadshot = "/Samriddhi.png";
 const mandeepHeadshot = "/Mandeep.png";
+const mohitHeadshot = "/Mohit Luitel.png";
 const heroLeadership = "/hero-leadership.jpg";
 const ganeshHeadshot = "/ganesh-dahal-headshot.png";
 const kalashHeadshot = "/kalash-shrestha-DopvHPEc.png";
@@ -152,7 +153,7 @@ const accountingTeam = [
     name: "Mohit Luitel",
     role: "Staff Accountant",
     category: "Accounting & Billing",
-    photo: "",
+    photo: mohitHeadshot,
   },
 ];
 const rickProfile = {
