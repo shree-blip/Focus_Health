@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/ssr";
 
 // Service-role client — bypasses RLS
 function getAdminClient() {
@@ -25,49 +24,29 @@ function isDomainAllowed(email: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify the caller is actually authenticated
-    const response = NextResponse.next();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY)!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options);
-            });
-          },
-        },
-      },
-    );
-
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 },
-      );
-    }
-
     const { auth_user_id, email, full_name } = await request.json();
 
-    // Validate the request matches the authenticated user
-    if (auth_user_id !== authUser.id) {
+    if (!auth_user_id || !email) {
       return NextResponse.json(
-        { error: "User mismatch" },
-        { status: 403 },
+        { error: "auth_user_id and email are required" },
+        { status: 400 },
       );
     }
 
     const admin = getAdminClient();
-    const normalizedEmail = (email || authUser.email || "").toLowerCase();
+
+    // Verify this auth_user_id actually exists in Supabase Auth
+    const { data: authUser, error: authError } =
+      await admin.auth.admin.getUserById(auth_user_id);
+
+    if (authError || !authUser?.user) {
+      return NextResponse.json(
+        { error: "Invalid auth user" },
+        { status: 401 },
+      );
+    }
+
+    const normalizedEmail = email.toLowerCase();
 
     // Step 1: Check by auth_user_id
     const { data: existingById } = await admin

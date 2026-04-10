@@ -1,36 +1,94 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { lopClient } from "@/lib/lop/client";
+import { useSearchParams, useRouter } from "next/navigation";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const [exchanging, setExchanging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const redirect = searchParams.get("redirect") || "/lop";
+  const code = searchParams.get("code");
+  const exchangeRan = useRef(false);
 
-  // If user already has a session, redirect straight to dashboard
+  // ———— Handle OAuth callback (code in URL) ————
   useEffect(() => {
-    lopClient.auth.getUser().then(({ data: { user } }) => {
+    if (!code || exchangeRan.current) return;
+    exchangeRan.current = true;
+    setExchanging(true);
+
+    (async () => {
+      try {
+        // Exchange the OAuth code for a session.
+        // This uses the SAME browser client that stored the PKCE verifier,
+        // so the verifier is guaranteed to be in the same cookie jar.
+        const { data, error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(code);
+
+        if (exchangeError || !data.session) {
+          console.error("Code exchange failed:", exchangeError);
+          setError(
+            exchangeError?.message || "Failed to complete sign-in. Please try again."
+          );
+          setExchanging(false);
+          return;
+        }
+
+        // Provision user server-side (service-role bypasses RLS)
+        const user = data.session.user;
+        await fetch("/api/lop/provision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            auth_user_id: user.id,
+            email: user.email,
+            full_name:
+              user.user_metadata?.full_name ??
+              user.user_metadata?.name ??
+              user.email?.split("@")[0] ??
+              "Unknown",
+          }),
+        });
+
+        // Redirect to dashboard
+        window.location.href = redirect;
+      } catch (err) {
+        console.error("Callback error:", err);
+        setError(
+          err instanceof Error ? err.message : "An unexpected error occurred."
+        );
+        setExchanging(false);
+      }
+    })();
+  }, [code, redirect]);
+
+  // ———— If already signed in, redirect ————
+  useEffect(() => {
+    if (code) return; // Don't check session if we're handling a callback
+    supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         window.location.href = redirect;
       }
     });
-  }, [redirect]);
+  }, [redirect, code]);
 
+  // ———— Start Google OAuth ————
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const { error: authError } = await lopClient.auth.signInWithOAuth({
+      const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/lop/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+          // Redirect back to THIS page so the same client handles the callback
+          redirectTo: `${window.location.origin}/lop/login?redirect=${encodeURIComponent(redirect)}`,
         },
       });
 
@@ -39,10 +97,26 @@ function LoginForm() {
         setLoading(false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start sign-in. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to start sign-in. Please try again."
+      );
       setLoading(false);
     }
   };
+
+  // ———— Exchanging code state ————
+  if (exchanging) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
+          <p className="text-sm text-slate-500">Completing sign-in…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
