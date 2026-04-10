@@ -21,6 +21,9 @@ const PERMISSIONS: Record<string, LopUserRole[]> = {
   "documents:upload": ["medical_records", "admin"],
   "documents:read": ["front_desk", "medical_records", "accounting", "admin"],
 
+  // Financial visibility — controls who sees dollar amounts
+  "financial:view": ["medical_records", "accounting", "admin"],
+
   // Law firms
   "law_firm:create": ["medical_records", "admin"],
   "law_firm:read": ["front_desk", "scheduler", "medical_records", "accounting", "admin"],

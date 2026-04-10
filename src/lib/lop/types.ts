@@ -22,9 +22,12 @@ export type LopDocumentType =
   | 'lop_letter'
   | 'medical_record'
   | 'affidavit'
-  | 'bill'
-  | 'reduction_letter'
-  | 'drop_letter';
+  | 'bill_llc'
+  | 'bill_pllc'
+  | 'drop_letter'
+  | 'reduction_letter_unsigned'
+  | 'reduction_letter_signed'
+  | 'check_image';
 
 // ————— Facility —————
 export interface LopFacility {
@@ -212,10 +215,60 @@ export const ROLE_LABELS: Record<LopUserRole, string> = {
 };
 
 export const DOCUMENT_TYPE_LABELS: Record<LopDocumentType, string> = {
-  lop_letter: 'LOP Letter',
-  medical_record: 'Medical Record',
-  affidavit: 'Affidavit for Bills',
-  bill: 'Medical Bill',
-  reduction_letter: 'Reduction Letter',
-  drop_letter: 'Drop Letter',
+  lop_letter: 'LOP Letter from Law Firm',
+  medical_record: 'Medical Record (Chart)',
+  affidavit: 'Affidavit (Notarized Form)',
+  bill_llc: 'Medical Bill – LLC',
+  bill_pllc: 'Medical Bill – PLLC',
+  drop_letter: 'Drop Letter (Case Closed No Pay)',
+  reduction_letter_unsigned: 'Reduction Letter (Unsigned)',
+  reduction_letter_signed: 'Reduction Letter (Signed)',
+  check_image: 'Check Image for Payment',
 };
+
+/**
+ * Documents required for every patient case.
+ * Used to compute the "missing documents" checklist.
+ * Affidavit is optional so excluded from required list.
+ */
+export const REQUIRED_DOCUMENTS: LopDocumentType[] = [
+  'lop_letter',
+  'medical_record',
+  'bill_llc',
+];
+
+/**
+ * All possible documents (for the full checklist view)
+ */
+export const ALL_DOCUMENT_TYPES: { type: LopDocumentType; required: boolean }[] = [
+  { type: 'lop_letter', required: true },
+  { type: 'medical_record', required: true },
+  { type: 'affidavit', required: false },
+  { type: 'bill_llc', required: true },
+  { type: 'bill_pllc', required: false },
+  { type: 'drop_letter', required: false },
+  { type: 'reduction_letter_unsigned', required: false },
+  { type: 'reduction_letter_signed', required: false },
+  { type: 'check_image', required: false },
+];
+
+/** Count missing required documents for a patient given their document records */
+export function getMissingDocuments(
+  documents: { document_type: string; status: string }[],
+  allTypes = ALL_DOCUMENT_TYPES,
+) {
+  const received = new Set(
+    documents
+      .filter((d) => d.status === 'received')
+      .map((d) => d.document_type),
+  );
+  return allTypes.map((dt) => ({
+    ...dt,
+    label: DOCUMENT_TYPE_LABELS[dt.type],
+    status: received.has(dt.type)
+      ? ('received' as const)
+      : documents.some((d) => d.document_type === dt.type && d.status === 'missing')
+        ? ('missing' as const)
+        : ('not_received' as const),
+  }));
+}

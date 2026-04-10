@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
-import { CASE_STATUS_LABELS, CASE_STATUS_COLORS } from "@/lib/lop/types";
+import { hasPermission } from "@/lib/lop/permissions";
+import { CASE_STATUS_LABELS, CASE_STATUS_COLORS, getMissingDocuments, REQUIRED_DOCUMENTS } from "@/lib/lop/types";
 import type { LopCaseStatus } from "@/lib/lop/types";
 import {
   Users,
@@ -26,6 +27,7 @@ interface DashboardStats {
   totalCollected: number;
   openFollowUps: number;
   missingLopLetters: number;
+  patientsWithMissingDocs: number;
   statusBreakdown: Record<LopCaseStatus, number>;
 }
 
@@ -44,7 +46,10 @@ export default function LopDashboardPage() {
         const filters = activeFacilityId
           ? [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }]
           : [];
-        const { data: patients } = await lopDb.select("lop_patients", { filters });
+        const { data: patients } = await lopDb.select("lop_patients", {
+          select: "*, lop_patient_documents(document_type, status)",
+          filters,
+        });
         const all = patients ?? [];
 
         // Today's arrivals
@@ -81,6 +86,15 @@ export default function LopDashboardPage() {
           (p) => p.lop_letter_status === "requested" || p.lop_letter_status === "missing"
         ).length;
 
+        // Count patients that have at least one required doc not yet received
+        const patientsWithMissingDocs = all.filter((p) => {
+          const docs = Array.isArray(p.lop_patient_documents)
+            ? (p.lop_patient_documents as { document_type: string; status: string }[])
+            : [];
+          const checklist = getMissingDocuments(docs);
+          return checklist.some((c) => c.required && c.status !== "received");
+        }).length;
+
         setStats({
           totalPatients: all.length,
           todayArrivals,
@@ -88,6 +102,7 @@ export default function LopDashboardPage() {
           totalCollected,
           openFollowUps,
           missingLopLetters,
+          patientsWithMissingDocs,
           statusBreakdown,
         });
 
@@ -130,6 +145,8 @@ export default function LopDashboardPage() {
     );
   }
 
+  const canViewFinancial = hasPermission(lopUser, "financial:view");
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -146,7 +163,7 @@ export default function LopDashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${canViewFinancial ? "lg:grid-cols-4" : "lg:grid-cols-2"} gap-4`}>
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -175,37 +192,41 @@ export default function LopDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">Total Billed</p>
-                <p className="text-3xl font-bold text-slate-900">
-                  {formatCurrency(stats?.totalBilled ?? 0)}
-                </p>
-              </div>
-              <DollarSign className="h-10 w-10 text-green-500 opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
+        {canViewFinancial && (
+          <>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">Total Billed</p>
+                    <p className="text-3xl font-bold text-slate-900">
+                      {formatCurrency(stats?.totalBilled ?? 0)}
+                    </p>
+                  </div>
+                  <DollarSign className="h-10 w-10 text-green-500 opacity-50" />
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500">Total Collected</p>
-                <p className="text-3xl font-bold text-slate-900">
-                  {formatCurrency(stats?.totalCollected ?? 0)}
-                </p>
-              </div>
-              <TrendingUp className="h-10 w-10 text-emerald-500 opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">Total Collected</p>
+                    <p className="text-3xl font-bold text-slate-900">
+                      {formatCurrency(stats?.totalCollected ?? 0)}
+                    </p>
+                  </div>
+                  <TrendingUp className="h-10 w-10 text-emerald-500 opacity-50" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Alert row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
@@ -237,6 +258,24 @@ export default function LopDashboardPage() {
             </div>
           </CardContent>
         </Card>
+
+        <Link href="/lop/patients">
+          <Card className="border-red-200 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer h-full">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div>
+                  <p className="text-sm font-medium text-red-800">
+                    Patients w/ Missing Docs
+                  </p>
+                  <p className="text-2xl font-bold text-red-900">
+                    {stats?.patientsWithMissingDocs ?? 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Case Status Breakdown */}

@@ -9,6 +9,9 @@ import {
   CASE_STATUS_LABELS,
   CASE_STATUS_COLORS,
   DOC_STATUS_LABELS,
+  REQUIRED_DOCUMENTS,
+  DOCUMENT_TYPE_LABELS,
+  getMissingDocuments,
 } from "@/lib/lop/types";
 import type { LopCaseStatus, LopDocumentStatus } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
@@ -21,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Search, Download, Loader2 } from "lucide-react";
+import { Plus, Search, Download, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function PatientsListPage() {
   const { lopUser, activeFacilityId, facilities } = useLopAuth();
@@ -40,7 +43,7 @@ export default function PatientsListPage() {
         ? [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }]
         : [];
       const { data } = await lopDb.select("lop_patients", {
-        select: "*, lop_facilities(name, slug), lop_law_firms(name)",
+        select: "*, lop_facilities(name, slug), lop_law_firms(name), lop_patient_documents(document_type, status)",
         order: { column: "created_at", ascending: false },
         filters,
       });
@@ -68,6 +71,7 @@ export default function PatientsListPage() {
   }, [patients, search, statusFilter, facilityFilter]);
 
   const canCreate = hasPermission(lopUser, "patient:create");
+  const canViewFinancial = hasPermission(lopUser, "financial:view");
 
   return (
     <div className="space-y-6">
@@ -158,8 +162,9 @@ export default function PatientsListPage() {
                     <th className="px-4 py-3 font-medium text-slate-500">Accident Date</th>
                     <th className="px-4 py-3 font-medium text-slate-500">Status</th>
                     <th className="px-4 py-3 font-medium text-slate-500">LOP Letter</th>
-                    <th className="px-4 py-3 font-medium text-slate-500">Billed</th>
-                    <th className="px-4 py-3 font-medium text-slate-500">Collected</th>
+                    <th className="px-4 py-3 font-medium text-slate-500">Missing Docs</th>
+                    {canViewFinancial && <th className="px-4 py-3 font-medium text-slate-500">Billed</th>}
+                    {canViewFinancial && <th className="px-4 py-3 font-medium text-slate-500">Collected</th>}
                     <th className="px-4 py-3 font-medium text-slate-500">Created</th>
                   </tr>
                 </thead>
@@ -203,16 +208,42 @@ export default function PatientsListPage() {
                         <td className="px-4 py-3 text-slate-600 text-xs">
                           {DOC_STATUS_LABELS[lopStatus] ?? lopStatus}
                         </td>
-                        <td className="px-4 py-3 text-slate-600">
-                          {p.bill_charges
-                            ? `$${Number(p.bill_charges).toLocaleString()}`
-                            : "—"}
+                        <td className="px-4 py-3">
+                          {(() => {
+                            const docs = Array.isArray(p.lop_patient_documents)
+                              ? (p.lop_patient_documents as { document_type: string; status: string }[])
+                              : [];
+                            const checklist = getMissingDocuments(docs);
+                            const missingReq = checklist.filter(
+                              (c) => c.required && c.status !== "received"
+                            );
+                            return missingReq.length > 0 ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                <AlertCircle className="h-3 w-3" />
+                                {missingReq.length} missing
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                <CheckCircle2 className="h-3 w-3" />
+                                Complete
+                              </span>
+                            );
+                          })()}
                         </td>
-                        <td className="px-4 py-3 text-slate-600">
-                          {p.amount_collected
-                            ? `$${Number(p.amount_collected).toLocaleString()}`
-                            : "—"}
-                        </td>
+                        {canViewFinancial && (
+                          <td className="px-4 py-3 text-slate-600">
+                            {p.bill_charges
+                              ? `$${Number(p.bill_charges).toLocaleString()}`
+                              : "—"}
+                          </td>
+                        )}
+                        {canViewFinancial && (
+                          <td className="px-4 py-3 text-slate-600">
+                            {p.amount_collected
+                              ? `$${Number(p.amount_collected).toLocaleString()}`
+                              : "—"}
+                          </td>
+                        )}
                         <td className="px-4 py-3 text-slate-500 text-xs">
                           {new Date(p.created_at as string).toLocaleDateString()}
                         </td>

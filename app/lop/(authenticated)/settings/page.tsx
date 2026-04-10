@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
+import { hasPermission } from "@/lib/lop/permissions";
 import { ROLE_LABELS } from "@/lib/lop/types";
 import type { LopUser, LopUserRole, LopFacility } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
@@ -33,11 +34,27 @@ import {
   Edit,
   Loader2,
   Shield,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LopSettingsPage() {
   const { lopUser } = useLopAuth();
+
+  // Page-level permission guard
+  if (!hasPermission(lopUser, "users:manage")) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-10 w-10 text-orange-500 mx-auto mb-3" />
+          <p className="text-lg font-medium text-slate-700">Access Restricted</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Settings are available to Admin users only.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -87,6 +104,7 @@ export default function LopSettingsPage() {
 
 // ————— Users Tab —————
 function UsersTab() {
+  const { lopUser } = useLopAuth();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [users, setUsers] = useState<any[]>([]);
   const [allFacilities, setAllFacilities] = useState<LopFacility[]>([]);
@@ -180,6 +198,15 @@ function UsersTab() {
         }
 
         toast.success("User updated.");
+        // Audit log
+        await lopDb.insert("lop_audit_log", {
+          user_id: lopUser?.id,
+          action: "user_updated",
+          entity_type: "lop_users",
+          entity_id: editingUser.id,
+          old_values: { role: editingUser.role, is_active: editingUser.is_active },
+          new_values: { role: form.role, is_active: form.is_active, facility_ids: form.facility_ids },
+        });
       } else {
         // For new users, we create a placeholder profile
         // The auth_user_id will be linked when they first sign in via Google
@@ -208,6 +235,14 @@ function UsersTab() {
         }
 
         toast.success("User added. They'll be linked on first Google sign-in.");
+        // Audit log
+        await lopDb.insert("lop_audit_log", {
+          user_id: lopUser?.id,
+          action: "user_created",
+          entity_type: "lop_users",
+          entity_id: (data as Record<string, unknown>).id,
+          new_values: { email: form.email, role: form.role, facility_ids: form.facility_ids },
+        });
       }
 
       setDialogOpen(false);
@@ -392,10 +427,12 @@ function UsersTab() {
 
 // ————— Facilities Tab —————
 function FacilitiesTab() {
+  const { lopUser } = useLopAuth();
   const [facilities, setFacilities] = useState<LopFacility[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingFacility, setEditingFacility] = useState<LopFacility | null>(null);
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -416,27 +453,83 @@ function FacilitiesTab() {
     loadFacilities();
   }, []);
 
-  const handleAddFacility = async () => {
+  const openDialog = (facility?: LopFacility) => {
+    if (facility) {
+      setEditingFacility(facility);
+      setForm({
+        name: facility.name,
+        slug: facility.slug,
+        type: facility.type,
+        address: facility.address ?? "",
+        is_active: facility.is_active,
+      });
+    } else {
+      setEditingFacility(null);
+      setForm({ name: "", slug: "", type: "er", address: "", is_active: true });
+    }
+    setDialogOpen(true);
+  };
+
+  const handleSaveFacility = async () => {
     if (!form.name.trim() || !form.slug.trim()) {
       toast.error("Name and slug are required.");
       return;
     }
     setSaving(true);
     try {
-      await lopDb.insert("lop_facilities", {
-        name: form.name.trim(),
-        slug: form.slug.trim(),
-        type: form.type,
-        address: form.address || null,
-        is_active: form.is_active,
-      });
-      toast.success("Facility added.");
+      if (editingFacility) {
+        await lopDb.update(
+          "lop_facilities",
+          {
+            name: form.name.trim(),
+            slug: form.slug.trim(),
+            type: form.type,
+            address: form.address || null,
+            is_active: form.is_active,
+          },
+          { id: editingFacility.id },
+        );
+        // Audit log
+        await lopDb.insert("lop_audit_log", {
+          user_id: lopUser?.id,
+          action: "facility_updated",
+          entity_type: "lop_facilities",
+          entity_id: editingFacility.id,
+          old_values: { name: editingFacility.name, address: editingFacility.address, is_active: editingFacility.is_active },
+          new_values: { name: form.name.trim(), address: form.address || null, is_active: form.is_active },
+        });
+        toast.success("Facility updated.");
+      } else {
+        const { data } = await lopDb.insert(
+          "lop_facilities",
+          {
+            name: form.name.trim(),
+            slug: form.slug.trim(),
+            type: form.type,
+            address: form.address || null,
+            is_active: form.is_active,
+          },
+          { select: "id", single: true },
+        );
+        // Audit log
+        if (data) {
+          await lopDb.insert("lop_audit_log", {
+            user_id: lopUser?.id,
+            action: "facility_created",
+            entity_type: "lop_facilities",
+            entity_id: (data as Record<string, unknown>).id,
+            new_values: { name: form.name.trim(), slug: form.slug.trim(), type: form.type },
+          });
+        }
+        toast.success("Facility added.");
+      }
       setDialogOpen(false);
       setForm({ name: "", slug: "", type: "er", address: "", is_active: true });
+      setEditingFacility(null);
       loadFacilities();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add facility.");
+      toast.error("Failed to save facility.");
     } finally {
       setSaving(false);
     }
@@ -446,7 +539,7 @@ function FacilitiesTab() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-slate-500">{facilities.length} facilities</p>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2">
+        <Button onClick={() => openDialog()} className="gap-2">
           <Plus className="h-4 w-4" />
           Add Facility
         </Button>
@@ -462,15 +555,25 @@ function FacilitiesTab() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center justify-between">
                   {f.name}
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      f.is_active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {f.is_active ? "Active" : "Inactive"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        f.is_active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {f.is_active ? "Active" : "Inactive"}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => openDialog(f)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-slate-600 space-y-1">
@@ -483,11 +586,11 @@ function FacilitiesTab() {
         </div>
       )}
 
-      {/* Add Facility Dialog */}
+      {/* Add/Edit Facility Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Facility</DialogTitle>
+            <DialogTitle>{editingFacility ? "Edit Facility" : "Add Facility"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
@@ -508,7 +611,11 @@ function FacilitiesTab() {
                   }))
                 }
                 placeholder="e.g. er-of-dallas"
+                disabled={!!editingFacility}
               />
+              {editingFacility && (
+                <p className="text-xs text-slate-400 mt-1">Slug cannot be changed after creation.</p>
+              )}
             </div>
             <div>
               <Label>Type</Label>
@@ -545,9 +652,9 @@ function FacilitiesTab() {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleAddFacility} disabled={saving}>
+              <Button onClick={handleSaveFacility} disabled={saving}>
                 {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                Add Facility
+                {editingFacility ? "Update" : "Add"} Facility
               </Button>
             </div>
           </div>
@@ -559,6 +666,7 @@ function FacilitiesTab() {
 
 // ————— Config Tab —————
 function ConfigTab() {
+  const { lopUser } = useLopAuth();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [configs, setConfigs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -587,6 +695,17 @@ function ConfigTab() {
       }
 
       await lopDb.update("lop_config", { value: parsedValue }, { key });
+
+      // Audit log
+      const oldConfig = configs.find((c) => (c.key as string) === key);
+      await lopDb.insert("lop_audit_log", {
+        user_id: lopUser?.id,
+        action: "config_updated",
+        entity_type: "lop_config",
+        entity_id: key,
+        old_values: { value: oldConfig?.value },
+        new_values: { value: parsedValue },
+      });
 
       toast.success(`Config "${key}" updated.`);
       setEditKey(null);

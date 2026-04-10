@@ -29,6 +29,34 @@ const ALLOWED_TABLES = [
   "lop_config",
 ];
 
+/**
+ * Server-side role → table/operation permission matrix.
+ * "select" is relatively open; mutations are restricted.
+ */
+type Role = "front_desk" | "scheduler" | "medical_records" | "accounting" | "admin";
+
+const TABLE_WRITE_RULES: Record<string, Role[]> = {
+  "lop_patients:insert": ["front_desk", "scheduler", "medical_records", "admin"],
+  "lop_patients:update": ["front_desk", "medical_records", "admin"],
+  "lop_patients:delete": ["admin"],
+  "lop_patient_documents:insert": ["medical_records", "admin"],
+  "lop_patient_documents:update": ["medical_records", "admin"],
+  "lop_patient_documents:delete": ["medical_records", "admin"],
+  "lop_law_firms:insert": ["medical_records", "admin"],
+  "lop_law_firms:update": ["medical_records", "admin"],
+  "lop_law_firms:delete": ["admin"],
+  "lop_reminder_emails:insert": ["medical_records", "admin"],
+  "lop_audit_log:insert": ["front_desk", "scheduler", "medical_records", "accounting", "admin"],
+  "lop_users:insert": ["admin"],
+  "lop_users:update": ["admin"],
+  "lop_user_facilities:insert": ["admin"],
+  "lop_user_facilities:delete": ["admin"],
+  "lop_facilities:insert": ["admin"],
+  "lop_facilities:update": ["admin"],
+  "lop_config:update": ["admin"],
+  "lop_config:upsert": ["admin"],
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -81,6 +109,18 @@ export async function POST(request: NextRequest) {
         { error: "LOP user not found or inactive" },
         { status: 403 },
       );
+    }
+
+    // Server-side role check for write operations
+    if (operation !== "select") {
+      const ruleKey = `${table}:${operation}`;
+      const allowedRoles = TABLE_WRITE_RULES[ruleKey];
+      if (allowedRoles && !allowedRoles.includes(lopUser.role as Role)) {
+        return NextResponse.json(
+          { error: `Role "${lopUser.role}" cannot ${operation} on ${table}` },
+          { status: 403 },
+        );
+      }
     }
 
     // Execute the operation

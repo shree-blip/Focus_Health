@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
+import { hasPermission } from "@/lib/lop/permissions";
 import { CASE_STATUS_LABELS } from "@/lib/lop/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -70,7 +71,7 @@ interface LawFirmMetric {
 }
 
 export default function ReportsPage() {
-  const { activeFacilityId, facilities } = useLopAuth();
+  const { lopUser, activeFacilityId, facilities } = useLopAuth();
   const [patients, setPatients] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [datePreset, setDatePreset] = useState("ytd");
@@ -262,6 +263,21 @@ export default function ReportsPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Page-level permission guard
+  if (!hasPermission(lopUser, "reports:read")) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-10 w-10 text-orange-500 mx-auto mb-3" />
+          <p className="text-lg font-medium text-slate-700">Access Restricted</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Reports are available to Accounting and Admin roles only.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

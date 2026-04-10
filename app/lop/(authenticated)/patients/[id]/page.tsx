@@ -12,6 +12,8 @@ import {
   CASE_STATUS_COLORS,
   DOC_STATUS_LABELS,
   DOCUMENT_TYPE_LABELS,
+  ALL_DOCUMENT_TYPES,
+  getMissingDocuments,
 } from "@/lib/lop/types";
 import type {
   LopCaseStatus,
@@ -48,6 +50,9 @@ import {
   X,
   Download,
   Trash2,
+  CheckCircle2,
+  AlertCircle,
+  Circle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -137,6 +142,8 @@ export default function PatientDetailPage({
   const [documents, setDocuments] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [reminders, setReminders] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [lawFirms, setLawFirms] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -158,7 +165,7 @@ export default function PatientDetailPage({
   // Load data
   const loadData = useCallback(async () => {
     try {
-      const [patientRes, docsRes, remindersRes, firmsRes] = await Promise.all([
+      const [patientRes, docsRes, remindersRes, firmsRes, auditRes] = await Promise.all([
         lopDb.select("lop_patients", {
           select: "*, lop_facilities(name), lop_law_firms(name)",
           filters: [{ column: "id", op: "eq", value: id }],
@@ -177,6 +184,12 @@ export default function PatientDetailPage({
           filters: [{ column: "is_active", op: "eq", value: true }],
           order: { column: "name" },
         }),
+        lopDb.select("lop_audit_log", {
+          select: "*, lop_users(full_name)",
+          filters: [{ column: "entity_id", op: "eq", value: id }],
+          order: { column: "created_at", ascending: false },
+          limit: 50,
+        }),
       ]);
 
       if (patientRes.data) {
@@ -189,6 +202,7 @@ export default function PatientDetailPage({
       }
       setDocuments((docsRes.data as unknown[]) ?? []);
       setReminders((remindersRes.data as unknown[]) ?? []);
+      setAuditLogs((auditRes.data as unknown[]) ?? []);
       setLawFirms((firmsRes.data as { id: string; name: string }[]) ?? []);
     } catch (err) {
       console.error("Failed to load patient data:", err);
@@ -441,6 +455,7 @@ export default function PatientDetailPage({
 
   const canEdit = hasPermission(lopUser, "patient:update");
   const canEditBilling = hasPermission(lopUser, "billing:update");
+  const canViewFinancial = hasPermission(lopUser, "financial:view");
   const canUploadDocs = hasPermission(lopUser, "documents:upload");
   const canSendEmail = hasPermission(lopUser, "email:send");
 
@@ -524,6 +539,23 @@ export default function PatientDetailPage({
             form.medical_records_status as LopDocumentStatus
           ] ?? "N/A"}
         </span>
+        {(() => {
+          const missingCount = getMissingDocuments(
+            documents.map((d) => ({
+              document_type: d.document_type as string,
+              status: d.status as string,
+            }))
+          ).filter((c) => c.required && c.status !== "received").length;
+          return missingCount > 0 ? (
+            <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+              {missingCount} Required Doc{missingCount > 1 ? "s" : ""} Missing
+            </span>
+          ) : (
+            <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+              All Required Docs Received
+            </span>
+          );
+        })()}
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
@@ -535,6 +567,9 @@ export default function PatientDetailPage({
           </TabsTrigger>
           <TabsTrigger value="reminders">
             Reminders ({reminders.length})
+          </TabsTrigger>
+          <TabsTrigger value="activity">
+            Activity ({auditLogs.length})
           </TabsTrigger>
         </TabsList>
 
@@ -816,39 +851,47 @@ export default function PatientDetailPage({
             <CardHeader>
               <CardTitle className="text-base">Billing</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <Label>Bill Charges ($)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={(form.bill_charges as string) ?? ""}
-                  onChange={(e) => updateForm("bill_charges", e.target.value)}
-                  disabled={!canEditBilling}
-                />
-              </div>
-              <div>
-                <Label>Amount Collected ($)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={(form.amount_collected as string) ?? ""}
-                  onChange={(e) =>
-                    updateForm("amount_collected", e.target.value)
-                  }
-                  disabled={!canEditBilling}
-                />
-              </div>
-              <div>
-                <Label>Date Paid</Label>
-                <Input
-                  type="date"
-                  value={(form.date_paid as string) ?? ""}
-                  onChange={(e) => updateForm("date_paid", e.target.value)}
-                  disabled={!canEditBilling}
-                />
-              </div>
-            </CardContent>
+            {canViewFinancial ? (
+              <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label>Bill Charges ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={(form.bill_charges as string) ?? ""}
+                    onChange={(e) => updateForm("bill_charges", e.target.value)}
+                    disabled={!canEditBilling}
+                  />
+                </div>
+                <div>
+                  <Label>Amount Collected ($)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={(form.amount_collected as string) ?? ""}
+                    onChange={(e) =>
+                      updateForm("amount_collected", e.target.value)
+                    }
+                    disabled={!canEditBilling}
+                  />
+                </div>
+                <div>
+                  <Label>Date Paid</Label>
+                  <Input
+                    type="date"
+                    value={(form.date_paid as string) ?? ""}
+                    onChange={(e) => updateForm("date_paid", e.target.value)}
+                    disabled={!canEditBilling}
+                  />
+                </div>
+              </CardContent>
+            ) : (
+              <CardContent>
+                <p className="text-sm text-slate-400 py-4 text-center">
+                  Financial details are restricted to Medical Records, Accounting, and Admin roles.
+                </p>
+              </CardContent>
+            )}
           </Card>
 
           <Card>
@@ -895,6 +938,78 @@ export default function PatientDetailPage({
 
         {/* ==================== Documents Tab ==================== */}
         <TabsContent value="documents" className="space-y-4 mt-4">
+          {/* ---- Document Checklist ---- */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Document Checklist</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const checklist = getMissingDocuments(
+                  documents.map((d) => ({
+                    document_type: d.document_type as string,
+                    status: d.status as string,
+                  }))
+                );
+                const missingRequired = checklist.filter(
+                  (c) => c.required && c.status !== "received"
+                );
+                return (
+                  <div className="space-y-3">
+                    {missingRequired.length > 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+                        <p className="text-sm font-medium text-red-700">
+                          <AlertCircle className="h-4 w-4 inline mr-1 -mt-0.5" />
+                          {missingRequired.length} required document
+                          {missingRequired.length > 1 ? "s" : ""} not yet
+                          received
+                        </p>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {checklist.map((item) => (
+                        <div
+                          key={item.type}
+                          className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
+                            item.status === "received"
+                              ? "bg-green-50 text-green-700"
+                              : item.status === "missing"
+                              ? "bg-red-50 text-red-700"
+                              : item.required
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-slate-50 text-slate-500"
+                          }`}
+                        >
+                          {item.status === "received" ? (
+                            <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                          ) : item.status === "missing" ? (
+                            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                          ) : (
+                            <Circle className="h-4 w-4 flex-shrink-0" />
+                          )}
+                          <span className="flex-1">{item.label}</span>
+                          {item.required && (
+                            <span className="text-[10px] uppercase tracking-wide font-semibold opacity-70">
+                              Required
+                            </span>
+                          )}
+                          <span className="text-xs font-medium">
+                            {item.status === "received"
+                              ? "Received"
+                              : item.status === "missing"
+                              ? "Missing"
+                              : "Pending"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+
+          {/* ---- Uploaded Documents ---- */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Documents</CardTitle>
@@ -1038,6 +1153,89 @@ export default function PatientDetailPage({
                       </span>
                     </div>
                   ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ==================== Activity Tab ==================== */}
+        <TabsContent value="activity" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Activity History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {auditLogs.length === 0 ? (
+                <p className="text-sm text-slate-400 py-8 text-center">
+                  No activity recorded yet.
+                </p>
+              ) : (
+                <div className="relative">
+                  {/* Timeline line */}
+                  <div className="absolute left-3 top-2 bottom-2 w-px bg-slate-200" />
+                  <div className="space-y-4">
+                    {auditLogs.map((log) => {
+                      const action = log.action as string;
+                      const isStatus = action === "status_changed";
+                      const isCreate = action === "patient_created";
+                      const isDoc = action === "document_uploaded";
+                      const isReminder = action === "reminder_sent";
+                      return (
+                        <div
+                          key={log.id as string}
+                          className="flex gap-3 pl-1 relative"
+                        >
+                          <div
+                            className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 z-10 ${
+                              isStatus
+                                ? "bg-blue-100 text-blue-600"
+                                : isCreate
+                                ? "bg-green-100 text-green-600"
+                                : isDoc
+                                ? "bg-purple-100 text-purple-600"
+                                : isReminder
+                                ? "bg-orange-100 text-orange-600"
+                                : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            <Circle className="h-2.5 w-2.5 fill-current" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium text-slate-800">
+                                {action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                              </span>
+                              <span className="text-xs text-slate-400">
+                                {new Date(log.created_at as string).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              by {(log.lop_users as Record<string, unknown>)?.full_name as string ?? "System"}
+                            </p>
+                            {isStatus && log.old_values && log.new_values && (
+                              <div className="mt-1 text-xs">
+                                <span className="text-red-500">
+                                  {CASE_STATUS_LABELS[(log.old_values as Record<string, string>)?.case_status as LopCaseStatus] ??
+                                    (log.old_values as Record<string, string>)?.case_status}
+                                </span>
+                                {" → "}
+                                <span className="text-green-600">
+                                  {CASE_STATUS_LABELS[(log.new_values as Record<string, string>)?.case_status as LopCaseStatus] ??
+                                    (log.new_values as Record<string, string>)?.case_status}
+                                </span>
+                              </div>
+                            )}
+                            {!isStatus && log.new_values && (
+                              <div className="mt-1 text-xs text-slate-400 max-w-md truncate">
+                                {JSON.stringify(log.new_values)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </CardContent>
