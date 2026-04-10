@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/supabase";
+import { lopClient } from "@/lib/lop/client";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,

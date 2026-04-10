@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/supabase";
+import { lopClient } from "@/lib/lop/client";
 import { CASE_STATUS_LABELS } from "@/lib/lop/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

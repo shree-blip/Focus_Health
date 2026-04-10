@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { lopClient } from "@/lib/lop/supabase";
+import { lopClient } from "@/lib/lop/client";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 

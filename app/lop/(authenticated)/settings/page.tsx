@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/supabase";
+import { lopClient } from "@/lib/lop/client";
 import { ROLE_LABELS } from "@/lib/lop/types";
 import type { LopUser, LopUserRole, LopFacility } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";

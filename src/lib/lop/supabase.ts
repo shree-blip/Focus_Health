@@ -18,8 +18,12 @@ export function createLopServerClient() {
 }
 
 /**
- * Client-side Supabase client re-exported as an `any`-typed instance
- * so LOP table queries compile before the generated types are updated.
+ * Client-side Supabase client re-exported as an `any`-typed instance.
+ * Lazy-loaded to avoid importing the browser client in server-only modules.
  */
-import { supabase } from "@/integrations/supabase/client";
-export const lopClient = supabase as ReturnType<typeof createClient<any>>;
+export function getLopClient() {
+  // Dynamic require so server-only API routes don't trigger the browser client
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { supabase } = require("@/integrations/supabase/client");
+  return supabase as ReturnType<typeof createClient<any>>;
+}

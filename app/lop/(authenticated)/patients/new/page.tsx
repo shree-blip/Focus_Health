@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/supabase";
+import { lopClient } from "@/lib/lop/client";
 import type { LopFacility, LopLawFirm } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

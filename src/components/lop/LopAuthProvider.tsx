@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { lopClient } from "@/lib/lop/supabase";
+import { lopClient } from "@/lib/lop/client";
 import type { LopUser, LopFacility } from "@/lib/lop/types";
 import type { User } from "@supabase/supabase-js";
 

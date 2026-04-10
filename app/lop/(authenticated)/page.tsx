@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/supabase";
+import { lopClient } from "@/lib/lop/client";
 import { CASE_STATUS_LABELS, CASE_STATUS_COLORS } from "@/lib/lop/types";
 import type { LopCaseStatus } from "@/lib/lop/types";
 import {
