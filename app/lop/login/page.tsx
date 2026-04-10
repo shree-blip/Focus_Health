@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -12,70 +12,67 @@ function LoginForm() {
   const [exchanging, setExchanging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const router = useRouter();
   const redirect = searchParams.get("redirect") || "/lop";
   const code = searchParams.get("code");
-  const exchangeRan = useRef(false);
+  const provisionRan = useRef(false);
 
-  // ———— Handle OAuth callback (code in URL) ————
+  // If URL has ?code=, the Supabase client will auto-exchange it.
+  // Show a spinner while that happens.
   useEffect(() => {
-    if (!code || exchangeRan.current) return;
-    exchangeRan.current = true;
-    setExchanging(true);
+    if (code) setExchanging(true);
+  }, [code]);
 
-    (async () => {
-      try {
-        // Exchange the OAuth code for a session.
-        // This uses the SAME browser client that stored the PKCE verifier,
-        // so the verifier is guaranteed to be in the same cookie jar.
-        const { data, error: exchangeError } =
-          await supabase.auth.exchangeCodeForSession(code);
+  // Listen for auth state changes.
+  // createBrowserClient from @supabase/ssr has detectSessionInUrl: true,
+  // so it automatically reads ?code= from the URL and exchanges it for a
+  // session using the PKCE verifier stored in cookies.
+  // We must NOT call exchangeCodeForSession manually — that races with the
+  // auto-detection and causes "PKCE code verifier not found" errors.
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Only act on initial session load or new sign-in
+      if (event !== "INITIAL_SESSION" && event !== "SIGNED_IN") return;
 
-        if (exchangeError || !data.session) {
-          console.error("Code exchange failed:", exchangeError);
-          setError(
-            exchangeError?.message || "Failed to complete sign-in. Please try again."
-          );
-          setExchanging(false);
-          return;
+      if (session?.user) {
+        // Already handled (e.g. duplicate event)
+        if (provisionRan.current) return;
+        provisionRan.current = true;
+        setExchanging(true);
+
+        try {
+          // Provision user server-side (service-role bypasses RLS)
+          await fetch("/api/lop/provision", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              auth_user_id: session.user.id,
+              email: session.user.email,
+              full_name:
+                session.user.user_metadata?.full_name ??
+                session.user.user_metadata?.name ??
+                session.user.email?.split("@")[0] ??
+                "Unknown",
+            }),
+          });
+        } catch (err) {
+          console.error("Provision error:", err);
         }
 
-        // Provision user server-side (service-role bypasses RLS)
-        const user = data.session.user;
-        await fetch("/api/lop/provision", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            auth_user_id: user.id,
-            email: user.email,
-            full_name:
-              user.user_metadata?.full_name ??
-              user.user_metadata?.name ??
-              user.email?.split("@")[0] ??
-              "Unknown",
-          }),
-        });
-
-        // Redirect to dashboard
+        // Hard redirect so middleware can read the new session cookies
         window.location.href = redirect;
-      } catch (err) {
-        console.error("Callback error:", err);
-        setError(
-          err instanceof Error ? err.message : "An unexpected error occurred."
-        );
+      } else if (code && event === "INITIAL_SESSION") {
+        // There was a ?code= in the URL but the auto-exchange failed
+        // (e.g. expired code, cleared cookies, different browser).
         setExchanging(false);
-      }
-    })();
-  }, [code, redirect]);
-
-  // ———— If already signed in, redirect ————
-  useEffect(() => {
-    if (code) return; // Don't check session if we're handling a callback
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        window.location.href = redirect;
+        setError(
+          "Sign-in could not be completed. The code may have expired — please try again."
+        );
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [redirect, code]);
 
   // ———— Start Google OAuth ————
