@@ -4,8 +4,12 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only apply LOP auth checks on /lop routes (except login)
-  if (!pathname.startsWith("/lop") || pathname === "/lop/login") {
+  // Only apply LOP auth checks on /lop routes (except login & auth callback)
+  if (
+    !pathname.startsWith("/lop") ||
+    pathname === "/lop/login" ||
+    pathname.startsWith("/lop/auth")
+  ) {
     return NextResponse.next();
   }
 
