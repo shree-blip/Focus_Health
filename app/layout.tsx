@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import "@/index.css";
 import AppProviders from "@/components/providers/AppProviders";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { PublicShell } from "@/components/layout/PublicShell";
 import { StructuredDataScript } from "@/components/seo/StructuredDataScript";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { siteConfig } from "@/lib/metadata";
@@ -106,11 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning className={`${inter.variable} ${sora.variable}`}>
         <AppProviders>
           <ScrollToTop />
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-1 pt-20">{children}</main>
-            <Footer />
-          </div>
+          <PublicShell>{children}</PublicShell>
         </AppProviders>
         <StructuredDataScript />
       </body>
