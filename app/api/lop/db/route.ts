@@ -100,6 +100,9 @@ export async function POST(request: NextRequest) {
             else if (f.op === "lte") q = q.lte(f.column, f.value);
             else if (f.op === "in") q = q.in(f.column, f.value);
             else if (f.op === "is") q = q.is(f.column, f.value);
+            else if (f.op === "not_is") q = q.not(f.column, "is", f.value);
+            else if (f.op === "like") q = q.like(f.column, f.value);
+            else if (f.op === "ilike") q = q.ilike(f.column, f.value);
           }
         }
         if (order) {
@@ -188,7 +191,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("LOP DB proxy error:", err);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: err instanceof Error ? err.message : "Internal server error" },
       { status: 500 },
     );
   }

@@ -115,8 +115,8 @@ export default function NewPatientPage() {
       toast.success("Patient record created.");
       router.push(`/lop/patients/${data.id}`);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to create patient record.");
+      console.error("Create patient error:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to create patient record.");
     } finally {
       setSaving(false);
     }

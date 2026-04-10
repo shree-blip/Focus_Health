@@ -157,39 +157,45 @@ export default function PatientDetailPage({
 
   // Load data
   const loadData = useCallback(async () => {
-    const [patientRes, docsRes, remindersRes, firmsRes] = await Promise.all([
-      lopDb.select("lop_patients", {
-        select: "*, lop_facilities(name), lop_law_firms(name)",
-        filters: [{ column: "id", op: "eq", value: id }],
-        single: true,
-      }),
-      lopDb.select("lop_patient_documents", {
-        filters: [{ column: "patient_id", op: "eq", value: id }],
-        order: { column: "created_at", ascending: false },
-      }),
-      lopDb.select("lop_reminder_emails", {
-        filters: [{ column: "patient_id", op: "eq", value: id }],
-        order: { column: "sent_at", ascending: false },
-      }),
-      lopDb.select("lop_law_firms", {
-        select: "id, name",
-        filters: [{ column: "is_active", op: "eq", value: true }],
-        order: { column: "name" },
-      }),
-    ]);
+    try {
+      const [patientRes, docsRes, remindersRes, firmsRes] = await Promise.all([
+        lopDb.select("lop_patients", {
+          select: "*, lop_facilities(name), lop_law_firms(name)",
+          filters: [{ column: "id", op: "eq", value: id }],
+          single: true,
+        }),
+        lopDb.select("lop_patient_documents", {
+          filters: [{ column: "patient_id", op: "eq", value: id }],
+          order: { column: "created_at", ascending: false },
+        }),
+        lopDb.select("lop_reminder_emails", {
+          filters: [{ column: "patient_id", op: "eq", value: id }],
+          order: { column: "sent_at", ascending: false },
+        }),
+        lopDb.select("lop_law_firms", {
+          select: "id, name",
+          filters: [{ column: "is_active", op: "eq", value: true }],
+          order: { column: "name" },
+        }),
+      ]);
 
-    if (patientRes.data) {
-      setPatient(patientRes.data);
-      setForm({
-        ...patientRes.data,
-        billing_tags: patientRes.data.billing_tags ?? [],
-        medical_record_tags: patientRes.data.medical_record_tags ?? [],
-      });
+      if (patientRes.data) {
+        setPatient(patientRes.data);
+        setForm({
+          ...patientRes.data,
+          billing_tags: patientRes.data.billing_tags ?? [],
+          medical_record_tags: patientRes.data.medical_record_tags ?? [],
+        });
+      }
+      setDocuments((docsRes.data as unknown[]) ?? []);
+      setReminders((remindersRes.data as unknown[]) ?? []);
+      setLawFirms((firmsRes.data as { id: string; name: string }[]) ?? []);
+    } catch (err) {
+      console.error("Failed to load patient data:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to load patient data");
+    } finally {
+      setLoading(false);
     }
-    setDocuments((docsRes.data as unknown[]) ?? []);
-    setReminders((remindersRes.data as unknown[]) ?? []);
-    setLawFirms((firmsRes.data as { id: string; name: string }[]) ?? []);
-    setLoading(false);
   }, [id]);
 
   useEffect(() => {
@@ -262,8 +268,8 @@ export default function PatientDetailPage({
       setPatient({ ...patient, ...form });
       toast.success("Patient record updated.");
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to save changes.");
+      console.error("Save error:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to save changes.");
     } finally {
       setSaving(false);
     }

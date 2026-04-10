@@ -22,7 +22,7 @@
 
 interface Filter {
   column: string;
-  op: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "is";
+  op: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "is" | "not_is" | "like" | "ilike";
   value: unknown;
 }
 
