@@ -80,8 +80,12 @@ export default function ReportsPage() {
   const [patients, setPatients] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [datePreset, setDatePreset] = useState("ytd");
-  const [customFrom, setCustomFrom] = useState("");
-  const [customTo, setCustomTo] = useState("");
+  const [customFrom, setCustomFrom] = useState(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return d.toISOString().split("T")[0];
+  });
+  const [customTo, setCustomTo] = useState(() => new Date().toISOString().split("T")[0]);
   const [facilityFilter, setFacilityFilter] = useState<string>("all");
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -102,12 +106,15 @@ export default function ReportsPage() {
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
       const range =
         datePreset === "custom"
           ? { from: customFrom, to: customTo }
           : getDateRange(datePreset);
 
+      // Don't fetch if custom range has empty dates
+      if (datePreset === "custom" && (!range.from || !range.to)) return;
+
+      setLoading(true);
       const filters: { column: string; op: "eq" | "gte" | "lte"; value: unknown }[] = [
         { column: "created_at", op: "gte", value: range.from },
         { column: "created_at", op: "lte", value: range.to + "T23:59:59" },
@@ -419,6 +426,60 @@ export default function ReportsPage() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          {/* Active filter summary */}
+          {(nameFilter || statusFilter !== "all" || facilityFilter !== "all" || datePreset !== "ytd") && (
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 flex-wrap">
+              <Filter className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-xs text-slate-500">Active:</span>
+              {datePreset !== "ytd" && (
+                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                  {datePreset === "custom"
+                    ? `${customFrom} → ${customTo}`
+                    : datePreset === "wtd" ? "Week to Date"
+                    : datePreset === "mtd" ? "Month to Date"
+                    : datePreset === "qtd" ? "Quarter to Date"
+                    : datePreset === "all" ? "All Time" : datePreset}
+                </span>
+              )}
+              {facilityFilter !== "all" && (
+                <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                  {facilities.find((f) => f.id === facilityFilter)?.name ?? "Facility"}
+                </span>
+              )}
+              {statusFilter !== "all" && (
+                <span className="text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                  {CASE_STATUS_LABELS[statusFilter as keyof typeof CASE_STATUS_LABELS] ?? statusFilter}
+                </span>
+              )}
+              {nameFilter && (
+                <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                  &quot;{nameFilter}&quot;
+                </span>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-slate-500 hover:text-slate-700 h-6 px-2 ml-auto"
+                onClick={() => {
+                  setDatePreset("ytd");
+                  setFacilityFilter("all");
+                  setStatusFilter("all");
+                  setNameFilter("");
+                }}
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
+          {/* Result count */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+            <span className="text-xs text-slate-500">
+              Showing <span className="font-semibold text-slate-700">{filteredPatients.length}</span> patient{filteredPatients.length !== 1 ? "s" : ""}
+              {patients.length !== filteredPatients.length && (
+                <> of {patients.length} loaded</>
+              )}
+            </span>
           </div>
         </CardContent>
       </Card>
