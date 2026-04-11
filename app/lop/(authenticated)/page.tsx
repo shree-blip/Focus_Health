@@ -16,9 +16,16 @@ import {
   TrendingUp,
   Activity,
   Loader2,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
+import { useAiChat } from "@/hooks/lop/useAiChat";
 
 interface DashboardStats {
   totalPatients: number;
@@ -146,6 +153,7 @@ export default function LopDashboardPage() {
   }
 
   const canViewFinancial = hasPermission(lopUser, "financial:view");
+  const canUseAi = hasPermission(lopUser, "ai:use");
 
   return (
     <div className="space-y-6">
@@ -161,6 +169,9 @@ export default function LopDashboardPage() {
           — {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
         </p>
       </div>
+
+      {/* AI Briefing Card */}
+      {canUseAi && <AiBriefingCard facilityId={activeFacilityId} />}
 
       {/* KPI Cards */}
       <div className={`grid grid-cols-1 sm:grid-cols-2 ${canViewFinancial ? "lg:grid-cols-4" : "lg:grid-cols-2"} gap-4`}>
@@ -384,4 +395,153 @@ export default function LopDashboardPage() {
       </Card>
     </div>
   );
+}
+
+/** AI Briefing sub-component — auto-generates a daily summary */
+function AiBriefingCard({ facilityId }: { facilityId: string | null }) {
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lop-ai-briefing-collapsed") === "true";
+    }
+    return false;
+  });
+  const [triggered, setTriggered] = useState(false);
+
+  const { messages, isLoading, append, setMessages } = useAiChat({
+    contextType: "dashboard_briefing",
+  });
+
+  // Auto-trigger briefing on first render (if not collapsed)
+  useEffect(() => {
+    if (!collapsed && !triggered && messages.length === 0) {
+      setTriggered(true);
+      append({ role: "user", content: "Generate today's operational briefing." });
+    }
+  }, [collapsed, triggered, messages.length, append]);
+
+  const handleToggle = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem("lop-ai-briefing-collapsed", String(next));
+    // Trigger on expand if never triggered
+    if (!next && !triggered && messages.length === 0) {
+      setTriggered(true);
+      append({ role: "user", content: "Generate today's operational briefing." });
+    }
+  };
+
+  const handleRefresh = () => {
+    setMessages([]);
+    setTriggered(false);
+    setTimeout(() => {
+      setTriggered(true);
+      append({ role: "user", content: "Generate today's operational briefing." });
+    }, 100);
+  };
+
+  const aiResponse = messages.find((m) => m.role === "assistant")?.content;
+
+  return (
+    <Card className="border-indigo-200 bg-gradient-to-r from-indigo-50/50 to-blue-50/50">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2 text-indigo-900">
+            <Sparkles className="h-5 w-5 text-indigo-500" />
+            AI Daily Briefing
+            <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-normal">
+              GPT-4o
+            </span>
+          </CardTitle>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              title="Regenerate briefing"
+            >
+              <RotateCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100"
+              onClick={handleToggle}
+            >
+              {collapsed ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      {!collapsed && (
+        <CardContent>
+          {isLoading && !aiResponse ? (
+            <div className="flex items-center gap-2 text-indigo-600 py-4">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Analyzing your data…</span>
+            </div>
+          ) : aiResponse ? (
+            <div className="prose prose-sm prose-slate max-w-none text-sm [&>*:first-child]:mt-0">
+              <AiBriefingMarkdown content={aiResponse} />
+            </div>
+          ) : (
+            <p className="text-sm text-indigo-500">Click refresh to generate a briefing.</p>
+          )}
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
+/** Simple markdown renderer for the briefing card */
+function AiBriefingMarkdown({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("### ")) {
+      elements.push(<h4 key={i} className="font-semibold text-sm mt-3 mb-1 text-indigo-900">{boldInline(line.slice(4))}</h4>);
+    } else if (line.startsWith("## ")) {
+      elements.push(<h3 key={i} className="font-bold text-sm mt-3 mb-1 text-indigo-900">{boldInline(line.slice(3))}</h3>);
+    } else if (/^\d+\.\s/.test(line)) {
+      elements.push(
+        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
+          <span className="text-indigo-400 flex-shrink-0">{line.match(/^\d+/)?.[0]}.</span>
+          <span>{boldInline(line.replace(/^\d+\.\s/, ""))}</span>
+        </div>
+      );
+    } else if (line.startsWith("- ") || line.startsWith("* ")) {
+      elements.push(
+        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
+          <span className="text-indigo-400 flex-shrink-0">•</span>
+          <span>{boldInline(line.slice(2))}</span>
+        </div>
+      );
+    } else if (line.trim() === "") {
+      elements.push(<div key={i} className="h-1.5" />);
+    } else {
+      elements.push(<p key={i} className="my-0.5 text-slate-700">{boldInline(line)}</p>);
+    }
+  }
+  return <>{elements}</>;
+}
+
+function boldInline(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  const regex = /(\*\*[^*]+\*\*)/g;
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    parts.push(<strong key={match.index}>{match[0].slice(2, -2)}</strong>);
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts.length > 0 ? parts : text;
 }

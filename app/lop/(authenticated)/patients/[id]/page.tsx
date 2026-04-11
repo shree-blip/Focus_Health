@@ -53,8 +53,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Circle,
+  Sparkles,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAiChat } from "@/hooks/lop/useAiChat";
 
 /* ------------------------------------------------------------------ */
 /*  Tag Input                                                          */
@@ -458,6 +461,7 @@ export default function PatientDetailPage({
   const canViewFinancial = hasPermission(lopUser, "financial:view");
   const canUploadDocs = hasPermission(lopUser, "documents:upload");
   const canSendEmail = hasPermission(lopUser, "email:send");
+  const canUseAi = hasPermission(lopUser, "ai:use");
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -571,6 +575,12 @@ export default function PatientDetailPage({
           <TabsTrigger value="activity">
             Activity ({auditLogs.length})
           </TabsTrigger>
+          {canUseAi && (
+            <TabsTrigger value="ai-summary" className="gap-1">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI Summary
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* ==================== Overview Tab ==================== */}
@@ -1241,6 +1251,13 @@ export default function PatientDetailPage({
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* ==================== AI Summary Tab ==================== */}
+        {canUseAi && (
+          <TabsContent value="ai-summary" className="mt-4">
+            <PatientAiSummary patientId={id} />
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* ==================== Add Document Dialog ==================== */}
@@ -1330,4 +1347,125 @@ export default function PatientDetailPage({
       </Dialog>
     </div>
   );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Patient AI Summary Sub-component                                   */
+/* ------------------------------------------------------------------ */
+function PatientAiSummary({ patientId }: { patientId: string }) {
+  const [triggered, setTriggered] = useState(false);
+  const { messages, isLoading, append, setMessages } = useAiChat({
+    contextType: "patient_summary",
+    contextId: patientId,
+  });
+
+  useEffect(() => {
+    if (!triggered && messages.length === 0) {
+      setTriggered(true);
+      append({
+        role: "user",
+        content: "Generate a comprehensive case summary for this patient.",
+      });
+    }
+  }, [triggered, messages.length, append]);
+
+  const handleRegenerate = () => {
+    setMessages([]);
+    setTriggered(false);
+    setTimeout(() => {
+      setTriggered(true);
+      append({
+        role: "user",
+        content: "Generate a comprehensive case summary for this patient.",
+      });
+    }, 100);
+  };
+
+  const aiResponse = messages.find((m) => m.role === "assistant")?.content;
+
+  return (
+    <Card className="border-indigo-200 bg-gradient-to-r from-indigo-50/50 to-blue-50/50">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2 text-indigo-900">
+            <Sparkles className="h-5 w-5 text-indigo-500" />
+            AI Case Summary
+            <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-normal">
+              GPT-4o
+            </span>
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100 gap-1"
+            onClick={handleRegenerate}
+            disabled={isLoading}
+          >
+            <RotateCcw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            Regenerate
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading && !aiResponse ? (
+          <div className="flex items-center gap-2 text-indigo-600 py-6">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Analyzing patient case data…</span>
+          </div>
+        ) : aiResponse ? (
+          <div className="prose prose-sm prose-slate max-w-none text-sm [&>*:first-child]:mt-0">
+            <PatientAiMarkdown content={aiResponse} />
+          </div>
+        ) : (
+          <p className="text-sm text-indigo-500 py-2">Failed to load. Click Regenerate.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PatientAiMarkdown({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("### ")) {
+      elements.push(<h4 key={i} className="font-semibold text-sm mt-3 mb-1 text-indigo-900">{inlineBold(line.slice(4))}</h4>);
+    } else if (line.startsWith("## ")) {
+      elements.push(<h3 key={i} className="font-bold text-sm mt-3 mb-1 text-indigo-900">{inlineBold(line.slice(3))}</h3>);
+    } else if (/^\d+\.\s/.test(line)) {
+      elements.push(
+        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
+          <span className="text-indigo-400 flex-shrink-0">{line.match(/^\d+/)?.[0]}.</span>
+          <span>{inlineBold(line.replace(/^\d+\.\s/, ""))}</span>
+        </div>
+      );
+    } else if (line.startsWith("- ") || line.startsWith("* ")) {
+      elements.push(
+        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
+          <span className="text-indigo-400 flex-shrink-0">•</span>
+          <span>{inlineBold(line.slice(2))}</span>
+        </div>
+      );
+    } else if (line.trim() === "") {
+      elements.push(<div key={i} className="h-1.5" />);
+    } else {
+      elements.push(<p key={i} className="my-0.5 text-slate-700">{inlineBold(line)}</p>);
+    }
+  }
+  return <>{elements}</>;
+}
+
+function inlineBold(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  const regex = /(\*\*[^*]+\*\*)/g;
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    parts.push(<strong key={match.index}>{match[0].slice(2, -2)}</strong>);
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts.length > 0 ? parts : text;
 }

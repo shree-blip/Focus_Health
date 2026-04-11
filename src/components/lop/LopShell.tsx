@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   ClipboardList,
+  Bot,
   ChevronDown,
 } from "lucide-react";
 import { useLopAuth } from "./LopAuthProvider";
@@ -122,6 +123,21 @@ export function LopShell({ children }: { children: ReactNode }) {
               </Link>
             );
           })}
+
+          {/* AI indicator (admin only) */}
+          {hasPermission(lopUser, "ai:use") && (
+            <div className="pt-3 mt-3 border-t border-slate-200">
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 border border-indigo-100">
+                <Bot className="h-5 w-5 flex-shrink-0" />
+                <span>AI Assistant</span>
+                <span className="ml-auto flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-indigo-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 px-3 mt-1">Click the floating button →</p>
+            </div>
+          )}
         </nav>
 
         {/* User info + Logout */}

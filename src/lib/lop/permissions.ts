@@ -36,6 +36,9 @@ const PERMISSIONS: Record<string, LopUserRole[]> = {
   // Email
   "email:send": ["medical_records", "admin"],
 
+  // AI assistant
+  "ai:use": ["admin"],
+
   // Admin
   "users:manage": ["admin"],
   "config:manage": ["admin"],

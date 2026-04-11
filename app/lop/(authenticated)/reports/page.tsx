@@ -8,6 +8,8 @@ import { CASE_STATUS_LABELS } from "@/lib/lop/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAiChat } from "@/hooks/lop/useAiChat";
 import {
   Select,
   SelectContent,
@@ -24,6 +26,9 @@ import {
   Download,
   Filter,
   Loader2,
+  Sparkles,
+  RotateCcw,
+  X,
 } from "lucide-react";
 
 // Date range presets
@@ -230,6 +235,8 @@ export default function ReportsPage() {
     }).format(n);
 
   const alertFirms = metrics.firmMetrics.filter((f) => f.belowThreshold);
+  const canUseAi = hasPermission(lopUser, "ai:use");
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const handleExportCsv = () => {
     const rows = filteredPatients.map((p) => ({
@@ -288,15 +295,27 @@ export default function ReportsPage() {
             Financial analytics across all facilities
           </p>
         </div>
-        <Button
-          variant="outline"
-          className="gap-2"
-          onClick={handleExportCsv}
-          disabled={filteredPatients.length === 0}
-        >
-          <Download className="h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          {canUseAi && (
+            <Button
+              variant="outline"
+              className="gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+              onClick={() => setAiPanelOpen(true)}
+            >
+              <Sparkles className="h-4 w-4" />
+              AI Analysis
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={handleExportCsv}
+            disabled={filteredPatients.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -595,6 +614,194 @@ export default function ReportsPage() {
           )}
         </>
       )}
+
+      {/* AI Analysis Slide-over */}
+      {canUseAi && aiPanelOpen && (
+        <ReportsAiPanel
+          metrics={metrics}
+          datePreset={datePreset}
+          onClose={() => setAiPanelOpen(false)}
+        />
+      )}
     </div>
   );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reports AI Analysis Panel                                          */
+/* ------------------------------------------------------------------ */
+function ReportsAiPanel({
+  metrics,
+  datePreset,
+  onClose,
+}: {
+  metrics: {
+    totalPatients: number;
+    totalBilled: number;
+    totalCollected: number;
+    avgBilled: number;
+    avgCollected: number;
+    openFollowUps: number;
+    droppedCases: number;
+    missingLop: number;
+    firmMetrics: LawFirmMetric[];
+    facilityMetrics: { name: string; count: number; billed: number; collected: number }[];
+  };
+  datePreset: string;
+  onClose: () => void;
+}) {
+  const [triggered, setTriggered] = useState(false);
+  const reportData = useMemo(
+    () =>
+      JSON.stringify({
+        dateRange: datePreset,
+        kpis: {
+          totalPatients: metrics.totalPatients,
+          totalBilled: metrics.totalBilled,
+          totalCollected: metrics.totalCollected,
+          avgBilled: metrics.avgBilled,
+          avgCollected: metrics.avgCollected,
+          openFollowUps: metrics.openFollowUps,
+          droppedCases: metrics.droppedCases,
+          missingLop: metrics.missingLop,
+        },
+        lawFirmBreakdown: metrics.firmMetrics.map((f) => ({
+          firm: f.firmName,
+          patients: f.patientCount,
+          billed: f.totalBilled,
+          collected: f.totalCollected,
+          avgCollected: f.avgCollected,
+          belowThreshold: f.belowThreshold,
+        })),
+        facilityBreakdown: metrics.facilityMetrics,
+      }),
+    [metrics, datePreset]
+  );
+
+  const { messages, isLoading, append, setMessages } = useAiChat({
+    contextType: "reports_analysis",
+    reportData: reportData,
+  });
+
+  useEffect(() => {
+    if (!triggered && messages.length === 0) {
+      setTriggered(true);
+      append({
+        role: "user",
+        content:
+          "Analyze these report metrics and provide actionable insights, revenue optimization suggestions, and risk flags.",
+      });
+    }
+  }, [triggered, messages.length, append]);
+
+  const handleRegenerate = () => {
+    setMessages([]);
+    setTriggered(false);
+    setTimeout(() => {
+      setTriggered(true);
+      append({
+        role: "user",
+        content:
+          "Analyze these report metrics and provide actionable insights, revenue optimization suggestions, and risk flags.",
+      });
+    }, 100);
+  };
+
+  const aiResponse = messages.find((m) => m.role === "assistant")?.content;
+
+  return (
+    <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white border-l shadow-2xl z-50 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-indigo-50 to-blue-50">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-indigo-500" />
+          <span className="font-semibold text-indigo-900">AI Report Analysis</span>
+          <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">
+            GPT-4o
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-indigo-500 hover:text-indigo-700"
+            onClick={handleRegenerate}
+            disabled={isLoading}
+          >
+            <RotateCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-slate-500 hover:text-slate-700"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Body */}
+      <ScrollArea className="flex-1 p-4">
+        {isLoading && !aiResponse ? (
+          <div className="flex items-center gap-2 text-indigo-600 py-8">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Analyzing report data…</span>
+          </div>
+        ) : aiResponse ? (
+          <div className="prose prose-sm prose-slate max-w-none text-sm [&>*:first-child]:mt-0">
+            <ReportsAiMarkdown content={aiResponse} />
+          </div>
+        ) : (
+          <p className="text-sm text-indigo-500">Click refresh to re-analyze.</p>
+        )}
+      </ScrollArea>
+    </div>
+  );
+}
+
+function ReportsAiMarkdown({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("### ")) {
+      elements.push(<h4 key={i} className="font-semibold text-sm mt-3 mb-1 text-indigo-900">{rBold(line.slice(4))}</h4>);
+    } else if (line.startsWith("## ")) {
+      elements.push(<h3 key={i} className="font-bold text-sm mt-3 mb-1 text-indigo-900">{rBold(line.slice(3))}</h3>);
+    } else if (/^\d+\.\s/.test(line)) {
+      elements.push(
+        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
+          <span className="text-indigo-400 flex-shrink-0">{line.match(/^\d+/)?.[0]}.</span>
+          <span>{rBold(line.replace(/^\d+\.\s/, ""))}</span>
+        </div>
+      );
+    } else if (line.startsWith("- ") || line.startsWith("* ")) {
+      elements.push(
+        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
+          <span className="text-indigo-400 flex-shrink-0">•</span>
+          <span>{rBold(line.slice(2))}</span>
+        </div>
+      );
+    } else if (line.trim() === "") {
+      elements.push(<div key={i} className="h-1.5" />);
+    } else {
+      elements.push(<p key={i} className="my-0.5 text-slate-700">{rBold(line)}</p>);
+    }
+  }
+  return <>{elements}</>;
+}
+
+function rBold(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  const regex = /(\*\*[^*]+\*\*)/g;
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    parts.push(<strong key={match.index}>{match[0].slice(2, -2)}</strong>);
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts.length > 0 ? parts : text;
 }

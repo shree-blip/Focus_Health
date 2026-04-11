@@ -1,0 +1,239 @@
+import { createLopServerClient } from "./supabase";
+
+/**
+ * Server-side AI context builders.
+ * These fetch data from Supabase using the service-role client
+ * and format it into structured text for the LLM system prompt.
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Rec = Record<string, any>;
+
+export async function buildDashboardContext(facilityId?: string | null): Promise<string> {
+  const db = createLopServerClient();
+
+  // Patients with docs
+  let query = db
+    .from("lop_patients")
+    .select("*, lop_patient_documents(document_type, status), lop_facilities(name), lop_law_firms(name)");
+  if (facilityId) query = query.eq("facility_id", facilityId);
+  const { data: patients } = await query;
+  const all: Rec[] = patients ?? [];
+
+  // Facilities
+  const { data: facilities } = await db.from("lop_facilities").select("id, name, is_active");
+
+  // Law firms
+  const { data: lawFirms } = await db.from("lop_law_firms").select("id, name, is_active");
+
+  // Today's date
+  const today = new Date().toISOString().split("T")[0];
+
+  // Compute stats
+  const totalBilled = all.reduce((s, p) => s + (Number(p.bill_charges) || 0), 0);
+  const totalCollected = all.reduce((s, p) => s + (Number(p.amount_collected) || 0), 0);
+  const collectionRate = totalBilled > 0 ? ((totalCollected / totalBilled) * 100).toFixed(1) : "N/A";
+
+  // Status distribution
+  const statusCounts: Record<string, number> = {};
+  for (const p of all) {
+    const s = p.case_status ?? "unknown";
+    statusCounts[s] = (statusCounts[s] || 0) + 1;
+  }
+
+  // Today's arrivals
+  const todayArrivals = all.filter((p) => {
+    if (!p.expected_arrival) return false;
+    return (p.expected_arrival as string).startsWith(today);
+  });
+
+  // Missing docs analysis
+  const requiredTypes = ["lop_letter", "medical_record", "bill_llc"];
+  const patientsWithMissingDocs = all.filter((p) => {
+    const docs: Rec[] = Array.isArray(p.lop_patient_documents) ? p.lop_patient_documents : [];
+    const receivedTypes = new Set(docs.filter((d) => d.status === "received").map((d) => d.document_type));
+    return requiredTypes.some((t) => !receivedTypes.has(t));
+  });
+
+  // Missing LOP letters specifically
+  const missingLop = all.filter(
+    (p) => p.lop_letter_status === "requested" || p.lop_letter_status === "missing"
+  );
+
+  // Follow-ups
+  const openFollowUps = all.filter((p) => p.case_status === "follow_up_needed");
+
+  // Law firm performance
+  const firmStats: Record<string, { name: string; patients: number; billed: number; collected: number }> = {};
+  for (const p of all) {
+    const firmName = (p.lop_law_firms as Rec)?.name ?? "No Firm";
+    const firmId = p.law_firm_id ?? "none";
+    if (!firmStats[firmId])
+      firmStats[firmId] = { name: firmName, patients: 0, billed: 0, collected: 0 };
+    firmStats[firmId].patients++;
+    firmStats[firmId].billed += Number(p.bill_charges) || 0;
+    firmStats[firmId].collected += Number(p.amount_collected) || 0;
+  }
+
+  return `=== DASHBOARD CONTEXT (${today}) ===
+FACILITY SCOPE: ${facilityId ? "Single Facility" : "All Facilities"}
+ACTIVE FACILITIES: ${(facilities ?? []).filter((f: Rec) => f.is_active).map((f: Rec) => f.name).join(", ")}
+ACTIVE LAW FIRMS: ${(lawFirms ?? []).filter((f: Rec) => f.is_active).map((f: Rec) => f.name).join(", ")}
+
+HEADLINE METRICS:
+- Total Patients: ${all.length}
+- Total Billed: $${totalBilled.toLocaleString()}
+- Total Collected: $${totalCollected.toLocaleString()}
+- Collection Rate: ${collectionRate}%
+- Today's Scheduled Arrivals: ${todayArrivals.length}
+
+STATUS DISTRIBUTION:
+${Object.entries(statusCounts).sort(([, a], [, b]) => b - a).map(([s, c]) => `- ${s}: ${c}`).join("\n")}
+
+ALERTS:
+- Open Follow-Ups: ${openFollowUps.length}
+- Missing LOP Letters: ${missingLop.length}
+- Patients with Missing Required Docs: ${patientsWithMissingDocs.length}
+
+LAW FIRM PERFORMANCE:
+${Object.values(firmStats).sort((a, b) => b.patients - a.patients).map((f) =>
+    `- ${f.name}: ${f.patients} patients, $${f.billed.toLocaleString()} billed, $${f.collected.toLocaleString()} collected (${f.billed > 0 ? ((f.collected / f.billed) * 100).toFixed(1) : "0"}%)`
+  ).join("\n")}
+
+PATIENTS NEEDING FOLLOW-UP:
+${openFollowUps.slice(0, 10).map((p) =>
+    `- ${p.first_name} ${p.last_name} (status: ${p.case_status}, note: ${p.follow_up_note ?? "none"})`
+  ).join("\n") || "None"}
+
+MISSING LOP LETTERS (first 10):
+${missingLop.slice(0, 10).map((p) =>
+    `- ${p.first_name} ${p.last_name} (lop_letter_status: ${p.lop_letter_status}, firm: ${(p.lop_law_firms as Rec)?.name ?? "N/A"})`
+  ).join("\n") || "None"}`;
+}
+
+export async function buildPatientContext(patientId: string): Promise<string> {
+  const db = createLopServerClient();
+
+  // Full patient with relations
+  const { data: patient } = await db
+    .from("lop_patients")
+    .select("*, lop_facilities(name), lop_law_firms(name, primary_contact, intake_email), lop_patient_documents(*)")
+    .eq("id", patientId)
+    .single();
+
+  if (!patient) return "Patient not found.";
+
+  // Reminders
+  const { data: reminders } = await db
+    .from("lop_reminder_emails")
+    .select("*")
+    .eq("patient_id", patientId)
+    .order("sent_at", { ascending: false })
+    .limit(20);
+
+  // Audit log
+  const { data: auditLogs } = await db
+    .from("lop_audit_log")
+    .select("*")
+    .eq("entity_id", patientId)
+    .eq("entity_type", "patient")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  const docs: Rec[] = Array.isArray(patient.lop_patient_documents) ? patient.lop_patient_documents : [];
+  const requiredTypes = ["lop_letter", "medical_record", "bill_llc"];
+  const receivedDocs = new Set(docs.filter((d) => d.status === "received").map((d) => d.document_type));
+  const missingRequired = requiredTypes.filter((t) => !receivedDocs.has(t));
+
+  const balance = (Number(patient.bill_charges) || 0) - (Number(patient.amount_collected) || 0);
+
+  return `=== PATIENT CASE CONTEXT ===
+NAME: ${patient.first_name} ${patient.last_name}
+DOB: ${patient.date_of_birth ?? "N/A"}
+PHONE: ${patient.phone ?? "N/A"} | EMAIL: ${patient.email ?? "N/A"}
+ADDRESS: ${[patient.address_line1, patient.city, patient.state, patient.zip].filter(Boolean).join(", ") || "N/A"}
+ACCIDENT DATE: ${patient.date_of_accident ?? "N/A"}
+
+FACILITY: ${(patient.lop_facilities as Rec)?.name ?? "N/A"}
+LAW FIRM: ${(patient.lop_law_firms as Rec)?.name ?? "N/A"}
+ATTORNEY CONTACT: ${(patient.lop_law_firms as Rec)?.primary_contact ?? "N/A"}
+ATTORNEY EMAIL: ${(patient.lop_law_firms as Rec)?.intake_email ?? "N/A"}
+
+CASE STATUS: ${patient.case_status}
+LOP Letter Status: ${patient.lop_letter_status}
+Medical Records Status: ${patient.medical_records_status}
+Follow-Up Note: ${patient.follow_up_note ?? "None"}
+Intake Notes: ${patient.intake_notes ?? "None"}
+
+FINANCIAL:
+- Bill Charges: $${(Number(patient.bill_charges) || 0).toLocaleString()}
+- Amount Collected: $${(Number(patient.amount_collected) || 0).toLocaleString()}
+- Outstanding Balance: $${balance.toLocaleString()}
+- Date Paid: ${patient.date_paid ?? "Not paid"}
+- Billing Tags: ${(patient.billing_tags ?? []).join(", ") || "None"}
+
+DOCUMENTS (${docs.length} total):
+${docs.map((d) => `- ${d.document_type}: status=${d.status}, file=${d.file_name ?? "none"}`).join("\n") || "No documents uploaded"}
+
+MISSING REQUIRED DOCS: ${missingRequired.length > 0 ? missingRequired.join(", ") : "All required docs received"}
+
+SCHEDULING:
+- Expected Arrival: ${patient.expected_arrival ?? "Not scheduled"}
+- Arrival Window: ${patient.arrival_window_min ?? 30} minutes
+
+REMINDERS SENT (${(reminders ?? []).length}):
+${(reminders ?? []).slice(0, 10).map((r: Rec) => `- ${r.sent_at}: ${r.email_type} to ${r.recipient_email} (${r.status})`).join("\n") || "No reminders sent"}
+
+AUDIT TIMELINE (recent ${Math.min((auditLogs ?? []).length, 15)} events):
+${(auditLogs ?? []).slice(0, 15).map((a: Rec) => `- ${a.created_at}: ${a.action}`).join("\n") || "No audit entries"}
+
+CREATED: ${patient.created_at}
+LAST UPDATED: ${patient.updated_at}`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function buildReportsContext(reportData: any): string {
+  // Accept raw JSON from client — may be a string or object
+  let d: Record<string, unknown>;
+  try {
+    d = typeof reportData === "string" ? JSON.parse(reportData) : reportData;
+  } catch {
+    return `=== REPORTS ANALYSIS CONTEXT ===\nRaw report data:\n${JSON.stringify(reportData, null, 2)}`;
+  }
+
+  const kpis = (d.kpis ?? d) as Record<string, number>;
+  const totalBilled = kpis.totalBilled ?? 0;
+  const totalCollected = kpis.totalCollected ?? 0;
+  const collectionRate = totalBilled > 0 ? ((totalCollected / totalBilled) * 100).toFixed(1) : "N/A";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const firmBreakdown = (d.lawFirmBreakdown ?? []) as any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const facilityBreakdown = (d.facilityBreakdown ?? []) as any[];
+
+  return `=== REPORTS ANALYSIS CONTEXT ===
+DATE RANGE: ${d.dateRange ?? "Unknown"}
+
+SUMMARY METRICS:
+- Total Patients: ${kpis.totalPatients ?? 0}
+- Total Billed: $${(totalBilled).toLocaleString()}
+- Total Collected: $${(totalCollected).toLocaleString()}
+- Collection Rate: ${collectionRate}%
+- Avg Billed per Patient: $${(kpis.avgBilled ?? 0).toLocaleString()}
+- Avg Collected per Patient: $${(kpis.avgCollected ?? 0).toLocaleString()}
+
+ALERTS:
+- Open Follow-Ups: ${kpis.openFollowUps ?? 0}
+- Dropped Cases: ${kpis.droppedCases ?? 0}
+- Missing LOP Letters: ${kpis.missingLop ?? 0}
+
+LAW FIRM BREAKDOWN:
+${firmBreakdown.sort((a, b) => (b.patients ?? 0) - (a.patients ?? 0)).map((f) =>
+    `- ${f.firm ?? f.name}: ${f.patients ?? f.patientCount} patients, $${(f.billed ?? f.totalBilled ?? 0).toLocaleString()} billed, $${(f.collected ?? f.totalCollected ?? 0).toLocaleString()} collected${f.belowThreshold ? " ⚠️ BELOW THRESHOLD" : ""}`
+  ).join("\n") || "No law firm data"}
+
+FACILITY BREAKDOWN:
+${facilityBreakdown.map((f) =>
+    `- ${f.name}: ${f.count} patients, $${(f.billed ?? 0).toLocaleString()} billed, $${(f.collected ?? 0).toLocaleString()} collected`
+  ).join("\n") || "No facility data"}`;
+}

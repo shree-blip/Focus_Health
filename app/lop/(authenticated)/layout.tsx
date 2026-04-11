@@ -2,6 +2,7 @@
 
 import { LopAuthProvider, useLopAuth } from "@/components/lop/LopAuthProvider";
 import { LopShell } from "@/components/lop/LopShell";
+import { AiChatPanel } from "@/components/lop/AiChatPanel";
 import { Loader2 } from "lucide-react";
 
 function LopAppContent({ children }: { children: React.ReactNode }) {
@@ -38,7 +39,12 @@ function LopAppContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <LopShell>{children}</LopShell>;
+  return (
+    <>
+      <LopShell>{children}</LopShell>
+      <AiChatPanel />
+    </>
+  );
 }
 
 export default function LopAuthenticatedLayout({
