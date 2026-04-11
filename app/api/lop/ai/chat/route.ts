@@ -12,7 +12,9 @@ import {
   buildDashboardContext,
   buildPatientContext,
   buildReportsContext,
+  buildDateFilteredContext,
 } from "@/lib/lop/ai-context";
+import { parseDateExpression } from "@/lib/lop/ai-utils";
 
 function getAdmin() {
   return createClient(
@@ -96,6 +98,13 @@ export async function POST(request: NextRequest) {
     let dataContext = "";
     const ctxType = context_type as ContextType;
 
+    // Extract the last user message to detect date expressions
+    const lastUserMsg =
+      (messages ?? [])
+        .filter((m: { role: string }) => m.role === "user")
+        .pop()?.content ?? "";
+    const dateRange = parseDateExpression(lastUserMsg);
+
     switch (ctxType) {
       case "dashboard_briefing":
         dataContext = await buildDashboardContext(facility_id);
@@ -117,10 +126,23 @@ export async function POST(request: NextRequest) {
         }
         break;
       case "general":
-      default:
+      default: {
         // For general chat, provide dashboard-level context
-        dataContext = await buildDashboardContext(facility_id);
+        const dashCtx = await buildDashboardContext(facility_id);
+
+        // If the user's message contains a date expression, also include date-filtered context
+        if (dateRange) {
+          const dateCtx = await buildDateFilteredContext(
+            facility_id,
+            dateRange.from,
+            dateRange.to,
+          );
+          dataContext = `${dateCtx}\n\n${dashCtx}`;
+        } else {
+          dataContext = dashCtx;
+        }
         break;
+      }
     }
 
     // Get the system prompt

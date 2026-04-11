@@ -265,7 +265,7 @@ export default function SchedulingPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-blue-600 hover:bg-blue-100"
+                className="h-7 w-7 text-blue-600 hover:bg-blue-100 hover:text-blue-800"
                 onClick={() => changeWeek(-1)}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -278,7 +278,7 @@ export default function SchedulingPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-blue-600 hover:bg-blue-100"
+                className="h-7 w-7 text-blue-600 hover:bg-blue-100 hover:text-blue-800"
                 onClick={() => changeWeek(1)}
               >
                 <ChevronRight className="h-4 w-4" />

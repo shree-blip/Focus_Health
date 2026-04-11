@@ -306,7 +306,7 @@ export default function ReportsPage() {
           {canUseAi && (
             <Button
               variant="outline"
-              className="gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+              className="gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-900 hover:border-indigo-300"
               onClick={() => setAiPanelOpen(true)}
             >
               <Sparkles className="h-4 w-4" />

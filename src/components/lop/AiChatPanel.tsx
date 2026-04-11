@@ -24,14 +24,20 @@ import {
   DollarSign,
   AlertTriangle,
   BarChart3,
+  ClipboardList,
+  Calendar,
+  CalendarRange,
 } from "lucide-react";
 
 const QUICK_ACTIONS = [
   { label: "Daily Briefing", icon: Sparkles, prompt: "Give me today's operational briefing." },
+  { label: "Missing Data", icon: ClipboardList, prompt: "Which patients have incomplete profiles? For each patient with missing data, list ALL missing fields grouped by category (Demographics, Contact, Address, Case, Financial, Scheduling, Notes, Documents). Show their data completeness scores and flag critical missing fields." },
   { label: "Missing Docs", icon: FileText, prompt: "Which patients have missing required documents? List them with what's missing." },
+  { label: "Today's Activity", icon: Calendar, prompt: "Show me everything that happened today — new patients, status changes, arrivals, payments, and any notable events." },
+  { label: "This Week", icon: CalendarRange, prompt: "Give me a summary of this week — new patients added, cases resolved, payments received, arrivals, and key changes." },
   { label: "Collections", icon: DollarSign, prompt: "Analyze our collection rate. Which law firms have the lowest collection rates?" },
   { label: "Follow-Ups", icon: AlertTriangle, prompt: "List all patients needing follow-up with their current notes and how long they've been in that status." },
-  { label: "Performance", icon: BarChart3, prompt: "Compare performance across all facilities — patient volume, billing, and collection rates." },
+  { label: "Performance", icon: BarChart3, prompt: "Compare performance across all facilities — patient volume, billing, collection rates, and data completeness." },
 ];
 
 export function AiChatPanel() {
@@ -131,7 +137,8 @@ export function AiChatPanel() {
                   <div>
                     <p className="font-medium text-slate-900">LOP AI Assistant</p>
                     <p className="text-sm text-slate-500 mt-1">
-                      Ask me anything about your patients, cases, finances, or operations.
+                      Ask me anything about patients, cases, finances, or try
+                      &quot;show me yesterday&apos;s activity&quot; or &quot;what data is missing?&quot;
                     </p>
                   </div>
 
@@ -140,7 +147,7 @@ export function AiChatPanel() {
                     <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
                       Quick Actions
                     </p>
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {QUICK_ACTIONS.map((action) => (
                         <button
                           key={action.label}
@@ -201,7 +208,7 @@ export function AiChatPanel() {
               <Input
                 value={input}
                 onChange={handleInputChange}
-                placeholder="Ask about patients, cases, finances…"
+                placeholder="Ask anything… try &quot;yesterday&quot; or &quot;missing data&quot;"
                 className="flex-1 text-sm"
                 disabled={isLoading}
               />
