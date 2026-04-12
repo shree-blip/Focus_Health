@@ -63,6 +63,13 @@ export function AiChatPanel() {
     }
   }, [messages]);
 
+  // Listen for sidebar "open-ai-chat" event
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-ai-chat", handler);
+    return () => window.removeEventListener("open-ai-chat", handler);
+  }, []);
+
   // Only render for admin users
   if (!hasPermission(lopUser, "ai:use")) return null;
 

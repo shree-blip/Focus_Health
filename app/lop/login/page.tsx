@@ -60,7 +60,25 @@ function LoginForm() {
           console.error("Provision error:", err);
         }
 
-        // Hard redirect so middleware can read the new session cookies
+        // Check MFA status — redirect to MFA setup/verify if needed
+        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aalData) {
+          const { currentLevel, nextLevel } = aalData;
+
+          // User has factors enrolled but hasn't verified this session
+          if (nextLevel === "aal2" && currentLevel === "aal1") {
+            window.location.href = `/lop/mfa-setup?step=verify&redirect=${encodeURIComponent(redirect)}`;
+            return;
+          }
+
+          // User hasn't enrolled MFA yet — send to enrollment
+          if (currentLevel === "aal1" && nextLevel === "aal1") {
+            window.location.href = `/lop/mfa-setup?step=enroll&redirect=${encodeURIComponent(redirect)}`;
+            return;
+          }
+        }
+
+        // MFA already satisfied (aal2) — go to dashboard
         window.location.href = redirect;
       } else if (code && event === "INITIAL_SESSION") {
         // There was a ?code= in the URL but the auto-exchange failed

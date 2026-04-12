@@ -8,11 +8,12 @@ import { createClient } from "@supabase/supabase-js";
  *
  * HIPAA: Never trust client-supplied auth_user_id — always verify from the cookie.
  *
- * Returns { authUserId, email } or null if not authenticated.
+ * Returns { authUserId, email, aal } or null if not authenticated.
  */
 export async function getAuthenticatedUser(): Promise<{
   authUserId: string;
   email: string;
+  aal: string;
 } | null> {
   try {
     const cookieStore = await cookies();
@@ -40,9 +41,14 @@ export async function getAuthenticatedUser(): Promise<{
 
     if (error || !user) return null;
 
+    // HIPAA: Check MFA assurance level
+    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    const aal = aalData?.currentLevel ?? "aal1";
+
     return {
       authUserId: user.id,
       email: user.email ?? "",
+      aal,
     };
   } catch {
     return null;
@@ -83,12 +89,17 @@ export async function getLopUser(authUserId: string) {
 }
 
 /**
- * Full auth check: cookie → auth user → LOP user.
+ * Full auth check: cookie → auth user → AAL2 MFA check → LOP user.
  * Returns { authUserId, lopUser } or null.
+ *
+ * HIPAA: Rejects sessions that have not completed MFA (aal1).
  */
 export async function requireLopAuth() {
   const authUser = await getAuthenticatedUser();
   if (!authUser) return null;
+
+  // Enforce MFA: reject aal1 sessions accessing PHI
+  if (authUser.aal !== "aal2") return null;
 
   const lopUser = await getLopUser(authUser.authUserId);
   if (!lopUser) return null;

@@ -124,17 +124,20 @@ export function LopShell({ children }: { children: ReactNode }) {
             );
           })}
 
-          {/* AI indicator (admin only) */}
+          {/* AI Chat – click to open floating chat panel */}
           {hasPermission(lopUser, "ai:use") && (
             <div className="pt-3 mt-3 border-t border-slate-200">
-              <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 border border-indigo-100">
-                <Bot className="h-4 w-4 flex-shrink-0" />
-                <span className="text-xs">AI</span>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 border border-indigo-100 hover:from-blue-100 hover:to-indigo-100 transition-colors cursor-pointer"
+              >
+                <Bot className="h-5 w-5 flex-shrink-0" />
+                <span>AI Assistant</span>
                 <span className="ml-auto relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-indigo-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
                 </span>
-              </div>
+              </button>
             </div>
           )}
         </nav>
