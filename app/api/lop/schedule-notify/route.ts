@@ -1,9 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createLopServerClient } from "@/lib/lop/supabase";
+import { requireLopAuth } from "@/lib/lop/server-auth";
 import nodemailer from "nodemailer";
 
 /**
  * POST /api/lop/schedule-notify
+ *
+ * HIPAA: Requires authenticated LOP user (scheduler, front_desk, or admin).
  *
  * Sends scheduling notification emails to:
  * 1. Facility director (director_email on lop_facilities)
@@ -14,6 +17,22 @@ import nodemailer from "nodemailer";
  */
 export async function POST(request: NextRequest) {
   try {
+    // HIPAA: Authenticate from session cookie
+    const auth = await requireLopAuth();
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+    // Only scheduler, front_desk, and admin can send scheduling notifications
+    if (!["scheduler", "front_desk", "admin"].includes(auth.lopUser.role)) {
+      return NextResponse.json(
+        { error: "Insufficient permissions" },
+        { status: 403 },
+      );
+    }
+
     const { patientId } = await request.json();
     if (!patientId) {
       return NextResponse.json(
@@ -160,13 +179,16 @@ export async function POST(request: NextRequest) {
       sentCount += 1;
     }
 
-    // Log each notification
+    // HIPAA: Log each notification with user + IP
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
     for (const r of recipients) {
       await supabase.from("lop_audit_log").insert({
+        user_id: auth.lopUser.id,
         action: "schedule_notification_sent",
         entity_type: "patient",
         entity_id: patientId,
         facility_id: patient.facility_id,
+        ip_address: ip,
         new_values: {
           recipient_type: r.type,
           recipient_email: r.email,

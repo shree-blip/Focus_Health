@@ -10,20 +10,16 @@ interface UseAiChatOptions {
 }
 
 export function useAiChat(opts: UseAiChatOptions = {}) {
-  const { lopUser, activeFacilityId } = useLopAuth();
-  const authUserId = lopUser?.auth_user_id;
+  const { activeFacilityId } = useLopAuth();
 
   const chatOptions: UseChatOptions = {
     api: "/api/lop/ai/chat",
     body: {
-      auth_user_id: authUserId,
+      // HIPAA: No auth_user_id in body — server reads identity from session cookie
       context_type: opts.contextType ?? "general",
       context_id: opts.contextId,
       facility_id: activeFacilityId,
       report_data: opts.reportData,
-    },
-    headers: {
-      "x-lop-user-id": authUserId ?? "",
     },
     initialMessages: [],
   };

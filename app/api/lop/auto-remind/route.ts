@@ -9,10 +9,10 @@ import nodemailer from "nodemailer";
  * send a reminder email to the law firm and log it.
  */
 export async function GET(request: NextRequest) {
-  // Simple bearer-token auth for cron
+  // Bearer-token auth for cron – always required in production
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

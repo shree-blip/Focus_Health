@@ -46,13 +46,12 @@ export function setLopDbAuthUser(id: string | null) {
 }
 
 async function call(body: Record<string, unknown>) {
-  if (!_authUserId) {
-    throw new Error("lopDb: auth_user_id not set. Call setLopDbAuthUser first.");
-  }
-
+  // HIPAA: Server now authenticates via session cookie, not body.auth_user_id.
+  // We still send it as a legacy field but the server ignores it.
   const res = await fetch("/api/lop/db", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "same-origin", // Ensure cookies are sent
     body: JSON.stringify({ auth_user_id: _authUserId, ...body }),
   });
 

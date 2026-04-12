@@ -1,21 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireLopAuth, getAdminClient } from "@/lib/lop/server-auth";
 
 /**
  * General-purpose LOP database proxy.
  * Uses the service-role client to bypass RLS.
- * Verifies the caller is a real Supabase auth user before executing.
+ * HIPAA: User identity is verified from the session cookie — not client body.
  *
  * POST /api/lop/db
- * Body: { auth_user_id, table, operation, data?, match?, select?, order?, filters? }
+ * Body: { table, operation, data?, match?, select?, order?, filters? }
  */
-
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
 
 const ALLOWED_TABLES = [
   "lop_facilities",
@@ -57,11 +50,23 @@ const TABLE_WRITE_RULES: Record<string, Role[]> = {
   "lop_config:upsert": ["admin"],
 };
 
+// Tables containing PHI — read access will be audit-logged
+const PHI_TABLES = ["lop_patients", "lop_patient_documents", "lop_reminder_emails"];
+
 export async function POST(request: NextRequest) {
   try {
+    // HIPAA: Authenticate from session cookie — not client-supplied ID
+    const auth = await requireLopAuth();
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+    const { authUserId, lopUser } = auth;
+
     const body = await request.json();
     const {
-      auth_user_id,
       table,
       operation,
       data,
@@ -74,9 +79,9 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate inputs
-    if (!auth_user_id || !table || !operation) {
+    if (!table || !operation) {
       return NextResponse.json(
-        { error: "auth_user_id, table, and operation are required" },
+        { error: "table and operation are required" },
         { status: 400 },
       );
     }
@@ -88,28 +93,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const admin = getAdmin();
-
-    // Verify auth user exists
-    const { data: authUser, error: authError } =
-      await admin.auth.admin.getUserById(auth_user_id);
-    if (authError || !authUser?.user) {
-      return NextResponse.json({ error: "Invalid user" }, { status: 401 });
-    }
-
-    // Verify user has lop_users record
-    const { data: lopUser } = await admin
-      .from("lop_users")
-      .select("id, role, is_active")
-      .eq("auth_user_id", auth_user_id)
-      .single();
-
-    if (!lopUser || !lopUser.is_active) {
-      return NextResponse.json(
-        { error: "LOP user not found or inactive" },
-        { status: 403 },
-      );
-    }
+    const admin = getAdminClient();
 
     // Server-side role check for write operations
     if (operation !== "select") {
@@ -225,6 +209,21 @@ export async function POST(request: NextRequest) {
         { error: (result.error as { message?: string }).message || "Database error" },
         { status: 500 },
       );
+    }
+
+    // HIPAA: Log PHI read access
+    if (operation === "select" && PHI_TABLES.includes(table)) {
+      // Fire-and-forget — don't block the response
+      const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+      void admin.from("lop_audit_log").insert({
+        user_id: lopUser.id,
+        action: `phi_read:${table}`,
+        entity_type: table.replace("lop_", ""),
+        entity_id: (filters?.find((f: { column: string; op: string; value: string }) => f.column === "id" && f.op === "eq")?.value) ?? null,
+        facility_id: (filters?.find((f: { column: string; op: string; value: string }) => f.column === "facility_id" && f.op === "eq")?.value) ?? null,
+        ip_address: ip,
+        new_values: { select: selectCols ?? "*", filter_count: filters?.length ?? 0 },
+      });
     }
 
     return NextResponse.json({ data: result.data });

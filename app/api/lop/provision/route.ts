@@ -101,19 +101,21 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Also assign all active facilities to the new user
-      const { data: facilities } = await admin
-        .from("lop_facilities")
-        .select("id")
-        .eq("is_active", true);
-
-      if (facilities && facilities.length > 0 && newUser) {
-        await admin.from("lop_user_facilities").insert(
-          facilities.map((f: { id: string }) => ({
-            user_id: newUser.id,
-            facility_id: f.id,
-          })),
-        );
+      // HIPAA: Do NOT auto-assign all facilities.
+      // New users start with zero facility access.
+      // An admin must explicitly assign facilities (minimum-necessary principle).
+      // Log the auto-provisioning event.
+      if (newUser) {
+        await admin.from("lop_audit_log").insert({
+          action: "user_auto_provisioned",
+          entity_type: "user",
+          entity_id: newUser.id,
+          new_values: {
+            email: normalizedEmail,
+            role: "front_desk",
+            note: "Auto-provisioned — awaiting admin facility assignment",
+          },
+        });
       }
 
       return NextResponse.json({ user: newUser });

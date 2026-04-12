@@ -1,9 +1,26 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createLopServerClient } from "@/lib/lop/supabase";
+import { requireLopAuth } from "@/lib/lop/server-auth";
 import nodemailer from "nodemailer";
 
 export async function POST(request: NextRequest) {
   try {
+    // HIPAA: Authenticate from session cookie
+    const auth = await requireLopAuth();
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+    // Only medical_records and admin can send reminders
+    if (!["medical_records", "admin"].includes(auth.lopUser.role)) {
+      return NextResponse.json(
+        { error: "Insufficient permissions" },
+        { status: 403 },
+      );
+    }
+
     const { patientId, lawFirmId } = await request.json();
     if (!patientId || !lawFirmId) {
       return NextResponse.json(
@@ -83,6 +100,17 @@ export async function POST(request: NextRequest) {
       cc: firm.escalation_email ?? undefined,
       subject,
       html,
+    });
+
+    // HIPAA: Log the reminder action with IP
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    await supabase.from("lop_audit_log").insert({
+      user_id: auth.lopUser.id,
+      action: "send_lop_reminder",
+      entity_type: "patient",
+      entity_id: patientId,
+      ip_address: ip,
+      new_values: { law_firm_id: lawFirmId, recipient: firm.intake_email },
     });
 
     return NextResponse.json({ success: true });
