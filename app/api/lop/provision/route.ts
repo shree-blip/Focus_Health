@@ -1,13 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Service-role client — bypasses RLS
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
+import { getAuthenticatedUser, getAdminClient } from "@/lib/lop/server-auth";
 
 const ALLOWED_DOMAINS = [
   "getfocushealth.com",
@@ -22,31 +14,22 @@ function isDomainAllowed(email: string): boolean {
   return domain ? ALLOWED_DOMAINS.includes(domain) : false;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
-    const { auth_user_id, email, full_name } = await request.json();
-
-    if (!auth_user_id || !email) {
+    // HIPAA: Authenticate from session cookie — not client-supplied ID
+    const authUser = await getAuthenticatedUser();
+    if (!authUser) {
       return NextResponse.json(
-        { error: "auth_user_id and email are required" },
-        { status: 400 },
-      );
-    }
-
-    const admin = getAdminClient();
-
-    // Verify this auth_user_id actually exists in Supabase Auth
-    const { data: authUser, error: authError } =
-      await admin.auth.admin.getUserById(auth_user_id);
-
-    if (authError || !authUser?.user) {
-      return NextResponse.json(
-        { error: "Invalid auth user" },
+        { error: "Authentication required" },
         { status: 401 },
       );
     }
 
-    const normalizedEmail = email.toLowerCase();
+    const auth_user_id = authUser.authUserId;
+    const normalizedEmail = authUser.email.toLowerCase();
+    const full_name = normalizedEmail.split("@")[0];
+
+    const admin = getAdminClient();
 
     // Step 1: Check by auth_user_id
     const { data: existingById } = await admin

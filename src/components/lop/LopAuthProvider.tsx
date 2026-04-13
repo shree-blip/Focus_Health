@@ -59,11 +59,33 @@ export function LopAuthProvider({ children }: { children: ReactNode }) {
         // Set auth user ID for the db helper (server-side proxy)
         setLopDbAuthUser(user.id);
 
-        // Fetch LOP user profile via server API (bypasses RLS)
-        const { data: lopProfile } = await lopDb.select("lop_users", {
-          filters: [{ column: "auth_user_id", op: "eq", value: user.id }],
-          single: true,
-        });
+        // Step 1: Resolve or auto-provision the LOP user via the provision API.
+        // This is necessary because /api/lop/db requires an existing lop_users
+        // record (via requireLopAuth), so we can't query lop_users through the
+        // normal DB proxy for first-time users. The provision API uses cookie
+        // auth and handles: lookup by auth_user_id, link by email, or
+        // auto-create for allowed domains.
+        let lopProfile: Record<string, unknown> | null = null;
+
+        try {
+          const provisionRes = await fetch("/api/lop/provision", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+          });
+
+          if (provisionRes.ok) {
+            const { user: provisionedUser } = await provisionRes.json();
+            if (provisionedUser) {
+              lopProfile = provisionedUser;
+            }
+          } else {
+            // Provision failed (domain not allowed, auth issue, etc.)
+            console.warn("LOP provision failed:", provisionRes.status);
+          }
+        } catch (provisionErr) {
+          console.error("LOP provision error:", provisionErr);
+        }
 
         if (lopProfile) {
           setLopUser(lopProfile as unknown as LopUser);
