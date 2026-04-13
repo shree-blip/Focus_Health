@@ -20,7 +20,7 @@ const Privacy = () => {
           <div className="max-w-4xl mx-auto prose prose-lg dark:prose-invert">
             <ScrollReveal>
               <div className="space-y-8">
-                <p className="text-muted-foreground text-sm">Effective Date: January 1, 2026</p>
+                <p className="text-muted-foreground text-sm">Effective Date: April 13, 2026</p>
 
                 <div>
                   <h2 className="text-2xl font-heading font-bold text-foreground mb-4">1. Introduction</h2>
@@ -57,15 +57,28 @@ const Privacy = () => {
                 </div>
 
                 <div>
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-4">4a. SMS Communications & Messaging</h2>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    If you provide your phone number, we may use it to send appointment confirmations, reminders, and notifications via SMS. These messages are processed by Twilio, a third-party service provider.
+                  </p>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+                    <li><strong className="text-foreground">Opt-out:</strong> Reply "STOP" to any SMS message to unsubscribe from appointment notifications.</li>
+                    <li><strong className="text-foreground">Carrier Charges:</strong> Standard SMS rates from your wireless carrier may apply.</li>
+                    <li><strong className="text-foreground">Twilio Privacy:</strong> Your phone number is shared with Twilio for SMS delivery. See <a href="https://www.twilio.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Twilio's Privacy Policy</a>.</li>
+                  </ul>
+                </div>
+
+                <div>
                   <h2 className="text-2xl font-heading font-bold text-foreground mb-4">5. Information Sharing</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     We do not sell your personal information. We may share information with:
                   </p>
                   <ul className="list-disc list-inside text-muted-foreground space-y-2">
-                    <li>Service providers who assist with Site operations;</li>
+                    <li><strong className="text-foreground">Service providers:</strong> Third parties assisting with Site operations, SMS delivery (Twilio), email notifications, and analytics;</li>
                     <li>Legal authorities if required by law;</li>
                     <li>Affiliates in connection with a merger or sale of assets.</li>
                   </ul>
+                  <p className="text-muted-foreground leading-relaxed mt-4"><strong className="text-foreground">Business Associate Notice:</strong> We may share protected health information (PHI) with Twilio under a Business Associate Agreement (BAA) for HIPAA-compliant SMS delivery.</p>
                 </div>
 
                 <div>

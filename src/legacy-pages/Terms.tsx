@@ -20,7 +20,7 @@ const Terms = () => {
           <div className="max-w-4xl mx-auto prose prose-lg dark:prose-invert">
             <ScrollReveal>
               <div className="space-y-8">
-                <p className="text-muted-foreground text-sm">Effective Date: January 1, 2026</p>
+                <p className="text-muted-foreground text-sm">Effective Date: April 13, 2026</p>
 
                 <div>
                   <h2 className="text-2xl font-heading font-bold text-foreground mb-4">1. Acceptance of Terms</h2>
@@ -52,6 +52,18 @@ const Terms = () => {
                   <p className="text-muted-foreground leading-relaxed">
                     All Site content is the property of Focus Health or its licensors and is protected by copyright and other intellectual property laws.
                   </p>
+                </div>
+
+                <div>
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-4">4a. SMS Communications</h2>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    By providing your phone number, you consent to receive appointment confirmation and reminder messages via SMS from Focus Health.
+                  </p>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+                    <li><strong className="text-foreground">Opting Out:</strong> Reply "STOP" to any message to unsubscribe. You will receive a final confirmation message.</li>
+                    <li><strong className="text-foreground">Carrier Responsibility:</strong> Standard SMS rates apply and are the responsibility of your wireless carrier, not Focus Health.</li>
+                    <li><strong className="text-foreground">Third-Party Processor:</strong> SMS is delivered via Twilio. Your phone number is shared with Twilio solely for message delivery.</li>
+                  </ul>
                 </div>
 
                 <div>
