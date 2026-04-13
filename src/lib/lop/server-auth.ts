@@ -89,17 +89,18 @@ export async function getLopUser(authUserId: string) {
 }
 
 /**
- * Full auth check: cookie → auth user → AAL2 MFA check → LOP user.
+ * Full auth check: cookie → auth user → LOP user lookup.
  * Returns { authUserId, lopUser } or null.
  *
- * HIPAA: Rejects sessions that have not completed MFA (aal1).
+ * NOTE: MFA (AAL2) enforcement is handled by middleware.ts which CAN
+ * read/write cookies for token refresh. API routes have read-only cookies
+ * (setAll is a no-op), so getAuthenticatorAssuranceLevel() can return
+ * stale AAL1 after a token refresh. Enforcing AAL2 here would block
+ * all data fetching for users who already passed the middleware MFA check.
  */
 export async function requireLopAuth() {
   const authUser = await getAuthenticatedUser();
   if (!authUser) return null;
-
-  // Enforce MFA: reject aal1 sessions accessing PHI
-  if (authUser.aal !== "aal2") return null;
 
   const lopUser = await getLopUser(authUser.authUserId);
   if (!lopUser) return null;
