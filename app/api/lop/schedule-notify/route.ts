@@ -199,15 +199,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Send to patient (SMS via Twilio)
+    console.log("[SMS DEBUG] twilioSid?", !!twilioSid, "twilioToken?", !!twilioToken, "twilioFrom?", twilioFrom, "patientPhone?", patientPhone, "rawPhone?", patient.phone);
     if (twilioSid && twilioToken && twilioFrom && patientPhone) {
       try {
         const twilioClient = twilio(twilioSid, twilioToken);
         const smsBody = `Hi ${patient.first_name}, your visit at ${facilityName} is scheduled for ${arrivalStr}. Reply STOP to opt out.`;
-        await twilioClient.messages.create({
+        console.log("[SMS DEBUG] Sending SMS from", twilioFrom, "to", patientPhone);
+        const msg = await twilioClient.messages.create({
           body: smsBody,
           from: twilioFrom,
           to: patientPhone,
         });
+        console.log("[SMS DEBUG] Twilio response SID:", msg.sid, "status:", msg.status);
         sentCount += 1;
 
         // Audit log the SMS
@@ -222,13 +225,36 @@ export async function POST(request: NextRequest) {
           new_values: {
             recipient_type: "patient_sms",
             phone: patientPhone,
+            twilio_sid: msg.sid,
             expected_arrival: patient.expected_arrival,
           },
         });
-      } catch (smsErr) {
-        // Don't fail the whole request if SMS fails — log and continue
-        console.error("Twilio SMS error:", smsErr);
+      } catch (smsErr: unknown) {
+        // Log full Twilio error details
+        const errMsg = smsErr instanceof Error ? smsErr.message : String(smsErr);
+        const errCode = (smsErr as Record<string, unknown>)?.code ?? "unknown";
+        const errStatus = (smsErr as Record<string, unknown>)?.status ?? "unknown";
+        console.error("[SMS DEBUG] Twilio SMS FAILED:", errMsg, "code:", errCode, "status:", errStatus, "full:", JSON.stringify(smsErr, null, 2));
+
+        // Also log the failure to the audit log so admin can see it
+        const ipSmsErr = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+        await supabase.from("lop_audit_log").insert({
+          user_id: auth.lopUser.id,
+          action: "schedule_sms_failed",
+          entity_type: "patient",
+          entity_id: patientId,
+          facility_id: patient.facility_id,
+          ip_address: ipSmsErr,
+          new_values: {
+            recipient_type: "patient_sms",
+            phone: patientPhone,
+            error: errMsg,
+            twilio_error_code: errCode,
+          },
+        });
       }
+    } else {
+      console.warn("[SMS DEBUG] SMS skipped — missing config or phone. twilioSid?", !!twilioSid, "twilioToken?", !!twilioToken, "twilioFrom?", !!twilioFrom, "patientPhone?", patientPhone);
     }
 
     // HIPAA: Log each notification with user + IP
