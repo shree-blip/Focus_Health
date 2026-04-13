@@ -92,6 +92,11 @@ export async function POST(request: NextRequest) {
       : "Not scheduled";
     const windowMin = patient.arrival_window_min ?? 60;
 
+    const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+    const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+    const twilioFrom = process.env.TWILIO_FROM_NUMBER;
+    const patientPhone = patient.phone ? toE164(patient.phone) : null;
+
     // Build recipient list
     const recipients: { email: string; type: string }[] = [];
     if (facility?.director_email) {
@@ -104,11 +109,16 @@ export async function POST(request: NextRequest) {
       recipients.push({ email: patient.email, type: "patient" });
     }
 
-    if (recipients.length === 0) {
+    const hasSmsRecipient = Boolean(
+      twilioSid && twilioToken && twilioFrom && patientPhone,
+    );
+
+    if (recipients.length === 0 && !hasSmsRecipient) {
       return NextResponse.json({
         success: true,
         sent: 0,
-        message: "No notification recipients found (no facility or patient emails configured).",
+        message:
+          "No notification recipients found (no facility or patient emails configured, and no SMS recipient available).",
       });
     }
 
@@ -189,11 +199,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Send to patient (SMS via Twilio)
-    const twilioSid = process.env.TWILIO_ACCOUNT_SID;
-    const twilioToken = process.env.TWILIO_AUTH_TOKEN;
-    const twilioFrom = process.env.TWILIO_FROM_NUMBER;
-    const patientPhone = patient.phone ? toE164(patient.phone) : null;
-
     if (twilioSid && twilioToken && twilioFrom && patientPhone) {
       try {
         const twilioClient = twilio(twilioSid, twilioToken);
