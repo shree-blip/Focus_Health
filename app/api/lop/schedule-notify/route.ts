@@ -2,19 +2,28 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createLopServerClient } from "@/lib/lop/supabase";
 import { requireLopAuth } from "@/lib/lop/server-auth";
 import nodemailer from "nodemailer";
+import twilio from "twilio";
 
 /**
  * POST /api/lop/schedule-notify
  *
  * HIPAA: Requires authenticated LOP user (scheduler, front_desk, or admin).
  *
- * Sends scheduling notification emails to:
- * 1. Facility director (director_email on lop_facilities)
- * 2. Front desk (front_desk_email on lop_facilities)
- * 3. Patient (email on lop_patients)
+ * Sends scheduling notifications to:
+ * 1. Facility director — email
+ * 2. Front desk — email
+ * 3. Patient — email + SMS (if phone on file)
  *
  * Body: { patientId: string }
  */
+
+/** Normalize a phone number to E.164 (+1XXXXXXXXXX) for Twilio. Returns null if unparseable. */
+function toE164(phone: string): string | null {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  return null;
+}
 export async function POST(request: NextRequest) {
   try {
     // HIPAA: Authenticate from session cookie
@@ -47,7 +56,7 @@ export async function POST(request: NextRequest) {
     const { data: patient } = await supabase
       .from("lop_patients")
       .select(
-        "first_name, last_name, email, expected_arrival, arrival_window_min, facility_id, lop_facilities(name, director_email, front_desk_email), lop_law_firms(name)",
+        "first_name, last_name, email, phone, expected_arrival, arrival_window_min, facility_id, lop_facilities(name, director_email, front_desk_email), lop_law_firms(name)",
       )
       .eq("id", patientId)
       .single();
@@ -168,7 +177,7 @@ export async function POST(request: NextRequest) {
       sentCount += staffEmails.length;
     }
 
-    // Send to patient
+    // Send to patient (email)
     if (patientEmail) {
       await transporter.sendMail({
         from: process.env.SMTP_FROM ?? "noreply@getfocushealth.com",
@@ -177,6 +186,44 @@ export async function POST(request: NextRequest) {
         html: patientHtml,
       });
       sentCount += 1;
+    }
+
+    // Send to patient (SMS via Twilio)
+    const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+    const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+    const twilioFrom = process.env.TWILIO_FROM_NUMBER;
+    const patientPhone = patient.phone ? toE164(patient.phone) : null;
+
+    if (twilioSid && twilioToken && twilioFrom && patientPhone) {
+      try {
+        const twilioClient = twilio(twilioSid, twilioToken);
+        const smsBody = `Hi ${patient.first_name}, your visit at ${facilityName} is scheduled for ${arrivalStr}. Reply STOP to opt out.`;
+        await twilioClient.messages.create({
+          body: smsBody,
+          from: twilioFrom,
+          to: patientPhone,
+        });
+        sentCount += 1;
+
+        // Audit log the SMS
+        const ipSms = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+        await supabase.from("lop_audit_log").insert({
+          user_id: auth.lopUser.id,
+          action: "schedule_sms_sent",
+          entity_type: "patient",
+          entity_id: patientId,
+          facility_id: patient.facility_id,
+          ip_address: ipSms,
+          new_values: {
+            recipient_type: "patient_sms",
+            phone: patientPhone,
+            expected_arrival: patient.expected_arrival,
+          },
+        });
+      } catch (smsErr) {
+        // Don't fail the whole request if SMS fails — log and continue
+        console.error("Twilio SMS error:", smsErr);
+      }
     }
 
     // HIPAA: Log each notification with user + IP
