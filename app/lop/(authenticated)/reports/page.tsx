@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
 import { hasPermission } from "@/lib/lop/permissions";
 import { CASE_STATUS_LABELS } from "@/lib/lop/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,21 +16,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import {
-  BarChart3,
-  DollarSign,
-  TrendingUp,
-  Users,
   AlertTriangle,
+  ArrowRight,
+  Building2,
+  CalendarDays,
   Download,
-  Filter,
   Loader2,
-  Sparkles,
   RotateCcw,
+  Search,
+  Sparkles,
+  Users,
   X,
 } from "lucide-react";
 
-// Date range presets
 function getDateRange(preset: string): { from: string; to: string } {
   const now = new Date();
   const to = now.toISOString().split("T")[0];
@@ -39,9 +38,9 @@ function getDateRange(preset: string): { from: string; to: string } {
 
   switch (preset) {
     case "wtd": {
-      const d = new Date(now);
-      d.setDate(d.getDate() - d.getDay()); // Sunday start
-      from = d.toISOString().split("T")[0];
+      const current = new Date(now);
+      current.setDate(current.getDate() - current.getDay());
+      from = current.toISOString().split("T")[0];
       break;
     }
     case "mtd": {
@@ -49,8 +48,8 @@ function getDateRange(preset: string): { from: string; to: string } {
       break;
     }
     case "qtd": {
-      const qMonth = Math.floor(now.getMonth() / 3) * 3;
-      from = `${now.getFullYear()}-${String(qMonth + 1).padStart(2, "0")}-01`;
+      const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
+      from = `${now.getFullYear()}-${String(quarterMonth + 1).padStart(2, "0")}-01`;
       break;
     }
     case "ytd": {
@@ -61,7 +60,31 @@ function getDateRange(preset: string): { from: string; to: string } {
     default:
       from = "2020-01-01";
   }
+
   return { from, to };
+}
+
+function getPresetLabel(
+  preset: string,
+  customFrom: string,
+  customTo: string
+) {
+  switch (preset) {
+    case "wtd":
+      return "Week to Date";
+    case "mtd":
+      return "Month to Date";
+    case "qtd":
+      return "Quarter to Date";
+    case "ytd":
+      return "Year to Date";
+    case "all":
+      return "All Time";
+    case "custom":
+      return customFrom && customTo ? `${customFrom} → ${customTo}` : "Custom Range";
+    default:
+      return preset;
+  }
 }
 
 interface LawFirmMetric {
@@ -75,52 +98,73 @@ interface LawFirmMetric {
   belowThreshold: boolean;
 }
 
+interface ReportsMetrics {
+  totalPatients: number;
+  totalBilled: number;
+  totalCollected: number;
+  avgBilled: number;
+  avgCollected: number;
+  openFollowUps: number;
+  droppedCases: number;
+  missingLop: number;
+  firmMetrics: LawFirmMetric[];
+  facilityMetrics: { name: string; count: number; billed: number; collected: number }[];
+}
+
 export default function ReportsPage() {
   const { lopUser, activeFacilityId, facilities } = useLopAuth();
   const [patients, setPatients] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [datePreset, setDatePreset] = useState("ytd");
   const [customFrom, setCustomFrom] = useState(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - 1);
-    return d.toISOString().split("T")[0];
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().split("T")[0];
   });
   const [customTo, setCustomTo] = useState(() => new Date().toISOString().split("T")[0]);
   const [facilityFilter, setFacilityFilter] = useState<string>("all");
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [lowThreshold, setLowThreshold] = useState(3000);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
-  // Load config threshold on mount
   useEffect(() => {
-    lopDb
+    void lopDb
       .select("lop_config", {
         select: "value",
         filters: [{ column: "key", op: "eq", value: "low_collection_threshold" }],
         single: true,
       })
       .then(({ data }) => {
-        if (data?.value) setLowThreshold(Number(data.value) || 3000);
+        if ((data as { value?: unknown } | null)?.value) {
+          setLowThreshold(Number((data as { value: unknown }).value) || 3000);
+        }
       });
   }, []);
 
   useEffect(() => {
-    const load = async () => {
+    const loadReports = async () => {
       const range =
         datePreset === "custom"
           ? { from: customFrom, to: customTo }
           : getDateRange(datePreset);
 
-      // Don't fetch if custom range has empty dates
       if (datePreset === "custom" && (!range.from || !range.to)) return;
 
       setLoading(true);
-      const filters: { column: string; op: "eq" | "gte" | "lte"; value: unknown }[] = [
+
+      const filters: Array<{
+        column: string;
+        op: "eq" | "gte" | "lte";
+        value: unknown;
+      }> = [
         { column: "created_at", op: "gte", value: range.from },
-        { column: "created_at", op: "lte", value: range.to + "T23:59:59" },
+        { column: "created_at", op: "lte", value: `${range.to}T23:59:59` },
       ];
 
-      const effectiveFacility = activeFacilityId || (facilityFilter !== "all" ? facilityFilter : null);
+      const effectiveFacility =
+        activeFacilityId || (facilityFilter !== "all" ? facilityFilter : null);
+
       if (effectiveFacility) {
         filters.push({ column: "facility_id", op: "eq", value: effectiveFacility });
       }
@@ -129,53 +173,69 @@ export default function ReportsPage() {
         select: "*, lop_facilities(name), lop_law_firms(id, name)",
         filters,
       });
+
       setPatients((data as Record<string, unknown>[]) ?? []);
       setLoading(false);
     };
-    load();
+
+    void loadReports();
   }, [datePreset, customFrom, customTo, activeFacilityId, facilityFilter]);
 
-  // Compute metrics
   const filteredPatients = useMemo(() => {
     let result = patients;
+
     if (nameFilter.trim()) {
-      const q = nameFilter.toLowerCase();
+      const query = nameFilter.toLowerCase();
       result = result.filter(
-        (p) =>
-          ((p.first_name as string) ?? "").toLowerCase().includes(q) ||
-          ((p.last_name as string) ?? "").toLowerCase().includes(q)
+        (patient) =>
+          ((patient.first_name as string) ?? "").toLowerCase().includes(query) ||
+          ((patient.last_name as string) ?? "").toLowerCase().includes(query)
       );
     }
+
     if (statusFilter !== "all") {
-      result = result.filter((p) => p.case_status === statusFilter);
+      result = result.filter((patient) => patient.case_status === statusFilter);
     }
+
     return result;
   }, [patients, nameFilter, statusFilter]);
 
-  const metrics = useMemo(() => {
+  const metrics = useMemo<ReportsMetrics>(() => {
     const totalPatients = filteredPatients.length;
-    const totalBilled = filteredPatients.reduce((s, p) => s + (Number(p.bill_charges) || 0), 0);
-    const totalCollected = filteredPatients.reduce((s, p) => s + (Number(p.amount_collected) || 0), 0);
+    const totalBilled = filteredPatients.reduce(
+      (sum, patient) => sum + (Number(patient.bill_charges) || 0),
+      0
+    );
+    const totalCollected = filteredPatients.reduce(
+      (sum, patient) => sum + (Number(patient.amount_collected) || 0),
+      0
+    );
     const avgBilled = totalPatients > 0 ? totalBilled / totalPatients : 0;
     const avgCollected = totalPatients > 0 ? totalCollected / totalPatients : 0;
 
-    const openFollowUps = filteredPatients.filter((p) => p.case_status === "follow_up_needed").length;
+    const openFollowUps = filteredPatients.filter(
+      (patient) => patient.case_status === "follow_up_needed"
+    ).length;
     const droppedCases = filteredPatients.filter(
-      (p) => p.case_status === "case_dropped" || p.case_status === "closed_no_recovery"
+      (patient) =>
+        patient.case_status === "case_dropped" ||
+        patient.case_status === "closed_no_recovery"
     ).length;
     const missingLop = filteredPatients.filter(
-      (p) => p.lop_letter_status === "requested" || p.lop_letter_status === "missing"
+      (patient) =>
+        patient.lop_letter_status === "requested" ||
+        patient.lop_letter_status === "missing"
     ).length;
 
-    // By law firm
     const firmMap: Record<string, LawFirmMetric> = {};
-    for (const p of filteredPatients) {
-      const firm = p.lop_law_firms as Record<string, unknown> | null;
+    for (const patient of filteredPatients) {
+      const firm = patient.lop_law_firms as Record<string, unknown> | null;
       if (!firm?.id) continue;
-      const fid = firm.id as string;
-      if (!firmMap[fid]) {
-        firmMap[fid] = {
-          firmId: fid,
+
+      const firmId = firm.id as string;
+      if (!firmMap[firmId]) {
+        firmMap[firmId] = {
+          firmId,
           firmName: firm.name as string,
           patientCount: 0,
           totalBilled: 0,
@@ -185,40 +245,46 @@ export default function ReportsPage() {
           belowThreshold: false,
         };
       }
-      firmMap[fid].patientCount++;
-      firmMap[fid].totalBilled += Number(p.bill_charges) || 0;
-      firmMap[fid].totalCollected += Number(p.amount_collected) || 0;
+
+      firmMap[firmId].patientCount += 1;
+      firmMap[firmId].totalBilled += Number(patient.bill_charges) || 0;
+      firmMap[firmId].totalCollected += Number(patient.amount_collected) || 0;
     }
 
-    const firmMetrics = Object.values(firmMap).map((m) => ({
-      ...m,
-      avgBilled: m.patientCount > 0 ? m.totalBilled / m.patientCount : 0,
-      avgCollected: m.patientCount > 0 ? m.totalCollected / m.patientCount : 0,
-      belowThreshold:
-        m.patientCount > 0 &&
-        m.totalCollected / m.patientCount < lowThreshold,
-    }));
+    const firmMetrics = Object.values(firmMap)
+      .map((metric) => ({
+        ...metric,
+        avgBilled: metric.patientCount > 0 ? metric.totalBilled / metric.patientCount : 0,
+        avgCollected:
+          metric.patientCount > 0 ? metric.totalCollected / metric.patientCount : 0,
+        belowThreshold:
+          metric.patientCount > 0 &&
+          metric.totalCollected / metric.patientCount < lowThreshold,
+      }))
+      .sort((left, right) => right.totalCollected - left.totalCollected);
 
-    firmMetrics.sort((a, b) => b.totalCollected - a.totalCollected);
+    const facilityMap: Record<
+      string,
+      { name: string; count: number; billed: number; collected: number }
+    > = {};
 
-    // By facility
-    const facMap: Record<string, { name: string; count: number; billed: number; collected: number }> = {};
-    for (const p of filteredPatients) {
-      const fac = p.lop_facilities as Record<string, unknown> | null;
-      const fid = p.facility_id as string;
-      if (!facMap[fid]) {
-        facMap[fid] = {
-          name: (fac?.name as string) ?? "Unknown",
+    for (const patient of filteredPatients) {
+      const facility = patient.lop_facilities as Record<string, unknown> | null;
+      const facilityId = patient.facility_id as string;
+
+      if (!facilityMap[facilityId]) {
+        facilityMap[facilityId] = {
+          name: (facility?.name as string) ?? "Unknown",
           count: 0,
           billed: 0,
           collected: 0,
         };
       }
-      facMap[fid].count++;
-      facMap[fid].billed += Number(p.bill_charges) || 0;
-      facMap[fid].collected += Number(p.amount_collected) || 0;
+
+      facilityMap[facilityId].count += 1;
+      facilityMap[facilityId].billed += Number(patient.bill_charges) || 0;
+      facilityMap[facilityId].collected += Number(patient.amount_collected) || 0;
     }
-    const facilityMetrics = Object.values(facMap);
 
     return {
       totalPatients,
@@ -230,62 +296,68 @@ export default function ReportsPage() {
       droppedCases,
       missingLop,
       firmMetrics,
-      facilityMetrics,
+      facilityMetrics: Object.values(facilityMap),
     };
   }, [filteredPatients, lowThreshold]);
 
-  const fmt = (n: number) =>
+  const formatCurrency = (value: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: 0,
-    }).format(n);
+    }).format(value);
 
-  const alertFirms = metrics.firmMetrics.filter((f) => f.belowThreshold);
+  const alertFirms = metrics.firmMetrics.filter((firm) => firm.belowThreshold);
+  const primaryAlertFirm = alertFirms[0];
   const canUseAi = hasPermission(lopUser, "ai:use");
-  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  const scopeFacilityLabel = activeFacilityId
+    ? facilities.find((facility) => facility.id === activeFacilityId)?.name ?? "Assigned Facility"
+    : facilityFilter !== "all"
+    ? facilities.find((facility) => facility.id === facilityFilter)?.name ?? "Selected Facility"
+    : "All Facilities";
 
   const handleExportCsv = () => {
-    const rows = filteredPatients.map((p) => ({
-      first_name: p.first_name ?? "",
-      last_name: p.last_name ?? "",
-      facility: (p.lop_facilities as Record<string, unknown>)?.name ?? "",
-      law_firm: (p.lop_law_firms as Record<string, unknown>)?.name ?? "",
-      case_status: p.case_status ?? "",
-      lop_letter_status: p.lop_letter_status ?? "",
-      bill_charges: p.bill_charges ?? "",
-      amount_collected: p.amount_collected ?? "",
-      date_of_accident: p.date_of_accident ?? "",
-      created_at: p.created_at ?? "",
+    const rows = filteredPatients.map((patient) => ({
+      first_name: patient.first_name ?? "",
+      last_name: patient.last_name ?? "",
+      facility: (patient.lop_facilities as Record<string, unknown>)?.name ?? "",
+      law_firm: (patient.lop_law_firms as Record<string, unknown>)?.name ?? "",
+      case_status: patient.case_status ?? "",
+      lop_letter_status: patient.lop_letter_status ?? "",
+      bill_charges: patient.bill_charges ?? "",
+      amount_collected: patient.amount_collected ?? "",
+      date_of_accident: patient.date_of_accident ?? "",
+      created_at: patient.created_at ?? "",
     }));
+
     const header = Object.keys(rows[0] ?? {}).join(",");
     const csv =
       header +
       "\n" +
       rows
-        .map((r) =>
-          Object.values(r)
-            .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .map((row) =>
+          Object.values(row)
+            .map((value) => `"${String(value).replace(/"/g, '""')}"`)
             .join(",")
         )
         .join("\n");
+
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `lop-report-${datePreset}.csv`;
-    a.click();
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `lop-report-${datePreset}.csv`;
+    anchor.click();
     URL.revokeObjectURL(url);
   };
 
-  // Page-level permission guard
   if (!hasPermission(lopUser, "reports:read")) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center">
         <div className="text-center">
-          <AlertTriangle className="h-10 w-10 text-orange-500 mx-auto mb-3" />
+          <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-orange-500" />
           <p className="text-lg font-medium text-slate-700">Access Restricted</p>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="mt-1 text-sm text-slate-400">
             Reports are available to Accounting and Admin roles only.
           </p>
         </div>
@@ -294,47 +366,69 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Reports</h1>
-          <p className="text-sm text-slate-500">
-            Financial analytics across all facilities
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {canUseAi && (
-            <Button
-              variant="outline"
-              className="gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-900 hover:border-indigo-300"
-              onClick={() => setAiPanelOpen(true)}
-            >
-              <Sparkles className="h-4 w-4" />
-              AI Analysis
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            className="gap-2"
-            onClick={handleExportCsv}
-            disabled={filteredPatients.length === 0}
-          >
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Button>
-        </div>
-      </div>
+    <div className="pb-8 lg:pb-12">
+      <header className="mb-6 rounded-[30px] border border-white/70 bg-white/70 px-5 py-5 shadow-[0_24px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:sticky lg:top-0 lg:z-20 lg:mb-8 lg:px-8 lg:py-6">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <p className="font-heading text-lg font-semibold text-[#0B3B91]">
+              Reports
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#0B3B91]/5 px-3 py-1.5 text-xs font-semibold text-[#0B3B91]">
+                <Building2 className="h-3.5 w-3.5" />
+                {scopeFacilityLabel}
+              </span>
+              <span className="text-sm text-slate-500">
+                {getPresetLabel(datePreset, customFrom, customTo)}
+              </span>
+            </div>
+          </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-4">
-          <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-full border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              onClick={handleExportCsv}
+              disabled={filteredPatients.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+            {canUseAi && (
+              <Button
+                type="button"
+                className="h-11 rounded-full bg-gradient-to-r from-[#D72638] to-[#ff4d5e] px-5 text-white shadow-[0_16px_35px_rgba(215,38,56,0.2)] hover:scale-[1.01] hover:from-[#c91f31] hover:to-[#ff4355]"
+                onClick={() => setAiPanelOpen(true)}
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Analysis
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <section className="px-1 lg:px-0">
+        <div className="mb-8 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h1 className="font-heading text-4xl font-extrabold tracking-tight text-[#0B3B91] md:text-5xl">
+              Reports
+            </h1>
+            <p className="mt-2 text-sm font-medium text-slate-500 md:text-base">
+              Financial analytics across all facilities
+            </p>
+          </div>
+        </div>
+
+        <section className="mb-8 rounded-[30px] border border-white/80 bg-slate-100/80 p-6">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
             <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">
+              <label className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
                 Date Range
               </label>
               <Select value={datePreset} onValueChange={setDatePreset}>
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="h-12 rounded-2xl border-white bg-white text-sm font-semibold text-[#0B3B91] shadow-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -348,47 +442,20 @@ export default function ReportsPage() {
               </Select>
             </div>
 
-            {datePreset === "custom" && (
-              <>
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">
-                    From
-                  </label>
-                  <Input
-                    type="date"
-                    value={customFrom}
-                    onChange={(e) => setCustomFrom(e.target.value)}
-                    className="w-auto"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">
-                    To
-                  </label>
-                  <Input
-                    type="date"
-                    value={customTo}
-                    onChange={(e) => setCustomTo(e.target.value)}
-                    className="w-auto"
-                  />
-                </div>
-              </>
-            )}
-
             {!activeFacilityId && facilities.length > 1 && (
               <div>
-                <label className="text-xs font-medium text-slate-500 mb-1 block">
-                  Facility
+                <label className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                  Facility Selection
                 </label>
                 <Select value={facilityFilter} onValueChange={setFacilityFilter}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="h-12 rounded-2xl border-white bg-white text-sm font-semibold text-[#0B3B91] shadow-none">
                     <SelectValue placeholder="All Facilities" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Facilities</SelectItem>
-                    {facilities.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>
-                        {f.name}
+                    {facilities.map((facility) => (
+                      <SelectItem key={facility.id} value={facility.id}>
+                        {facility.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -397,29 +464,32 @@ export default function ReportsPage() {
             )}
 
             <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">
-                Patient Name
+              <label className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                Patient Name Search
               </label>
-              <Input
-                placeholder="Search by name..."
-                value={nameFilter}
-                onChange={(e) => setNameFilter(e.target.value)}
-                className="w-[180px]"
-              />
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Start typing name..."
+                  value={nameFilter}
+                  onChange={(event) => setNameFilter(event.target.value)}
+                  className="h-12 rounded-2xl border-white bg-white pl-11 text-sm font-semibold shadow-none focus-visible:ring-[#0B3B91]/20"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">
+              <label className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
                 Case Status
               </label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="h-12 rounded-2xl border-white bg-white text-sm font-semibold text-[#0B3B91] shadow-none">
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
-                  {Object.entries(CASE_STATUS_LABELS).map(([val, label]) => (
-                    <SelectItem key={val} value={val}>
+                  {Object.entries(CASE_STATUS_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
                       {label}
                     </SelectItem>
                   ))}
@@ -427,256 +497,403 @@ export default function ReportsPage() {
               </Select>
             </div>
           </div>
-          {/* Active filter summary */}
-          {(nameFilter || statusFilter !== "all" || facilityFilter !== "all" || datePreset !== "ytd") && (
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 flex-wrap">
-              <Filter className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs text-slate-500">Active:</span>
-              {datePreset !== "ytd" && (
-                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                  {datePreset === "custom"
-                    ? `${customFrom} → ${customTo}`
-                    : datePreset === "wtd" ? "Week to Date"
-                    : datePreset === "mtd" ? "Month to Date"
-                    : datePreset === "qtd" ? "Quarter to Date"
-                    : datePreset === "all" ? "All Time" : datePreset}
-                </span>
-              )}
-              {facilityFilter !== "all" && (
-                <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                  {facilities.find((f) => f.id === facilityFilter)?.name ?? "Facility"}
-                </span>
-              )}
-              {statusFilter !== "all" && (
-                <span className="text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full font-medium">
-                  {CASE_STATUS_LABELS[statusFilter as keyof typeof CASE_STATUS_LABELS] ?? statusFilter}
-                </span>
-              )}
-              {nameFilter && (
-                <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-medium">
-                  &quot;{nameFilter}&quot;
-                </span>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-slate-500 hover:text-slate-700 h-6 px-2 ml-auto"
-                onClick={() => {
-                  setDatePreset("ytd");
-                  setFacilityFilter("all");
-                  setStatusFilter("all");
-                  setNameFilter("");
-                }}
-              >
-                Clear all
-              </Button>
+
+          {datePreset === "custom" && (
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                  From
+                </label>
+                <Input
+                  type="date"
+                  value={customFrom}
+                  onChange={(event) => setCustomFrom(event.target.value)}
+                  className="h-12 rounded-2xl border-white bg-white shadow-none"
+                />
+              </div>
+              <div>
+                <label className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                  To
+                </label>
+                <Input
+                  type="date"
+                  value={customTo}
+                  onChange={(event) => setCustomTo(event.target.value)}
+                  className="h-12 rounded-2xl border-white bg-white shadow-none"
+                />
+              </div>
             </div>
           )}
-          {/* Result count */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-            <span className="text-xs text-slate-500">
-              Showing <span className="font-semibold text-slate-700">{filteredPatients.length}</span> patient{filteredPatients.length !== 1 ? "s" : ""}
-              {patients.length !== filteredPatients.length && (
-                <> of {patients.length} loaded</>
-              )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4">
+            <span className="text-xs font-medium text-slate-500">
+              Showing{" "}
+              <span className="font-semibold text-slate-700">{filteredPatients.length}</span>{" "}
+              patient{filteredPatients.length === 1 ? "" : "s"}
             </span>
+            {(nameFilter || statusFilter !== "all" || facilityFilter !== "all" || datePreset !== "ytd") && (
+              <>
+                <span className="text-slate-300">•</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                  {getPresetLabel(datePreset, customFrom, customTo)}
+                </span>
+                {statusFilter !== "all" && (
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                    {CASE_STATUS_LABELS[statusFilter as keyof typeof CASE_STATUS_LABELS] ?? statusFilter}
+                  </span>
+                )}
+                {nameFilter && (
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                    "{nameFilter}"
+                  </span>
+                )}
+              </>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      {loading ? (
-        <div className="py-16 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
-          <p className="text-sm text-slate-400">Loading reports…</p>
-        </div>
-      ) : (
-        <>
-          {/* KPI row */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            <Card>
-              <CardContent className="pt-5">
-                <p className="text-xs text-slate-500">Total Patients</p>
-                <p className="text-2xl font-bold">{metrics.totalPatients}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5">
-                <p className="text-xs text-slate-500">Total Billed</p>
-                <p className="text-2xl font-bold">{fmt(metrics.totalBilled)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5">
-                <p className="text-xs text-slate-500">Total Collected</p>
-                <p className="text-2xl font-bold text-green-700">
-                  {fmt(metrics.totalCollected)}
+        {loading ? (
+          <div className="flex min-h-[320px] items-center justify-center rounded-[30px] border border-white/80 bg-white shadow-sm">
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <Loader2 className="h-4 w-4 animate-spin text-[#0B3B91]" />
+              Loading reports...
+            </div>
+          </div>
+        ) : (
+          <>
+            <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-[26px] border-l-4 border-[#0B3B91] bg-white p-6 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                  Total Capacity
                 </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5">
-                <p className="text-xs text-slate-500">Avg Billed / Patient</p>
-                <p className="text-2xl font-bold">{fmt(metrics.avgBilled)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5">
-                <p className="text-xs text-slate-500">Avg Collected / Patient</p>
-                <p className="text-2xl font-bold">{fmt(metrics.avgCollected)}</p>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="mt-4 flex items-end gap-2">
+                  <span className="font-heading text-5xl font-black text-[#0B3B91]">
+                    {metrics.totalPatients}
+                  </span>
+                  <span className="pb-2 text-xs font-medium uppercase tracking-[0.22em] text-slate-400">
+                    Patients
+                  </span>
+                </div>
+              </div>
 
-          {/* Secondary KPIs */}
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="pt-5 flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
-                <div>
-                  <p className="text-xs text-slate-500">Open Follow-Ups</p>
-                  <p className="text-xl font-bold">{metrics.openFollowUps}</p>
+              <div className="rounded-[26px] bg-white p-6 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                  Revenue Lifecycle
+                </p>
+                <div className="mt-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Billed
+                    </span>
+                    <span className="font-heading text-3xl font-black text-slate-900">
+                      {formatCurrency(metrics.totalBilled)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Collected
+                    </span>
+                    <span className="font-heading text-3xl font-black text-blue-700">
+                      {formatCurrency(metrics.totalCollected)}
+                    </span>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5 flex items-center gap-3">
-                <Users className="h-5 w-5 text-red-500" />
-                <div>
-                  <p className="text-xs text-slate-500">Dropped Cases</p>
-                  <p className="text-xl font-bold">{metrics.droppedCases}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5 flex items-center gap-3">
-                <BarChart3 className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="text-xs text-slate-500">Missing LOP Letters</p>
-                  <p className="text-xl font-bold">{metrics.missingLop}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
 
-          {/* Low-performing law firm alert */}
-          {alertFirms.length > 0 && (
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base text-red-800 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
-                  Low-Performing Law Firms (Below {fmt(lowThreshold)} avg collected/patient)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {alertFirms.map((f) => (
-                    <div
-                      key={f.firmId}
-                      className="flex items-center justify-between p-2 bg-white rounded border border-red-100"
-                    >
-                      <span className="font-medium text-slate-900">{f.firmName}</span>
-                      <div className="text-sm text-right">
-                        <span className="text-red-700 font-semibold">
-                          {fmt(f.avgCollected)}
-                        </span>
-                        <span className="text-slate-400 ml-2">
-                          ({f.patientCount} patient{f.patientCount !== 1 ? "s" : ""})
-                        </span>
-                      </div>
+              <div className="rounded-[26px] bg-white p-6 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                  Patient Averages
+                </p>
+                <div className="mt-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Avg Billed
+                    </span>
+                    <span className="font-heading text-2xl font-black text-[#0B3B91]">
+                      {formatCurrency(metrics.avgBilled)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Avg Collected
+                    </span>
+                    <span className="font-heading text-2xl font-black text-blue-700">
+                      {formatCurrency(metrics.avgCollected)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[26px] border-l-4 border-[#D72638] bg-white p-6 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                  Action Items
+                </p>
+                <div className="mt-5 grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="font-heading text-2xl font-black text-[#D72638]">
+                      {metrics.openFollowUps}
+                    </p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                      Follow-Ups
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-heading text-2xl font-black text-[#D72638]">
+                      {metrics.droppedCases}
+                    </p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                      Dropped
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-heading text-2xl font-black text-[#D72638]">
+                      {metrics.missingLop}
+                    </p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                      Missing LOP
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <div className="relative overflow-hidden rounded-[28px] border border-rose-100 bg-rose-50/60 p-6">
+                <div className="absolute inset-y-0 left-0 w-1.5 bg-[#D72638]" />
+                <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-[#D72638]">
+                      <AlertTriangle className="h-5 w-5" />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    <div>
+                      <h2 className="font-heading text-xl font-bold text-slate-900">
+                        {primaryAlertFirm
+                          ? "Low-Performing Law Firms Detected"
+                          : "Portfolio Stable"}
+                      </h2>
+                      <p className="mt-1 text-sm font-medium text-slate-500">
+                        {primaryAlertFirm
+                          ? "Review firms that are under the average collection threshold and may be dragging down portfolio efficiency."
+                          : "No law firms are currently below the configured collection threshold."}
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Collections by Law Firm */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Collections by Law Firm</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {metrics.firmMetrics.length === 0 ? (
-                <p className="text-sm text-slate-400 py-6 text-center">
-                  No data with assigned law firms.
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left">
-                        <th className="pb-2 font-medium text-slate-500">Firm</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Patients</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Total Billed</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Total Collected</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Avg Billed</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Avg Collected</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {metrics.firmMetrics.map((f) => (
-                        <tr
-                          key={f.firmId}
-                          className={`${f.belowThreshold ? "bg-red-50" : "hover:bg-slate-50"}`}
-                        >
-                          <td className="py-2 font-medium text-slate-900">
-                            {f.firmName}
-                            {f.belowThreshold && (
-                              <AlertTriangle className="inline h-3.5 w-3.5 text-red-500 ml-1.5" />
+                  <div className="rounded-[22px] border border-white/60 bg-white/80 px-6 py-4 shadow-sm">
+                    {primaryAlertFirm ? (
+                      <div className="flex flex-wrap items-center gap-6">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                            Target Entity
+                          </p>
+                          <p className="text-sm font-black text-[#0B3B91]">
+                            {primaryAlertFirm.firmName}
+                          </p>
+                        </div>
+                        <div className="h-8 w-px bg-slate-200" />
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                            Avg Collection
+                          </p>
+                          <p className="text-lg font-black text-[#D72638]">
+                            {formatCurrency(primaryAlertFirm.avgCollected)}
+                          </p>
+                        </div>
+                        <div className="h-8 w-px bg-slate-200" />
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                            Volume
+                          </p>
+                          <p className="text-lg font-black text-[#0B3B91]">
+                            {primaryAlertFirm.patientCount}{" "}
+                            <span className="text-[10px] font-medium uppercase text-slate-400">
+                              Pts
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
+                        <Users className="h-4 w-4 text-[#0B3B91]" />
+                        All tracked firms are performing at or above the current threshold.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+              <section className="overflow-hidden rounded-[30px] bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+                  <h2 className="font-heading text-xl font-bold text-[#0B3B91]">
+                    Collections by Law Firm
+                  </h2>
+                  <button
+                    type="button"
+                    className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-[#0B3B91]"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {metrics.firmMetrics.length === 0 ? (
+                  <div className="px-6 py-16 text-center text-sm text-slate-500">
+                    No data with assigned law firms for this filter set.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[620px] text-left">
+                      <thead>
+                        <tr className="bg-slate-50/80">
+                          <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Firm
+                          </th>
+                          <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Patients
+                          </th>
+                          <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Total Billed
+                          </th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Collected
+                          </th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Avg Col
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {metrics.firmMetrics.map((firm) => (
+                          <tr
+                            key={firm.firmId}
+                            className={cn(
+                              "transition-colors hover:bg-blue-50/30",
+                              firm.belowThreshold && "bg-rose-50/40"
                             )}
-                          </td>
-                          <td className="py-2 text-right text-slate-600">{f.patientCount}</td>
-                          <td className="py-2 text-right text-slate-600">{fmt(f.totalBilled)}</td>
-                          <td className="py-2 text-right text-slate-600">{fmt(f.totalCollected)}</td>
-                          <td className="py-2 text-right text-slate-600">{fmt(f.avgBilled)}</td>
-                          <td className={`py-2 text-right font-medium ${f.belowThreshold ? "text-red-700" : "text-slate-900"}`}>
-                            {fmt(f.avgCollected)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                          >
+                            <td className="px-6 py-5">
+                              <p className="text-sm font-bold text-slate-900">
+                                {firm.firmName}
+                              </p>
+                              <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                                {firm.patientCount} active cases
+                              </p>
+                            </td>
+                            <td className="px-6 py-5 text-sm font-medium text-slate-700">
+                              {firm.patientCount}
+                            </td>
+                            <td className="px-6 py-5 text-sm font-medium text-slate-700">
+                              {formatCurrency(firm.totalBilled)}
+                            </td>
+                            <td className="px-6 py-5 text-right text-sm font-black text-blue-700">
+                              {formatCurrency(firm.totalCollected)}
+                            </td>
+                            <td className="px-6 py-5 text-right text-sm font-black text-[#D72638]">
+                              {formatCurrency(firm.avgCollected)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
 
-          {/* Facility Totals */}
-          {metrics.facilityMetrics.length > 1 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Facility Totals</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left">
-                        <th className="pb-2 font-medium text-slate-500">Facility</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Patients</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Total Billed</th>
-                        <th className="pb-2 font-medium text-slate-500 text-right">Total Collected</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {metrics.facilityMetrics.map((f) => (
-                        <tr key={f.name} className="hover:bg-slate-50">
-                          <td className="py-2 font-medium text-slate-900">{f.name}</td>
-                          <td className="py-2 text-right text-slate-600">{f.count}</td>
-                          <td className="py-2 text-right text-slate-600">{fmt(f.billed)}</td>
-                          <td className="py-2 text-right text-slate-600">{fmt(f.collected)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <section className="overflow-hidden rounded-[30px] bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+                  <h2 className="font-heading text-xl font-bold text-[#0B3B91]">
+                    Facility Totals
+                  </h2>
+                  <button
+                    type="button"
+                    className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-[#0B3B91]"
+                  >
+                    <Building2 className="h-4 w-4" />
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
 
-      {/* AI Analysis Slide-over */}
+                {metrics.facilityMetrics.length === 0 ? (
+                  <div className="px-6 py-16 text-center text-sm text-slate-500">
+                    No facility totals available for this filter set.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-left">
+                      <thead>
+                        <tr className="bg-slate-50/80">
+                          <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Facility
+                          </th>
+                          <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Patients
+                          </th>
+                          <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Total Billed
+                          </th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                            Total Collected
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {metrics.facilityMetrics.map((facility) => (
+                          <tr key={facility.name} className="transition-colors hover:bg-blue-50/30">
+                            <td className="px-6 py-5">
+                              <p className="text-sm font-bold text-slate-900">
+                                {facility.name}
+                              </p>
+                            </td>
+                            <td className="px-6 py-5 text-sm font-medium text-slate-700">
+                              {facility.count}
+                            </td>
+                            <td className="px-6 py-5 text-sm font-medium text-slate-700">
+                              {formatCurrency(facility.billed)}
+                            </td>
+                            <td className="px-6 py-5 text-right text-sm font-black text-blue-700">
+                              {formatCurrency(facility.collected)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            </div>
+
+            <section className="relative mt-12 overflow-hidden rounded-[34px] border border-white/80 bg-[radial-gradient(circle_at_top_right,_rgba(37,99,235,0.18),_transparent_24%),linear-gradient(135deg,_rgba(11,59,145,0.12),_rgba(255,255,255,0.9))] p-10">
+              <div className="relative z-10 flex flex-col items-center justify-center text-center">
+                <h2 className="font-heading text-3xl font-bold text-[#0B3B91]">
+                  Predictive Forecasting
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
+                  Use historical LOP trends, law firm performance, and facility collection
+                  patterns to project upcoming liquidity. Activate the AI Analysis engine
+                  for a quick narrative on risks and opportunities.
+                </p>
+                {canUseAi ? (
+                  <Button
+                    type="button"
+                    className="mt-8 rounded-full bg-white text-[#0B3B91] shadow-xl hover:bg-slate-50"
+                    onClick={() => setAiPanelOpen(true)}
+                  >
+                    Enable Predictive Insights
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <div className="mt-8 rounded-full bg-white/80 px-6 py-3 text-sm font-semibold text-slate-500 shadow-sm">
+                    AI insights are available to admin users
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute -bottom-16 -right-8 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl" />
+            </section>
+          </>
+        )}
+      </section>
+
       {canUseAi && aiPanelOpen && (
         <ReportsAiPanel
           metrics={metrics}
@@ -688,26 +905,12 @@ export default function ReportsPage() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Reports AI Analysis Panel                                          */
-/* ------------------------------------------------------------------ */
 function ReportsAiPanel({
   metrics,
   datePreset,
   onClose,
 }: {
-  metrics: {
-    totalPatients: number;
-    totalBilled: number;
-    totalCollected: number;
-    avgBilled: number;
-    avgCollected: number;
-    openFollowUps: number;
-    droppedCases: number;
-    missingLop: number;
-    firmMetrics: LawFirmMetric[];
-    facilityMetrics: { name: string; count: number; billed: number; collected: number }[];
-  };
+  metrics: ReportsMetrics;
   datePreset: string;
   onClose: () => void;
 }) {
@@ -726,13 +929,13 @@ function ReportsAiPanel({
           droppedCases: metrics.droppedCases,
           missingLop: metrics.missingLop,
         },
-        lawFirmBreakdown: metrics.firmMetrics.map((f) => ({
-          firm: f.firmName,
-          patients: f.patientCount,
-          billed: f.totalBilled,
-          collected: f.totalCollected,
-          avgCollected: f.avgCollected,
-          belowThreshold: f.belowThreshold,
+        lawFirmBreakdown: metrics.firmMetrics.map((firm) => ({
+          firm: firm.firmName,
+          patients: firm.patientCount,
+          billed: firm.totalBilled,
+          collected: firm.totalCollected,
+          avgCollected: firm.avgCollected,
+          belowThreshold: firm.belowThreshold,
         })),
         facilityBreakdown: metrics.facilityMetrics,
       }),
@@ -741,7 +944,7 @@ function ReportsAiPanel({
 
   const { messages, isLoading, append, setMessages } = useAiChat({
     contextType: "reports_analysis",
-    reportData: reportData,
+    reportData,
   });
 
   useEffect(() => {
@@ -758,6 +961,7 @@ function ReportsAiPanel({
   const handleRegenerate = () => {
     setMessages([]);
     setTriggered(false);
+
     setTimeout(() => {
       setTriggered(true);
       append({
@@ -768,16 +972,15 @@ function ReportsAiPanel({
     }, 100);
   };
 
-  const aiResponse = messages.find((m) => m.role === "assistant")?.content;
+  const aiResponse = messages.find((message) => message.role === "assistant")?.content;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white border-l shadow-2xl z-50 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-indigo-50 to-blue-50">
+    <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l bg-white shadow-2xl">
+      <div className="flex items-center justify-between border-b bg-gradient-to-r from-indigo-50 to-blue-50 px-4 py-3">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-indigo-500" />
           <span className="font-semibold text-indigo-900">AI Report Analysis</span>
-          <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">
+          <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] text-indigo-600">
             GPT-4o
           </span>
         </div>
@@ -789,7 +992,7 @@ function ReportsAiPanel({
             onClick={handleRegenerate}
             disabled={isLoading}
           >
-            <RotateCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RotateCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </Button>
           <Button
             variant="ghost"
@@ -802,12 +1005,11 @@ function ReportsAiPanel({
         </div>
       </div>
 
-      {/* Body */}
       <ScrollArea className="flex-1 p-4">
         {isLoading && !aiResponse ? (
-          <div className="flex items-center gap-2 text-indigo-600 py-8">
+          <div className="flex items-center gap-2 py-8 text-indigo-600">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">Analyzing report data…</span>
+            <span className="text-sm">Analyzing report data...</span>
           </div>
         ) : aiResponse ? (
           <div className="prose prose-sm prose-slate max-w-none text-sm [&>*:first-child]:mt-0">
@@ -824,45 +1026,70 @@ function ReportsAiPanel({
 function ReportsAiMarkdown({ content }: { content: string }) {
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+
     if (line.startsWith("### ")) {
-      elements.push(<h4 key={i} className="font-semibold text-sm mt-3 mb-1 text-indigo-900">{rBold(line.slice(4))}</h4>);
+      elements.push(
+        <h4 key={index} className="mb-1 mt-3 text-sm font-semibold text-indigo-900">
+          {renderBoldText(line.slice(4))}
+        </h4>
+      );
     } else if (line.startsWith("## ")) {
-      elements.push(<h3 key={i} className="font-bold text-sm mt-3 mb-1 text-indigo-900">{rBold(line.slice(3))}</h3>);
+      elements.push(
+        <h3 key={index} className="mb-1 mt-3 text-sm font-bold text-indigo-900">
+          {renderBoldText(line.slice(3))}
+        </h3>
+      );
     } else if (/^\d+\.\s/.test(line)) {
       elements.push(
-        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
-          <span className="text-indigo-400 flex-shrink-0">{line.match(/^\d+/)?.[0]}.</span>
-          <span>{rBold(line.replace(/^\d+\.\s/, ""))}</span>
+        <div key={index} className="my-0.5 ml-1 flex gap-2 text-slate-700">
+          <span className="flex-shrink-0 text-indigo-400">
+            {line.match(/^\d+/)?.[0]}.
+          </span>
+          <span>{renderBoldText(line.replace(/^\d+\.\s/, ""))}</span>
         </div>
       );
     } else if (line.startsWith("- ") || line.startsWith("* ")) {
       elements.push(
-        <div key={i} className="flex gap-2 ml-1 my-0.5 text-slate-700">
-          <span className="text-indigo-400 flex-shrink-0">•</span>
-          <span>{rBold(line.slice(2))}</span>
+        <div key={index} className="my-0.5 ml-1 flex gap-2 text-slate-700">
+          <span className="flex-shrink-0 text-indigo-400">•</span>
+          <span>{renderBoldText(line.slice(2))}</span>
         </div>
       );
     } else if (line.trim() === "") {
-      elements.push(<div key={i} className="h-1.5" />);
+      elements.push(<div key={index} className="h-1.5" />);
     } else {
-      elements.push(<p key={i} className="my-0.5 text-slate-700">{rBold(line)}</p>);
+      elements.push(
+        <p key={index} className="my-0.5 text-slate-700">
+          {renderBoldText(line)}
+        </p>
+      );
     }
   }
+
   return <>{elements}</>;
 }
 
-function rBold(text: string): React.ReactNode {
+function renderBoldText(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
   const regex = /(\*\*[^*]+\*\*)/g;
   let lastIndex = 0;
-  let match;
+  let match: RegExpExecArray | null;
+
   while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
     parts.push(<strong key={match.index}>{match[0].slice(2, -2)}</strong>);
     lastIndex = regex.lastIndex;
   }
-  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
   return parts.length > 0 ? parts : text;
 }

@@ -12,9 +12,18 @@ import {
   LogOut,
   ClipboardList,
   Bot,
+  Menu,
 } from "lucide-react";
 import { useLopAuth } from "./LopAuthProvider";
 import { hasPermission } from "@/lib/lop/permissions";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 interface NavItem {
   href: string;
@@ -34,83 +43,191 @@ const navItems: NavItem[] = [
 
 export function LopShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { lopUser, facilities, activeFacilityId, setActiveFacilityId, signOut } = useLopAuth();
+  const { lopUser, signOut } = useLopAuth();
 
   const visibleItems = navItems.filter(
     (item) => !item.permission || hasPermission(lopUser, item.permission)
   );
 
+  const renderNavLink = (item: NavItem, closeOnClick = false) => {
+    const isActive =
+      item.href === "/lop"
+        ? pathname === "/lop"
+        : pathname.startsWith(item.href);
+
+    const link = (
+      <Link
+        href={item.href}
+        className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
+          isActive
+            ? "bg-white text-[#0B3B91] shadow-sm ring-1 ring-white/80"
+            : "text-slate-500 hover:bg-white/80 hover:text-slate-700"
+        }`}
+      >
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
+            isActive
+              ? "bg-[#0B3B91] text-white"
+              : "bg-slate-100 text-slate-500"
+          }`}
+        >
+          <item.icon className="h-[18px] w-[18px] flex-shrink-0" />
+        </div>
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <span className="truncate">{item.label}</span>
+          {isActive && (
+            <span className="h-2.5 w-2.5 rounded-full bg-[#D72638]" />
+          )}
+        </div>
+      </Link>
+    );
+
+    if (!closeOnClick) return link;
+
+    return (
+      <SheetClose asChild key={item.href}>
+        {link}
+      </SheetClose>
+    );
+  };
+
+  const renderAssistantButton = () => (
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+      className="w-full rounded-2xl bg-gradient-to-br from-[#D72638] via-[#ef4444] to-[#ff6b6b] p-4 text-left text-white shadow-[0_18px_40px_rgba(215,38,56,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(215,38,56,0.28)]"
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">
+          <Bot className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.22em]">AI Assistant</p>
+          <p className="text-[11px] text-white/80">Document insights</p>
+        </div>
+      </div>
+      <p className="text-xs leading-relaxed text-white/90">
+        Analyze LOP letters, missing docs, and patient readiness in one place.
+      </p>
+    </button>
+  );
+
   return (
-    <div className="min-h-screen bg-[#f7f9fc]">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-[calc(100vh-2rem)] w-64 m-4 rounded-xl bg-slate-50 shadow-xl shadow-slate-200/50 flex flex-col py-8 px-4 z-30">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(37,99,235,0.09),_transparent_28%),linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)]">
+      <header className="sticky top-0 z-30 border-b border-white/70 bg-[#f7f9fc]/90 px-4 py-4 backdrop-blur-xl lg:hidden">
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/lop" className="min-w-0">
+            <p className="font-heading text-lg font-extrabold tracking-tight text-[#0B3B91]">
+              Focus Health
+            </p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-400">
+              LOP Dashboard
+            </p>
+          </Link>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/90 text-[#0B3B91] shadow-sm transition-colors hover:bg-white"
+                aria-label="Open navigation menu"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className="w-[88vw] max-w-sm border-r-0 bg-[#f7f9fc] p-0"
+            >
+              <div className="flex h-full flex-col p-4">
+                <SheetHeader className="border-b border-slate-200 px-2 pb-6 pt-2 text-left">
+                  <SheetTitle className="font-heading text-xl font-extrabold tracking-tight text-[#0B3B91]">
+                    Focus Health
+                  </SheetTitle>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-400">
+                    LOP Dashboard
+                  </p>
+                </SheetHeader>
+
+                <nav className="mt-6 space-y-2">
+                  {visibleItems.map((item) => renderNavLink(item, true))}
+                </nav>
+
+                {hasPermission(lopUser, "ai:use") && (
+                  <div className="mt-6">{renderAssistantButton()}</div>
+                )}
+
+                <div className="mt-auto space-y-3 border-t border-slate-200 pt-4">
+                  {lopUser && (
+                    <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B3B91] text-sm font-bold text-white">
+                        {lopUser.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-slate-900">{lopUser.full_name}</p>
+                        <p className="truncate text-xs text-slate-500">{lopUser.email}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <SheetClose asChild>
+                    <button
+                      onClick={signOut}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-red-600"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </SheetClose>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </header>
+
+      <aside className="fixed left-0 top-0 hidden h-[calc(100vh-2rem)] w-72 flex-col rounded-[28px] border border-white/70 bg-slate-50/95 px-4 py-8 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:m-4 lg:flex">
         {/* Brand */}
-        <div className="mb-10 px-4">
+        <div className="mb-10 px-3">
           <Link href="/lop" className="block">
-            <h1 className="text-xl font-bold tracking-tighter text-[#0B3B91]">Focus Health</h1>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1">LOP Dashboard</p>
+            <h1 className="font-heading text-xl font-extrabold tracking-tight text-[#0B3B91]">
+              Focus Health
+            </h1>
+            <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.28em] text-slate-400">
+              LOP Dashboard
+            </p>
           </Link>
         </div>
 
         {/* Main Nav */}
-        <nav className="flex-grow space-y-1">
-          {visibleItems.map((item) => {
-            const isActive =
-              item.href === "/lop"
-                ? pathname === "/lop"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? "text-[#0B3B91] font-bold border-r-4 border-[#D72638] bg-white/50"
-                    : "text-slate-500 hover:bg-white/80"
-                }`}
-              >
-                <item.icon className="h-[18px] w-[18px] flex-shrink-0" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+        <nav className="flex-grow space-y-2">
+          {visibleItems.map((item) => renderNavLink(item))}
         </nav>
 
         {/* AI Section */}
         {hasPermission(lopUser, "ai:use") && (
           <div className="mt-auto mb-6">
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
-              className="w-full p-4 rounded-xl bg-gradient-to-br from-[#0B3B91] to-[#2563EB] text-white shadow-lg hover:shadow-xl transition-all cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Bot className="h-4 w-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">AI Assistant</span>
-              </div>
-              <p className="text-[11px] opacity-90 leading-relaxed">
-                Analyze LOP letters or patient docs with one click.
-              </p>
-            </button>
+            {renderAssistantButton()}
           </div>
         )}
 
         {/* User info + Logout */}
-        <div className="space-y-3 pt-4 border-t border-slate-200">
+        <div className="space-y-3 border-t border-slate-200 pt-4">
           {lopUser && (
-            <div className="flex items-center gap-3 px-3 py-3 bg-white rounded-lg shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-[#0B3B91]/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-bold text-[#0B3B91]">
+            <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0B3B91] text-sm font-bold text-white">
+                <span>
                   {lopUser.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                 </span>
               </div>
-              <div className="flex-grow min-w-0">
-                <p className="text-xs font-bold truncate">{lopUser.full_name}</p>
-                <p className="text-[10px] text-slate-400 truncate leading-none">{lopUser.email}</p>
+              <div className="min-w-0 flex-grow">
+                <p className="truncate text-sm font-bold text-slate-900">{lopUser.full_name}</p>
+                <p className="truncate text-[11px] text-slate-400">{lopUser.email}</p>
               </div>
               <button
                 onClick={signOut}
                 title="Sign out"
-                className="text-slate-400 hover:text-red-600 transition-colors flex-shrink-0"
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -120,7 +237,9 @@ export function LopShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main className="ml-[17.5rem] mr-8 min-h-screen">{children}</main>
+      <main className="min-h-screen px-4 pb-8 pt-4 lg:ml-80 lg:mr-8 lg:px-0 lg:pb-10 lg:pt-0">
+        {children}
+      </main>
     </div>
   );
 }
