@@ -536,7 +536,7 @@ export const BLOG_POSTS: BlogPost[] = [
 
       <ol>
         <li><strong>Site selection rigour:</strong> The difference between a high-performing and underperforming FSER in DFW is almost entirely a function of location quality — trade-area demographics, visibility, access, and competitor proximity.</li>
-        <li><strong>Payer contracting:</strong> Securing in-network contracts with major commercial payers (BCBS, Aetna, UnitedHealthcare, Cigna) before opening is critical to volume ramp and revenue predictability.</li>
+        <li><strong>Out-of-network billing readiness:</strong> Establishing efficient out-of-network claims workflows, No Surprises Act compliance processes, and independent dispute resolution (IDR) capabilities before opening is critical to revenue-cycle performance and cash-flow predictability.</li>
         <li><strong>Operational readiness:</strong> Facilities that launch with fully credentialled physicians, trained clinical staff, and functioning revenue-cycle systems perform markedly better in their first twelve months than those that scramble to build operational capacity post-opening.</li>
         <li><strong>Regulatory compliance:</strong> Texas licensing requirements, CLIA certifications, and DEA registrations must be secured before patient care begins. Experienced operators navigate this process efficiently; new entrants often underestimate the timeline.</li>
       </ol>
@@ -644,7 +644,7 @@ export const BLOG_POSTS: BlogPost[] = [
 
       <p>Houston operates under the same Texas regulatory framework that makes the state one of the most FSER-friendly in the country. No certificate-of-need requirement exists, licensing pathways are well-established, and the Texas Health and Human Services Commission provides clear regulatory guidance. Operators must secure state licensure, CLIA laboratory certification, DEA registration, and local building and occupancy permits — all manageable within a well-organised development timeline.</p>
 
-      <p>Balance-billing reforms enacted in recent years have changed the reimbursement landscape for out-of-network emergency care, making in-network payer contracting more important than ever. Operators who secure broad in-network participation before opening are better positioned for sustainable revenue and volume growth.</p>
+      <p>Balance-billing reforms enacted in recent years \u2014 including the No Surprises Act \u2014 have reshaped the reimbursement landscape for out-of-network emergency care. Operators who build robust out-of-network billing workflows, understand qualifying payment amount (QPA) calculations, and prepare for independent dispute resolution (IDR) processes are better positioned for sustainable revenue and cash-flow performance.</p>
 
       <h2>Investment Outlook</h2>
 
@@ -1117,21 +1117,13 @@ export const BLOG_POSTS: BlogPost[] = [
 
       <h3>Commercial Insurance</h3>
 
-      <p>Commercial payers (BCBS, Aetna, UnitedHealthcare, Cigna, and others) reimburse FSER services at the highest rates. In-network commercial reimbursement for a Level 4 emergency visit with CT and lab work can generate $1,500–3,000+ in combined facility and professional fees, depending on the specific payer contract and geographic market. High commercial insurance penetration is the most important payer-mix characteristic for FSER financial performance.</p>
-
-      <h3>Medicare</h3>
-
-      <p>Medicare reimburses at government-set rates that are substantially below commercial rates — typically 40–60 per cent of commercial reimbursement levels for comparable services. Medicare patients tend to be 65+ and present with higher acuity, which partially offsets the lower per-service reimbursement. Medicare volume above 15–20 per cent of total visits begins to materially compress per-visit revenue metrics.</p>
-
-      <h3>Medicaid</h3>
-
-      <p>Medicaid reimbursement is the lowest of all payer categories — often 20–35 per cent of commercial rates. Texas Medicaid rates for emergency services are among the lowest in the state programme. High Medicaid penetration significantly reduces per-visit revenue and is a key risk factor in certain trade areas.</p>
+      <p>Commercial payers (BCBS, Aetna, UnitedHealthcare, Cigna, and others) represent the highest reimbursement category for FSERs. Most freestanding ERs operate as out-of-network providers, with reimbursement governed by the No Surprises Act and state balance-billing protections. A Level 4 emergency visit with CT and lab work can generate $1,500–3,000+ in combined facility and professional fees, depending on the qualifying payment amount (QPA) and independent dispute resolution (IDR) outcomes. High commercial insurance penetration in the surrounding trade area is the most important payer-mix characteristic for FSER financial performance.</p>
 
       <h3>Self-Pay</h3>
 
       <p>Self-pay patients — those without insurance — represent both a revenue challenge and an access imperative. FSERs are required by EMTALA to provide a medical screening examination and stabilising treatment regardless of ability to pay. Self-pay collection rates typically range from 10–30 per cent of billed charges, depending on the facility's pricing policies, payment-plan offerings, and collection practices.</p>
 
-      <p>The interplay of these payer categories determines the facility's <strong>blended revenue per visit</strong> — the single most important metric for FSER financial modelling. A facility in a high-commercial, low-self-pay market may generate $1,200–1,800 in blended revenue per visit, while a facility in a high-Medicaid, high-self-pay market may generate $600–900. This differential has enormous implications for operating margins and investment returns.</p>
+      <p>The interplay of these payer categories determines the facility's <strong>blended revenue per visit</strong> — the single most important metric for FSER financial modelling. A facility in a high-commercial, low-self-pay market may generate $1,200–1,800 in blended revenue per visit, while a facility in a high-self-pay corridor may generate $600–900. This differential has enormous implications for operating margins and investment returns.</p>
 
       <p>Our <a href="/market">market evaluation methodology</a> places payer-mix analysis at the centre of site-selection decisions, ensuring that every Focus Health facility is positioned in a corridor with favourable insurance demographics.</p>
 
@@ -1189,7 +1181,7 @@ export const BLOG_POSTS: BlogPost[] = [
       <p>Operators have several levers available to optimise FSER revenue performance:</p>
 
       <ul>
-        <li><strong>Payer contracting:</strong> Securing in-network contracts with all major commercial payers is the highest-impact revenue lever. Each additional in-network contract broadens the accessible insured population and improves per-visit reimbursement predictability.</li>
+        <li><strong>Out-of-network billing optimisation:</strong> As an out-of-network provider, maximising reimbursement requires expertise in No Surprises Act compliance, qualifying payment amount (QPA) analysis, and independent dispute resolution (IDR) processes. Building efficient out-of-network claims workflows and appeals processes is the highest-impact revenue lever for FSER operators.</li>
         <li><strong>Clinical capability investment:</strong> On-site CT, comprehensive lab menus, and point-of-care ultrasound increase diagnostic intensity per visit, driving ancillary revenue and supporting higher-level E/M coding where clinically appropriate.</li>
         <li><strong>Documentation and coding excellence:</strong> Investing in physician documentation training and coding-quality audits ensures that clinical complexity is accurately captured and billed, preventing revenue leakage from undercoding.</li>
         <li><strong>Throughput optimisation:</strong> Reducing door-to-discharge times allows facilities to see more patients per day without adding staffing. Process improvements in triage, diagnostics, and discharge workflows drive volume-based revenue growth.</li>
