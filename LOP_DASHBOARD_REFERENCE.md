@@ -1,6 +1,6 @@
 # LOP Dashboard — Complete Implementation Reference
 
-> **Last updated:** April 14, 2026 (v4 — UI overhaul: glassmorphism, pill filters, gradient buttons across all tabs)
+> **Last updated:** April 15, 2026 (v5 — Config tab, enhanced audit log, PRD cleanup)
 > **Purpose:** Avoid re-crawling files in future sessions. Read this first.
 
 ---
@@ -151,7 +151,7 @@ Via Supabase Management API:
 | `/lop/scheduling` | `scheduling/page.tsx` | 626 | Calendar view with 30-min time slots, weekly overview bar chart, day stats pills, mark arrived |
 | `/lop/law-firms` | `law-firms/page.tsx` | 407 | Law firms CRUD, metrics cards, audit log |
 | `/lop/reports` | `reports/page.tsx` | 868 | Reports with date range, custom date filter, facility/status filters, active filter summary, CSV export |
-| `/lop/settings` | `settings/page.tsx` | 934 | Users CRUD, Facilities CRUD (phone/emails), Config mgmt, Audit detail |
+| `/lop/settings` | `settings/page.tsx` | ~1540 | Users CRUD, Facilities CRUD, Config management (lop_config upsert), Audit log with expandable change-diff |
 
 ### AI Assistant
 | File | Lines | Purpose |
@@ -463,7 +463,7 @@ Token stored in macOS Keychain under service "Supabase CLI".
 6. **OPENAI_API_KEY** — Must be set on Vercel for AI assistant to function. If missing, `/api/lop/ai/chat` returns 500.
 7. **MFA enrollment** — First-time login requires MFA setup; user cannot bypass. If QR enrollment fails, user can manually enter the TOTP secret.
 8. **PHI de-identification** — The `deidentifyPhi()` function uses regex patterns; exotic name formats or multi-word names may slip through. Consider a BAA with OpenAI for full HIPAA compliance.
-9. **Settings page missing** — `app/lop/(authenticated)/settings/` folder is empty. Users/Facilities/Config/Audit management functionality needs to be rebuilt. This breaks the `users:manage` gated nav link in `LopShell.tsx`.
+9. **Settings page** — Now fully rebuilt with 4 tabs: Users, Facilities, Configuration (`lop_config` CRUD), and Audit Log (expandable change-diff view with user names and action filters).
 10. **`no_show` status** — `no_show` is fully implemented in `LopCaseStatus`, `CASE_STATUS_LABELS` (→ "No-Show"), and `CASE_STATUS_COLORS` (`bg-rose-100 text-rose-800`). No action needed.
 
 ---
@@ -487,7 +487,7 @@ Token stored in macOS Keychain under service "Supabase CLI".
 | FR-11 | Law firm management with metrics | Done |
 | FR-12 | Reminder emails (manual + auto-cron) | Done |
 | FR-13 | Reports with filters + CSV export | Done |
-| FR-14 | Settings: Users, Facilities, Config, Audit log | **Broken** — settings page removed (empty dir) |
+| FR-14 | Settings: Users, Facilities, Config, Audit log | Done |
 | FR-15 | Audit logging for all mutations | Done |
 | FR-16 | Financial gating (financial:view permission) | Done |
 | FR-17 | Dynamic mandatory intake fields (from lop_config) | Done |

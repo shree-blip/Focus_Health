@@ -9,7 +9,7 @@ import type {
   LopUserRole,
   LopFacility,
   LopAuditLog,
-  LopUserFacility,
+  LopConfig,
 } from "@/lib/lop/types";
 import { ROLE_LABELS } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import {
+  ArrowRight,
   Building2,
+  ChevronDown,
+  ChevronRight,
   Clock,
   Edit3,
   Loader2,
@@ -39,10 +42,12 @@ import {
   MapPin,
   Phone,
   Plus,
+  Save,
   Search,
   Settings,
   Shield,
   ShieldCheck,
+  Sliders,
   UserCog,
   UserPlus,
   Users,
@@ -53,7 +58,7 @@ import { toast } from "sonner";
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-type Tab = "users" | "facilities" | "audit";
+type Tab = "users" | "facilities" | "config" | "audit";
 
 type UserRow = LopUser & {
   lop_user_facilities?: { facility_id: string }[];
@@ -135,9 +140,14 @@ export default function SettingsPage() {
     );
   }
 
+  const canManageConfig = hasPermission(lopUser, "config:manage");
+
   const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
     { key: "users", label: "Users", icon: Users },
     { key: "facilities", label: "Facilities", icon: Building2 },
+    ...(canManageConfig
+      ? [{ key: "config" as Tab, label: "Configuration", icon: Sliders }]
+      : []),
     ...(canReadAudit
       ? [{ key: "audit" as Tab, label: "Audit Log", icon: Clock }]
       : []),
@@ -219,6 +229,7 @@ export default function SettingsPage() {
 
         {tab === "users" && <UsersTab />}
         {tab === "facilities" && <FacilitiesTab />}
+        {tab === "config" && canManageConfig && <ConfigTab />}
         {tab === "audit" && canReadAudit && <AuditTab />}
       </section>
     </div>
@@ -884,28 +895,11 @@ function FacilitiesTab() {
 
   return (
     <>
-      {/* ── Metrics ── */}
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-[26px] border border-white/80 bg-white p-6 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-            Total Facilities
-          </p>
-          <p className="mt-3 font-heading text-3xl font-black text-[#0B3B91]">
-            {facilities.length}
-          </p>
-        </div>
-        <div className="rounded-[26px] border border-white/80 bg-white p-6 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-            Active
-          </p>
-          <p className="mt-3 font-heading text-3xl font-black text-emerald-600">
-            {facilities.filter((f) => f.is_active).length}
-          </p>
-        </div>
-      </div>
-
       {/* ── Add button ── */}
-      <div className="mb-6 flex justify-end">
+      <div className="mb-6 flex items-center justify-between">
+        <p className="text-sm text-slate-500">
+          {facilities.length} facilit{facilities.length === 1 ? "y" : "ies"} configured
+        </p>
         <Button
           type="button"
           onClick={() => openDialog()}
@@ -1185,37 +1179,432 @@ function FacilitiesTab() {
 }
 
 /* ================================================================== */
+/*  CONFIG TAB                                                         */
+/* ================================================================== */
+
+interface ConfigRow {
+  key: string;
+  value: unknown;
+  description: string | null;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+const KNOWN_CONFIGS: { key: string; label: string; description: string; type: "json" | "text" | "number" | "boolean" }[] = [
+  {
+    key: "mandatory_intake_fields",
+    label: "Mandatory Intake Fields",
+    description: "JSON array of field names required during patient intake (e.g. [\"first_name\",\"last_name\",\"facility_id\",\"law_firm_id\"])",
+    type: "json",
+  },
+  {
+    key: "auto_remind_days",
+    label: "Auto-Remind Interval (Days)",
+    description: "Number of days between automatic LOP reminder emails",
+    type: "number",
+  },
+  {
+    key: "default_arrival_window",
+    label: "Default Arrival Window (Minutes)",
+    description: "Default scheduling window in minutes when creating a patient",
+    type: "number",
+  },
+];
+
+function ConfigTab() {
+  const { lopUser } = useLopAuth();
+  const [configs, setConfigs] = useState<ConfigRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [form, setForm] = useState({ key: "", value: "", description: "" });
+
+  const loadConfigs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await lopDb.select("lop_config", {
+        order: { column: "key" },
+      });
+      setConfigs((data as ConfigRow[]) ?? []);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadConfigs();
+  }, [loadConfigs]);
+
+  const openDialog = (config?: ConfigRow) => {
+    if (config) {
+      setEditingKey(config.key);
+      setForm({
+        key: config.key,
+        value: typeof config.value === "string" ? config.value : JSON.stringify(config.value, null, 2),
+        description: config.description ?? "",
+      });
+    } else {
+      setEditingKey(null);
+      setForm({ key: "", value: "", description: "" });
+    }
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.key.trim()) {
+      toast.error("Config key is required.");
+      return;
+    }
+
+    setSaving(form.key);
+    try {
+      // Try to parse value as JSON, fall back to string
+      let parsedValue: unknown = form.value;
+      try {
+        parsedValue = JSON.parse(form.value);
+      } catch {
+        // Keep as string
+      }
+
+      const payload = {
+        key: form.key.trim(),
+        value: parsedValue,
+        description: form.description.trim() || null,
+        updated_by: lopUser?.id,
+        updated_at: new Date().toISOString(),
+      };
+
+      await lopDb.upsert("lop_config", payload);
+
+      await lopDb.insert("lop_audit_log", {
+        user_id: lopUser?.id,
+        action: editingKey ? "config_updated" : "config_created",
+        entity_type: "config",
+        entity_id: form.key.trim(),
+        old_values: editingKey
+          ? { value: configs.find((c) => c.key === editingKey)?.value }
+          : null,
+        new_values: { value: parsedValue },
+      });
+
+      toast.success(`Config "${form.key}" saved.`);
+      setDialogOpen(false);
+      await loadConfigs();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save config.");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  // Merge known configs with saved configs for display
+  const displayConfigs = useMemo(() => {
+    const savedMap = new Map(configs.map((c) => [c.key, c]));
+    const items: (ConfigRow & { knownLabel?: string; knownType?: string })[] = [];
+
+    // Known configs first
+    for (const known of KNOWN_CONFIGS) {
+      const saved = savedMap.get(known.key);
+      items.push({
+        key: known.key,
+        value: saved?.value ?? null,
+        description: saved?.description ?? known.description,
+        updated_at: saved?.updated_at ?? "",
+        updated_by: saved?.updated_by ?? null,
+        knownLabel: known.label,
+        knownType: known.type,
+      });
+      savedMap.delete(known.key);
+    }
+    // Unknown (custom) configs
+    for (const [, c] of savedMap) {
+      items.push(c);
+    }
+    return items;
+  }, [configs]);
+
+  return (
+    <>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="font-heading text-2xl font-bold text-slate-900">
+            System Configuration
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Key-value settings that control system behavior
+          </p>
+        </div>
+        <Button
+          type="button"
+          onClick={() => openDialog()}
+          className="h-10 rounded-full bg-gradient-to-r from-[#D72638] to-[#ff4d5e] px-4 text-sm text-white shadow-[0_16px_35px_rgba(215,38,56,0.2)] hover:scale-[1.01] hover:from-[#c91f31] hover:to-[#ff4355]"
+        >
+          <Plus className="h-4 w-4" />
+          Add Config
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex min-h-[200px] items-center justify-center rounded-[30px] border border-white/80 bg-white shadow-sm">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin text-[#0B3B91]" />
+          <span className="text-sm text-slate-500">Loading config…</span>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {displayConfigs.map((cfg) => {
+            const valueStr =
+              cfg.value === null || cfg.value === undefined
+                ? "—"
+                : typeof cfg.value === "string"
+                  ? cfg.value
+                  : JSON.stringify(cfg.value, null, 2);
+            const isSet = cfg.value !== null && cfg.value !== undefined;
+
+            return (
+              <div
+                key={cfg.key}
+                className={cn(
+                  "overflow-hidden rounded-[24px] border shadow-sm transition-all hover:-translate-y-0.5",
+                  isSet
+                    ? "border-white/70 bg-white/85"
+                    : "border-amber-200 bg-amber-50/50",
+                )}
+              >
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-heading text-base font-bold text-slate-900">
+                          {(cfg as { knownLabel?: string }).knownLabel ?? cfg.key}
+                        </h3>
+                        {!isSet && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                            NOT SET
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 font-mono text-xs text-slate-400">
+                        {cfg.key}
+                      </p>
+                      {cfg.description && (
+                        <p className="mt-2 text-xs text-slate-500">
+                          {cfg.description}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-xl text-slate-500 hover:bg-slate-100"
+                      onClick={() =>
+                        openDialog({
+                          key: cfg.key,
+                          value: cfg.value,
+                          description: cfg.description,
+                          updated_at: cfg.updated_at,
+                          updated_by: cfg.updated_by,
+                        })
+                      }
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {isSet && (
+                    <div className="mt-3 rounded-xl bg-slate-50 px-4 py-3">
+                      <pre className="whitespace-pre-wrap break-all font-mono text-xs text-slate-700">
+                        {valueStr}
+                      </pre>
+                    </div>
+                  )}
+
+                  {cfg.updated_at && (
+                    <p className="mt-2 text-[10px] text-slate-400">
+                      Last updated: {formatDate(cfg.updated_at)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Config Dialog ── */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-xl rounded-[28px] border-white/80 bg-white/95 p-0">
+          <DialogHeader className="border-b border-slate-100 px-6 py-5">
+            <DialogTitle className="font-heading text-2xl font-bold text-[#0B3B91]">
+              {editingKey ? "Edit Configuration" : "Add Configuration"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 px-6 py-6">
+            <div>
+              <Label>Key *</Label>
+              <Input
+                value={form.key}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, key: e.target.value }))
+                }
+                disabled={!!editingKey}
+                placeholder="e.g. mandatory_intake_fields"
+                className="mt-2 rounded-2xl font-mono text-sm"
+              />
+            </div>
+            <div>
+              <Label>Value *</Label>
+              <textarea
+                value={form.value}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, value: e.target.value }))
+                }
+                rows={5}
+                placeholder='e.g. ["first_name","last_name","facility_id"]'
+                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0B3B91]/20"
+              />
+              <p className="mt-1 text-[10px] text-slate-400">
+                JSON arrays/objects are auto-parsed. Plain text stored as string.
+              </p>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input
+                value={form.description}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, description: e.target.value }))
+                }
+                placeholder="What this config controls"
+                className="mt-2 rounded-2xl"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-2xl"
+                onClick={() => setDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="rounded-2xl bg-gradient-to-r from-[#0B3B91] to-[#2563EB] text-white hover:from-[#09337c] hover:to-[#1f57d6]"
+                onClick={handleSave}
+                disabled={!!saving}
+              >
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Save className="mr-1 h-4 w-4" />
+                Save Config
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+/* ================================================================== */
 /*  AUDIT LOG TAB                                                      */
 /* ================================================================== */
 
+const ACTION_COLORS: Record<string, string> = {
+  patient_created: "bg-emerald-50 text-emerald-700",
+  patient_updated: "bg-blue-50 text-blue-700",
+  status_changed: "bg-amber-50 text-amber-700",
+  user_created: "bg-emerald-50 text-emerald-700",
+  user_updated: "bg-blue-50 text-blue-700",
+  facility_created: "bg-emerald-50 text-emerald-700",
+  facility_updated: "bg-blue-50 text-blue-700",
+  config_created: "bg-emerald-50 text-emerald-700",
+  config_updated: "bg-indigo-50 text-indigo-700",
+  document_uploaded: "bg-cyan-50 text-cyan-700",
+  reminder_sent: "bg-violet-50 text-violet-700",
+  ai_query: "bg-purple-50 text-purple-700",
+};
+
+const ACTION_LABELS: Record<string, string> = {
+  patient_created: "Patient Created",
+  patient_updated: "Patient Updated",
+  status_changed: "Status Changed",
+  user_created: "User Created",
+  user_updated: "User Updated",
+  facility_created: "Facility Created",
+  facility_updated: "Facility Updated",
+  config_created: "Config Created",
+  config_updated: "Config Updated",
+  document_uploaded: "Document Uploaded",
+  reminder_sent: "Reminder Sent",
+};
+
+type AuditLogWithUser = LopAuditLog & {
+  lop_users?: { full_name: string } | null;
+};
+
 function AuditTab() {
-  const [logs, setLogs] = useState<LopAuditLog[]>([]);
+  const [logs, setLogs] = useState<AuditLogWithUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [filterAction, setFilterAction] = useState<string>("all");
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
         const { data } = await lopDb.select("lop_audit_log", {
+          select: "*, lop_users(full_name)",
           order: { column: "created_at", ascending: false },
-          limit: 100,
+          limit: 200,
         });
-        setLogs((data as LopAuditLog[]) ?? []);
+        setLogs((data as AuditLogWithUser[]) ?? []);
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
+  const actionTypes = useMemo(() => {
+    const set = new Set(logs.map((l) => l.action.startsWith("phi_read:") ? "phi_read" : l.action));
+    return Array.from(set).sort();
+  }, [logs]);
+
+  const filtered = useMemo(() => {
+    if (filterAction === "all") return logs;
+    if (filterAction === "phi_read") return logs.filter((l) => l.action.startsWith("phi_read:"));
+    return logs.filter((l) => l.action === filterAction);
+  }, [logs, filterAction]);
+
+  const toggleExpand = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
   return (
     <>
-      <div className="mb-6">
-        <h2 className="font-heading text-2xl font-bold text-slate-900">
-          Recent Audit Entries
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Last 100 actions across the LOP system
-        </p>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-heading text-2xl font-bold text-slate-900">
+            Audit Log
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            {filtered.length} of {logs.length} entries &middot; Last 200 actions
+          </p>
+        </div>
+        <Select value={filterAction} onValueChange={setFilterAction}>
+          <SelectTrigger className="h-10 w-[200px] rounded-2xl border-slate-200 text-sm">
+            <SelectValue placeholder="Filter by action" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Actions</SelectItem>
+            {actionTypes.map((a) => (
+              <SelectItem key={a} value={a}>
+                {ACTION_LABELS[a] ?? a}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {loading ? (
@@ -1223,69 +1612,195 @@ function AuditTab() {
           <Loader2 className="mr-2 h-4 w-4 animate-spin text-[#0B3B91]" />
           <span className="text-sm text-slate-500">Loading audit log…</span>
         </div>
-      ) : logs.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="rounded-[30px] border border-white/80 bg-white px-6 py-16 text-center shadow-sm">
           <Clock className="mx-auto h-10 w-10 text-slate-300" />
           <h2 className="mt-4 font-heading text-2xl font-bold text-slate-900">
-            No audit entries yet
+            No audit entries
           </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            {filterAction !== "all" ? "Try removing the filter." : "Actions will appear here once users start using the system."}
+          </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[28px] border border-white/70 bg-white/85 shadow-[0_20px_45px_rgba(15,23,42,0.05)]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/80">
-                  <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                    Timestamp
-                  </th>
-                  <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                    Action
-                  </th>
-                  <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                    Entity
-                  </th>
-                  <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                    User
-                  </th>
-                  <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                    IP
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="border-b border-slate-50 transition-colors hover:bg-slate-50/50"
-                  >
-                    <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-500">
-                      {formatDate(log.created_at)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                        {log.action}
+        <div className="space-y-3">
+          {filtered.map((log) => {
+            const isExpanded = expandedId === log.id;
+            const hasChanges =
+              (log.old_values && Object.keys(log.old_values).length > 0) ||
+              (log.new_values && Object.keys(log.new_values).length > 0);
+            const actionColor =
+              ACTION_COLORS[log.action] ??
+              (log.action.startsWith("phi_read:")
+                ? "bg-slate-100 text-slate-600"
+                : "bg-blue-50 text-blue-700");
+            const actionLabel =
+              ACTION_LABELS[log.action] ??
+              (log.action.startsWith("phi_read:")
+                ? `PHI Read: ${log.action.replace("phi_read:lop_", "")}`
+                : log.action);
+            const userName = log.lop_users?.full_name ?? null;
+
+            return (
+              <div
+                key={log.id}
+                className="overflow-hidden rounded-[20px] border border-white/70 bg-white/85 shadow-sm transition-all"
+              >
+                {/* ── Row Header ── */}
+                <button
+                  type="button"
+                  onClick={() => hasChanges && toggleExpand(log.id)}
+                  className={cn(
+                    "flex w-full items-center gap-3 px-5 py-4 text-left transition-colors",
+                    hasChanges ? "cursor-pointer hover:bg-slate-50/50" : "cursor-default",
+                  )}
+                >
+                  {hasChanges ? (
+                    isExpanded ? (
+                      <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                    )
+                  ) : (
+                    <div className="h-4 w-4 shrink-0" />
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={cn(
+                          "inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold",
+                          actionColor,
+                        )}
+                      >
+                        {actionLabel}
                       </span>
-                    </td>
-                    <td className="px-5 py-3 text-xs text-slate-600">
-                      {log.entity_type}
-                      {log.entity_id && (
-                        <span className="ml-1 text-slate-400">
-                          #{log.entity_id.slice(0, 8)}
+                      <span className="text-xs text-slate-400">
+                        {log.entity_type}
+                        {log.entity_id && (
+                          <span className="ml-1 font-mono text-slate-300">
+                            #{log.entity_id.slice(0, 8)}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
+                      <span>{formatDate(log.created_at)}</span>
+                      {userName && (
+                        <span className="font-semibold text-slate-500">
+                          {userName}
                         </span>
                       )}
-                    </td>
-                    <td className="px-5 py-3 text-xs text-slate-500">
-                      {log.user_id?.slice(0, 8) ?? "—"}
-                    </td>
-                    <td className="px-5 py-3 text-xs text-slate-400">
-                      {log.ip_address ?? "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      {!userName && log.user_id && (
+                        <span className="font-mono">
+                          {log.user_id.slice(0, 8)}
+                        </span>
+                      )}
+                      {log.ip_address && (
+                        <span className="font-mono">{log.ip_address}</span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {/* ── Expanded Change Details ── */}
+                {isExpanded && hasChanges && (
+                  <div className="border-t border-slate-100 bg-slate-50/60 px-5 py-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {/* Old Values */}
+                      {log.old_values && Object.keys(log.old_values).length > 0 && (
+                        <div>
+                          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-rose-500">
+                            Previous Values
+                          </p>
+                          <div className="space-y-1.5">
+                            {Object.entries(log.old_values).map(([key, val]) => (
+                              <div
+                                key={key}
+                                className="rounded-xl bg-rose-50 px-3 py-2"
+                              >
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400">
+                                  {key.replace(/_/g, " ")}
+                                </span>
+                                <p className="mt-0.5 break-all font-mono text-xs text-rose-700">
+                                  {typeof val === "object"
+                                    ? JSON.stringify(val)
+                                    : String(val ?? "null")}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* New Values */}
+                      {log.new_values && Object.keys(log.new_values).length > 0 && (
+                        <div>
+                          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-600">
+                            New Values
+                          </p>
+                          <div className="space-y-1.5">
+                            {Object.entries(log.new_values).map(([key, val]) => (
+                              <div
+                                key={key}
+                                className="rounded-xl bg-emerald-50 px-3 py-2"
+                              >
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">
+                                  {key.replace(/_/g, " ")}
+                                </span>
+                                <p className="mt-0.5 break-all font-mono text-xs text-emerald-700">
+                                  {typeof val === "object"
+                                    ? JSON.stringify(val)
+                                    : String(val ?? "null")}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Side-by-side diff for matching keys */}
+                    {log.old_values && log.new_values && (() => {
+                      const changedKeys = Object.keys(log.new_values).filter(
+                        (k) =>
+                          k in (log.old_values as Record<string, unknown>) &&
+                          JSON.stringify((log.old_values as Record<string, unknown>)[k]) !==
+                            JSON.stringify((log.new_values as Record<string, unknown>)[k]),
+                      );
+                      if (changedKeys.length === 0) return null;
+                      return (
+                        <div className="mt-4 border-t border-slate-200 pt-4">
+                          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                            Field Changes
+                          </p>
+                          <div className="space-y-2">
+                            {changedKeys.map((k) => (
+                              <div
+                                key={k}
+                                className="flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs"
+                              >
+                                <span className="min-w-[100px] font-semibold text-slate-600">
+                                  {k.replace(/_/g, " ")}
+                                </span>
+                                <span className="rounded bg-rose-50 px-2 py-0.5 font-mono text-rose-600 line-through">
+                                  {String((log.old_values as Record<string, unknown>)[k] ?? "null")}
+                                </span>
+                                <ArrowRight className="h-3 w-3 shrink-0 text-slate-400" />
+                                <span className="rounded bg-emerald-50 px-2 py-0.5 font-mono text-emerald-700">
+                                  {String((log.new_values as Record<string, unknown>)[k] ?? "null")}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </>
