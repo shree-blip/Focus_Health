@@ -1,6 +1,6 @@
 # LOP Dashboard — Complete Implementation Reference
 
-> **Last updated:** April 12, 2026 (v3 — AI assistant, MFA, HIPAA hardening)
+> **Last updated:** April 14, 2026 (v4 — UI overhaul: glassmorphism, pill filters, gradient buttons across all tabs)
 > **Purpose:** Avoid re-crawling files in future sessions. Read this first.
 
 ---
@@ -55,13 +55,14 @@ Vercel uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` but local uses `NEXT_
 | `accounting` | Accounting |
 | `admin` | Admin |
 
-### Case Statuses (9)
+### Case Statuses (10)
 | Value | Label | Color |
 |-------|-------|-------|
 | `scheduled` | Scheduled | blue |
-| `arrived` | Arrived | cyan |
+| `no_show` | No Show | rose |
+| `arrived` | Arrived | emerald |
 | `intake_complete` | Intake Complete | indigo |
-| `in_progress` | In Progress | yellow |
+| `in_progress` | In Progress | amber |
 | `follow_up_needed` | Follow Up Needed | orange |
 | `paid` | Paid | green |
 | `partial_paid` | Partial Paid | lime |
@@ -98,7 +99,7 @@ Vercel uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` but local uses `NEXT_
 2. **`lop_users`** — id, auth_user_id, email, full_name, role, is_active, created_at, updated_at
 3. **`lop_user_facilities`** — id, user_id, facility_id (junction)
 4. **`lop_law_firms`** — id, name, intake_email, escalation_email, primary_contact, primary_phone, is_active, notes, created_at, updated_at
-5. **`lop_patients`** — id, facility_id, law_firm_id, first_name, last_name, date_of_birth, phone, email, address_line1/2, city, state, zip, date_of_accident, expected_arrival, arrival_window_min, case_status, lop_letter_status, medical_records_status, bill_charges, amount_collected, date_paid, billing_tags, medical_record_tags, follow_up_note, intake_notes, created_by, updated_by, created_at, updated_at
+5. **`lop_patients`** — id, facility_id, law_firm_id, first_name, last_name, date_of_birth, phone, email, address_line1/2, city, state, zip, date_of_accident, expected_arrival, arrival_window_min, case_status, lop_letter_status, medical_records_status, bill_charges, amount_collected, **reduction_amount**, **billing_date**, date_paid, billing_tags, medical_record_tags, follow_up_note, intake_notes, created_by, updated_by, created_at, updated_at
 6. **`lop_patient_documents`** — id, patient_id, document_type (**TEXT**), file_name, file_url, storage_path, status, notes, uploaded_by, created_at, updated_at
 7. **`lop_reminder_emails`** — id, patient_id, law_firm_id, recipient_email, email_type, subject, sent_at, sent_by, status, error_message
 8. **`lop_audit_log`** — id, user_id, action, entity_type, entity_id, facility_id, old_values, new_values, ip_address, created_at
@@ -109,6 +110,10 @@ Via Supabase Management API:
 - `lop_facilities.phone TEXT`
 - `lop_facilities.director_email TEXT`
 - `lop_facilities.front_desk_email TEXT`
+
+### DB Columns Added (post April 10 2026)
+- `lop_patients.reduction_amount NUMERIC` — stores reduction letter amount
+- `lop_patients.billing_date DATE` — date billing was issued (used for AR aging calculation)
 
 ### Seeded Data
 - 3 facilities: ER of Irving, ER of White Rock, ER of Lufkin
@@ -161,7 +166,7 @@ Via Supabase Management API:
 | File | Lines | Purpose |
 |------|-------|---------|
 | `app/lop/(authenticated)/layout.tsx` | 61 | Wraps with LopAuthProvider + LopShell + **AiChatPanel** |
-| `src/components/lop/LopShell.tsx` | 172 | Sidebar nav: Dashboard, Patients, Scheduling, Law Firms, Reports, Settings. AI chat open event dispatch |
+| `src/components/lop/LopShell.tsx` | 246 | Sidebar nav: Dashboard, Scheduling, Patients, Law Firms, Reports, Settings. Responsive hamburger on mobile. AI chat open event dispatch. New frosted-glass style. |
 
 ### API Routes
 | Route | File | Lines | Purpose |
@@ -370,10 +375,37 @@ The AI chat endpoint uses `streamText()` from the `ai` package and returns `resu
 
 ---
 
+## 11b. UI Design System (April 14, 2026 overhaul)
+
+All dashboard tabs now share a consistent design language:
+
+| Pattern | Tailwind Classes |
+|---------|------------------|
+| Page sticky header | `sticky top-0 z-20 rounded-[30px] border border-white/70 bg-white/70 backdrop-blur-xl shadow-[0_24px_60px_rgba(15,23,42,0.06)]` |
+| Section cards | `rounded-[28px] border border-white/70 bg-white/85 shadow-[0_20px_45px_rgba(15,23,42,0.05)]` |
+| Page background | `bg-[radial-gradient(circle_at_top_right,_rgba(37,99,235,0.09),_transparent_28%),linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)]` |
+| Primary action button | `h-12 rounded-2xl bg-gradient-to-r from-[#D72638] to-[#ff4d5e] text-white shadow-[0_18px_38px_rgba(215,38,56,0.22)]` |
+| Secondary button | `h-11 rounded-full border-white/80 bg-white/90 shadow-sm` |
+| Search input | `h-11 rounded-full bg-slate-100/90 border-white/80 pl-11` |
+| Pill filter active | `rounded-2xl bg-white text-[#0B3B91] shadow-sm ring-1 ring-slate-200` |
+| Pill filter inactive | `rounded-2xl bg-slate-100 text-slate-500 hover:bg-slate-200/70` |
+| Page title | `font-heading text-4xl font-extrabold tracking-tight text-[#0B3B91]` |
+| Metric accent card | `border-l-4 border-[#0B3B91] rounded-[24px] bg-white shadow-sm` |
+| NavItem active | `bg-white text-[#0B3B91] shadow-sm ring-1 ring-white/80` (icon bg: `bg-[#0B3B91] text-white`) |
+| NavItem inactive | `text-slate-500 hover:bg-white/80` (icon bg: `bg-slate-100 text-slate-500`) |
+| Active dot | `h-2.5 w-2.5 rounded-full bg-[#D72638]` — shown on active nav item |
+| Brand colors | Primary: `#0B3B91` (navy) · Accent: `#D72638` (red) · Dark navy: `#002668` |
+
+### Tab Lists (shadcn Tabs)
+Patient detail tabs use shadcn `<Tabs>`. The `<TabsList>` should use `rounded-2xl bg-slate-100 p-1` with `<TabsTrigger>` styled as `rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#0B3B91]`.
+
+---
+
 ## 12. Git History (Key Commits)
 
 | Commit | Message |
 |--------|---------|
+| `UI-2026` | UI overhaul: glassmorphism cards, pill filters, gradient buttons, redesigned scheduling/patients/reports/law-firms/intake pages |
 | `b92672d` | Fix login hang: remove redundant MFA check from login page (middleware handles it) |
 | `f17f104` | Enforce MFA (TOTP) for all LOP dashboard access |
 | `1dc4140` | HIPAA compliance: cookie-based auth, PHI de-identification, security headers, MFA, session timeouts, read audit logging |
@@ -431,6 +463,8 @@ Token stored in macOS Keychain under service "Supabase CLI".
 6. **OPENAI_API_KEY** — Must be set on Vercel for AI assistant to function. If missing, `/api/lop/ai/chat` returns 500.
 7. **MFA enrollment** — First-time login requires MFA setup; user cannot bypass. If QR enrollment fails, user can manually enter the TOTP secret.
 8. **PHI de-identification** — The `deidentifyPhi()` function uses regex patterns; exotic name formats or multi-word names may slip through. Consider a BAA with OpenAI for full HIPAA compliance.
+9. **Settings page missing** — `app/lop/(authenticated)/settings/` folder is empty. Users/Facilities/Config/Audit management functionality needs to be rebuilt. This breaks the `users:manage` gated nav link in `LopShell.tsx`.
+10. **`no_show` status** — `no_show` is fully implemented in `LopCaseStatus`, `CASE_STATUS_LABELS` (→ "No-Show"), and `CASE_STATUS_COLORS` (`bg-rose-100 text-rose-800`). No action needed.
 
 ---
 
@@ -453,7 +487,7 @@ Token stored in macOS Keychain under service "Supabase CLI".
 | FR-11 | Law firm management with metrics | Done |
 | FR-12 | Reminder emails (manual + auto-cron) | Done |
 | FR-13 | Reports with filters + CSV export | Done |
-| FR-14 | Settings: Users, Facilities, Config, Audit log | Done |
+| FR-14 | Settings: Users, Facilities, Config, Audit log | **Broken** — settings page removed (empty dir) |
 | FR-15 | Audit logging for all mutations | Done |
 | FR-16 | Financial gating (financial:view permission) | Done |
 | FR-17 | Dynamic mandatory intake fields (from lop_config) | Done |

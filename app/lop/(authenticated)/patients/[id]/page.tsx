@@ -443,7 +443,10 @@ export default function PatientDetailPage({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#0B3B91] mx-auto mb-3" />
+          <p className="text-sm text-slate-400">Loading patient record…</p>
+        </div>
       </div>
     );
   }
@@ -451,12 +454,12 @@ export default function PatientDetailPage({
   if (!patient) {
     return (
       <div className="text-center py-16">
-        <p className="text-slate-500">Patient not found.</p>
+        <p className="text-slate-500 mb-3">Patient not found.</p>
         <Link
           href="/lop/patients"
-          className="text-blue-600 hover:underline mt-2 inline-block"
+          className="text-[#0B3B91] font-semibold hover:underline"
         >
-          Back to patients
+          ← Back to patients
         </Link>
       </div>
     );
@@ -470,133 +473,144 @@ export default function PatientDetailPage({
   const canUseAi = hasPermission(lopUser, "ai:use");
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <Link href="/lop/patients">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              {form.first_name as string} {form.last_name as string}
-            </h1>
-            <p className="text-sm text-slate-500">
-              {patient.lop_facilities?.name ?? ""} &middot; Created{" "}
-              {new Date(patient.created_at as string).toLocaleDateString()}
-              {patient.updated_at && (
-                <>
-                  {" "}
-                  &middot; Updated{" "}
-                  {new Date(
-                    patient.updated_at as string
-                  ).toLocaleDateString()}
-                </>
-              )}
-            </p>
+    <div className="pb-8 lg:pb-12">
+      {/* ── Sticky Glassmorphism Header ── */}
+      <header className="mb-6 rounded-[30px] border border-white/70 bg-white/70 px-5 py-5 shadow-[0_24px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:sticky lg:top-0 lg:z-20 lg:mb-8 lg:px-8 lg:py-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-start gap-3">
+            <Link href="/lop/patients">
+              <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-slate-100 mt-0.5">
+                <ArrowLeft className="h-5 w-5 text-slate-500" />
+              </Button>
+            </Link>
+            <div>
+              <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                <span
+                  className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${
+                    CASE_STATUS_COLORS[form.case_status as LopCaseStatus] ?? "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {CASE_STATUS_LABELS[form.case_status as LopCaseStatus] ?? form.case_status}
+                </span>
+                <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                  LOP: {DOC_STATUS_LABELS[form.lop_letter_status as LopDocumentStatus] ?? "N/A"}
+                </span>
+                <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                  Records: {DOC_STATUS_LABELS[form.medical_records_status as LopDocumentStatus] ?? "N/A"}
+                </span>
+                {(() => {
+                  const missingCount = getMissingDocuments(
+                    documents.map((d) => ({
+                      document_type: d.document_type as string,
+                      status: d.status as string,
+                    }))
+                  ).filter((c) => c.required && c.status !== "received").length;
+                  return missingCount > 0 ? (
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                      {missingCount} Doc{missingCount > 1 ? "s" : ""} Missing
+                    </span>
+                  ) : (
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                      Docs Complete
+                    </span>
+                  );
+                })()}
+              </div>
+              <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B3B91]">
+                {form.first_name as string} {form.last_name as string}
+              </h1>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {patient.lop_facilities?.name ?? ""} &middot; Created{" "}
+                {new Date(patient.created_at as string).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {canSendEmail && (
+              <Button
+                variant="outline"
+                onClick={handleSendReminder}
+                disabled={sendingReminder}
+                className="h-10 rounded-2xl border-slate-200 gap-2 font-semibold"
+              >
+                {sendingReminder ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Mail className="h-4 w-4" />
+                )}
+                {sendingReminder ? "Sending…" : "Send Reminder"}
+              </Button>
+            )}
+            {canEdit && (
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="h-10 rounded-2xl bg-gradient-to-r from-[#D72638] to-[#ff4d5e] px-5 text-white shadow-[0_16px_35px_rgba(215,38,56,0.2)] transition-transform hover:scale-[1.01] hover:from-[#c91f31] hover:to-[#ff4355] gap-2"
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {saving ? "Saving…" : "Save Changes"}
+              </Button>
+            )}
           </div>
         </div>
-        <div className="flex gap-2">
-          {canSendEmail && (
-            <Button
-              variant="outline"
-              onClick={handleSendReminder}
-              disabled={sendingReminder}
-              className="gap-2"
-            >
-              {sendingReminder ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Mail className="h-4 w-4" />
-              )}
-              {sendingReminder ? "Sending…" : "Send Reminder"}
-            </Button>
-          )}
-          {canEdit && (
-            <Button onClick={handleSave} disabled={saving} className="gap-2">
-              {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              Save Changes
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Status Badge Bar */}
-      <div className="flex flex-wrap gap-2">
-        <span
-          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-            CASE_STATUS_COLORS[form.case_status as LopCaseStatus] ??
-            "bg-gray-100 text-gray-600"
-          }`}
-        >
-          {CASE_STATUS_LABELS[form.case_status as LopCaseStatus] ??
-            form.case_status}
-        </span>
-        <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
-          LOP:{" "}
-          {DOC_STATUS_LABELS[form.lop_letter_status as LopDocumentStatus] ??
-            "N/A"}
-        </span>
-        <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
-          Med Records:{" "}
-          {DOC_STATUS_LABELS[
-            form.medical_records_status as LopDocumentStatus
-          ] ?? "N/A"}
-        </span>
-        {(() => {
-          const missingCount = getMissingDocuments(
-            documents.map((d) => ({
-              document_type: d.document_type as string,
-              status: d.status as string,
-            }))
-          ).filter((c) => c.required && c.status !== "received").length;
-          return missingCount > 0 ? (
-            <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-              {missingCount} Required Doc{missingCount > 1 ? "s" : ""} Missing
-            </span>
-          ) : (
-            <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-              All Required Docs Received
-            </span>
-          );
-        })()}
-      </div>
+      </header>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="billing">Billing &amp; Status</TabsTrigger>
-          <TabsTrigger value="documents">
-            Documents ({documents.length})
-          </TabsTrigger>
-          <TabsTrigger value="reminders">
-            Reminders ({reminders.length})
-          </TabsTrigger>
-          <TabsTrigger value="activity">
-            Activity ({auditLogs.length})
-          </TabsTrigger>
-          {canUseAi && (
-            <TabsTrigger value="ai-summary" className="gap-1">
-              <Sparkles className="h-3.5 w-3.5" />
-              AI Summary
+        {/* ── Pill Tab List ── */}
+        <div className="mb-6 rounded-[28px] border border-white/70 bg-white/85 p-2 shadow-[0_20px_45px_rgba(15,23,42,0.05)]">
+          <TabsList className="flex h-auto w-full flex-wrap gap-1 bg-transparent p-0">
+            <TabsTrigger
+              value="overview"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+            >
+              Overview
             </TabsTrigger>
-          )}
-        </TabsList>
+            <TabsTrigger
+              value="billing"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+            >
+              Billing &amp; Status
+            </TabsTrigger>
+            <TabsTrigger
+              value="documents"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+            >
+              Documents ({documents.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="reminders"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+            >
+              Reminders ({reminders.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="activity"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+            >
+              Activity ({auditLogs.length})
+            </TabsTrigger>
+            {canUseAi && (
+              <TabsTrigger
+                value="ai-summary"
+                className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm gap-1"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                AI Summary
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         {/* ==================== Overview Tab ==================== */}
         <TabsContent value="overview" className="space-y-4 mt-4">
           {/* Patient Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Patient Information</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Patient Information</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>First Name</Label>
                 <Input
@@ -639,15 +653,13 @@ export default function PatientDetailPage({
                   disabled={!canEdit}
                 />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
           {/* Address */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Address</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Address</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
                 <Label>Address Line 1</Label>
                 <Input
@@ -688,15 +700,13 @@ export default function PatientDetailPage({
                   disabled={!canEdit}
                 />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
           {/* Case & Scheduling */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Case &amp; Scheduling</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Case &amp; Scheduling</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Date of Accident</Label>
                 <Input
@@ -759,15 +769,13 @@ export default function PatientDetailPage({
                   </SelectContent>
                 </Select>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
           {/* Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Notes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Notes</h3>
+            <div className="space-y-4">
               <div>
                 <Label>Intake Notes</Label>
                 <Textarea
@@ -788,17 +796,15 @@ export default function PatientDetailPage({
                   placeholder="Communication and next steps..."
                 />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         </TabsContent>
 
         {/* ==================== Billing & Status Tab ==================== */}
         <TabsContent value="billing" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Case Status</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Case Status</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <Label>Case Status</Label>
                 <Select
@@ -860,15 +866,13 @@ export default function PatientDetailPage({
                   </SelectContent>
                 </Select>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Billing</CardTitle>
-            </CardHeader>
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Billing</h3>
             {canViewFinancial ? (
-              <CardContent className="space-y-4">
+              <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <Label>Bill Charges ($)</Label>
@@ -941,21 +945,17 @@ export default function PatientDetailPage({
                     </div>
                   </div>
                 </div>
-              </CardContent>
+              </div>
             ) : (
-              <CardContent>
-                <p className="text-sm text-slate-400 py-4 text-center">
-                  Financial details are restricted to Medical Records, Accounting, and Admin roles.
-                </p>
-              </CardContent>
+              <p className="text-sm text-slate-400 py-4 text-center">
+                Financial details are restricted to Medical Records, Accounting, and Admin roles.
+              </p>
             )}
-          </Card>
+          </section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Tags</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Tags</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <Label className="mb-2 block">Billing Tags</Label>
                 <TagInput
@@ -974,33 +974,26 @@ export default function PatientDetailPage({
                   placeholder="e.g. x-ray, blood-work"
                 />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Follow-Up</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                rows={4}
-                value={(form.follow_up_note as string) ?? ""}
-                onChange={(e) => updateForm("follow_up_note", e.target.value)}
-                disabled={!canEdit}
-                placeholder="Follow-up notes and communication log..."
-              />
-            </CardContent>
-          </Card>
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Follow-Up</h3>
+            <Textarea
+              rows={4}
+              value={(form.follow_up_note as string) ?? ""}
+              onChange={(e) => updateForm("follow_up_note", e.target.value)}
+              disabled={!canEdit}
+              placeholder="Follow-up notes and communication log..."
+            />
+          </section>
         </TabsContent>
 
         {/* ==================== Documents Tab ==================== */}
         <TabsContent value="documents" className="space-y-4 mt-4">
           {/* ---- Document Checklist ---- */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Document Checklist</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Document Checklist</h3>
               {(() => {
                 const checklist = getMissingDocuments(
                   documents.map((d) => ({
@@ -1063,25 +1056,23 @@ export default function PatientDetailPage({
                   </div>
                 );
               })()}
-            </CardContent>
-          </Card>
+          </section>
 
           {/* ---- Uploaded Documents ---- */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Documents</CardTitle>
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <div className="mb-5 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-[#0B3B91]">Documents</h3>
               {canUploadDocs && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="rounded-2xl gap-2 border-slate-200 font-semibold"
                   onClick={() => setDocDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4" /> Add Document
                 </Button>
               )}
-            </CardHeader>
-            <CardContent>
+            </div>
               {documents.length === 0 ? (
                 <p className="text-sm text-slate-400 py-8 text-center">
                   No documents uploaded yet.
@@ -1165,17 +1156,13 @@ export default function PatientDetailPage({
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+          </section>
         </TabsContent>
 
         {/* ==================== Reminders Tab ==================== */}
         <TabsContent value="reminders" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Email Reminders</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Email Reminders</h3>
               {reminders.length === 0 ? (
                 <p className="text-sm text-slate-400 py-8 text-center">
                   No reminders sent yet.
@@ -1212,17 +1199,13 @@ export default function PatientDetailPage({
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+          </section>
         </TabsContent>
 
         {/* ==================== Activity Tab ==================== */}
         <TabsContent value="activity" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Activity History</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Activity History</h3>
               {auditLogs.length === 0 ? (
                 <p className="text-sm text-slate-400 py-8 text-center">
                   No activity recorded yet.
@@ -1295,8 +1278,7 @@ export default function PatientDetailPage({
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+          </section>
         </TabsContent>
 
         {/* ==================== AI Summary Tab ==================== */}
@@ -1313,7 +1295,7 @@ export default function PatientDetailPage({
           <DialogHeader>
             <DialogTitle>Add Document</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-2">
+          <div className="space-y-4 mt-2 px-1">
             <div>
               <Label>Document Type *</Label>
               <Select
@@ -1379,7 +1361,7 @@ export default function PatientDetailPage({
                 variant="outline"
                 onClick={() => setDocDialogOpen(false)}
               >
-                Cancel
+                <span>Cancel</span>
               </Button>
               <Button onClick={handleDocUpload} disabled={docUploading}>
                 {docUploading && (
@@ -1455,7 +1437,7 @@ function PatientAiSummary({ patientId }: { patientId: string }) {
       </CardHeader>
       <CardContent>
         {isLoading && !aiResponse ? (
-          <div className="flex items-center gap-2 text-indigo-600 py-6">
+          <div className="flex items-center gap-2 py-4 text-indigo-500">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-sm">Analyzing patient case data…</span>
           </div>
