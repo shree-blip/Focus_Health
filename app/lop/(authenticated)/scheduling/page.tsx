@@ -23,6 +23,8 @@ import {
   UserCheck,
   TrendingUp,
   BarChart3,
+  XCircle,
+  PhoneCall,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -54,6 +56,8 @@ export default function SchedulingPage() {
   const [loading, setLoading] = useState(true);
   const [weekLoading, setWeekLoading] = useState(true);
   const [markingArrived, setMarkingArrived] = useState<string | null>(null);
+  const [markingNoShow, setMarkingNoShow] = useState<string | null>(null);
+  const [overduePatients, setOverduePatients] = useState<Record<string, unknown>[]>([]);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -114,28 +118,58 @@ export default function SchedulingPage() {
     load();
   }, [week.start, week.end, activeFacilityId]);
 
+  /* ---- Load overdue patients (scheduled but expected_arrival is in the past) ---- */
+  useEffect(() => {
+    const load = async () => {
+      const now = new Date();
+      const todayStr = now.toISOString().split("T")[0];
+      const filters: { column: string; op: "eq" | "gte" | "lte" | "lt"; value: unknown }[] = [
+        { column: "case_status", op: "eq", value: "scheduled" },
+        { column: "expected_arrival", op: "lt", value: `${todayStr}T00:00:00` },
+      ];
+      if (activeFacilityId) {
+        filters.push({ column: "facility_id", op: "eq", value: activeFacilityId });
+      }
+      try {
+        const { data } = await lopDb.select("lop_patients", {
+          select: "*, lop_facilities(name), lop_law_firms(name)",
+          filters,
+          order: { column: "expected_arrival", ascending: false },
+        });
+        setOverduePatients((data as Record<string, unknown>[]) ?? []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    load();
+  }, [activeFacilityId, patients]);
+
   /* ---- Week stats ---- */
   const weekStats = useMemo(() => {
-    const dayMap: Record<string, { scheduled: number; arrived: number; total: number }> = {};
+    const dayMap: Record<string, { scheduled: number; arrived: number; noShow: number; total: number }> = {};
     for (const d of week.days) {
-      dayMap[d] = { scheduled: 0, arrived: 0, total: 0 };
+      dayMap[d] = { scheduled: 0, arrived: 0, noShow: 0, total: 0 };
     }
     let weekTotal = 0;
     let weekArrived = 0;
+    let weekNoShow = 0;
     for (const p of weekPatients) {
       if (!p.expected_arrival) continue;
       const dateKey = (p.expected_arrival as string).split("T")[0];
       if (!dayMap[dateKey]) continue;
       dayMap[dateKey].total++;
       weekTotal++;
-      if (p.case_status === "arrived" || p.case_status === "intake_complete" || p.case_status === "in_progress" || p.case_status === "paid" || p.case_status === "partial_paid") {
+      if (p.case_status === "no_show") {
+        dayMap[dateKey].noShow++;
+        weekNoShow++;
+      } else if (p.case_status === "arrived" || p.case_status === "intake_complete" || p.case_status === "in_progress" || p.case_status === "paid" || p.case_status === "partial_paid") {
         dayMap[dateKey].arrived++;
         weekArrived++;
       } else {
         dayMap[dateKey].scheduled++;
       }
     }
-    return { dayMap, weekTotal, weekArrived };
+    return { dayMap, weekTotal, weekArrived, weekNoShow };
   }, [weekPatients, week.days]);
 
   const changeDate = (days: number) => {
@@ -171,7 +205,9 @@ export default function SchedulingPage() {
   const arrivedCount = patients.filter(
     (p) => p.case_status === "arrived" || p.case_status === "intake_complete" || p.case_status === "in_progress" || p.case_status === "paid" || p.case_status === "partial_paid"
   ).length;
-  const scheduledCount = patients.length - arrivedCount;
+  const noShowCount = patients.filter((p) => p.case_status === "no_show").length;
+  const scheduledCount = patients.length - arrivedCount - noShowCount;
+  const isPastDate = selectedDate < today;
 
   const canEdit = hasPermission(lopUser, "patient:update");
 
@@ -215,6 +251,94 @@ export default function SchedulingPage() {
       toast.error("Failed to update status.");
     } finally {
       setMarkingArrived(null);
+    }
+  };
+
+  /* ---- Mark No-Show handler ---- */
+  const handleMarkNoShow = async (
+    e: React.MouseEvent,
+    patientId: string,
+    facilityId: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMarkingNoShow(patientId);
+    try {
+      await lopDb.update(
+        "lop_patients",
+        { case_status: "no_show" },
+        { id: patientId },
+      );
+      await lopDb.insert("lop_audit_log", {
+        user_id: lopUser?.id,
+        action: "status_changed",
+        entity_type: "patient",
+        entity_id: patientId,
+        facility_id: facilityId,
+        old_values: { case_status: "scheduled" },
+        new_values: { case_status: "no_show" },
+      });
+      setPatients((prev) =>
+        prev.map((p) =>
+          p.id === patientId ? { ...p, case_status: "no_show" } : p
+        )
+      );
+      setWeekPatients((prev) =>
+        prev.map((p) =>
+          p.id === patientId ? { ...p, case_status: "no_show" } : p
+        )
+      );
+      // Remove from overdue list
+      setOverduePatients((prev) => prev.filter((p) => p.id !== patientId));
+      toast.success("Patient marked as no-show.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status.");
+    } finally {
+      setMarkingNoShow(null);
+    }
+  };
+
+  /* ---- Reschedule: set back to scheduled status (for no-show patients) ---- */
+  const handleReschedule = async (
+    e: React.MouseEvent,
+    patientId: string,
+    facilityId: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMarkingNoShow(patientId);
+    try {
+      await lopDb.update(
+        "lop_patients",
+        { case_status: "scheduled" },
+        { id: patientId },
+      );
+      await lopDb.insert("lop_audit_log", {
+        user_id: lopUser?.id,
+        action: "status_changed",
+        entity_type: "patient",
+        entity_id: patientId,
+        facility_id: facilityId,
+        old_values: { case_status: "no_show" },
+        new_values: { case_status: "scheduled" },
+      });
+      setPatients((prev) =>
+        prev.map((p) =>
+          p.id === patientId ? { ...p, case_status: "scheduled" } : p
+        )
+      );
+      setWeekPatients((prev) =>
+        prev.map((p) =>
+          p.id === patientId ? { ...p, case_status: "scheduled" } : p
+        )
+      );
+      toast.success("Patient rescheduled.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to reschedule.");
+    } finally {
+      setMarkingNoShow(null);
     }
   };
 
@@ -314,6 +438,17 @@ export default function SchedulingPage() {
                     <p className="text-[11px] text-slate-500">Arrived / Seen</p>
                   </div>
                 </div>
+                {weekStats.weekNoShow > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-rose-100 flex items-center justify-center">
+                      <XCircle className="h-4 w-4 text-rose-600" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-rose-700 leading-tight">{weekStats.weekNoShow}</p>
+                      <p className="text-[11px] text-slate-500">No-Shows</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center">
                     <TrendingUp className="h-4 w-4 text-indigo-600" />
@@ -330,11 +465,12 @@ export default function SchedulingPage() {
               {/* Day-by-day bar chart */}
               <div className="grid grid-cols-7 gap-1.5">
                 {week.days.map((d, i) => {
-                  const stats = weekStats.dayMap[d] ?? { total: 0, arrived: 0, scheduled: 0 };
+                  const stats = weekStats.dayMap[d] ?? { total: 0, arrived: 0, scheduled: 0, noShow: 0 };
                   const isSelected = d === selectedDate;
                   const isToday2 = d === today;
                   const barHeight = maxDayCount > 0 ? Math.max(4, (stats.total / maxDayCount) * 64) : 4;
                   const arrivedPct = stats.total > 0 ? (stats.arrived / stats.total) * 100 : 0;
+                  const noShowPct = stats.total > 0 ? (stats.noShow / stats.total) * 100 : 0;
 
                   return (
                     <button
@@ -371,8 +507,12 @@ export default function SchedulingPage() {
                               style={{ height: `${arrivedPct}%` }}
                             />
                             <div
+                              className="bg-rose-400 w-full transition-all duration-300"
+                              style={{ height: `${noShowPct}%` }}
+                            />
+                            <div
                               className="bg-blue-300 w-full transition-all duration-300"
-                              style={{ height: `${100 - arrivedPct}%` }}
+                              style={{ height: `${100 - arrivedPct - noShowPct}%` }}
                             />
                           </div>
                         ) : (
@@ -395,6 +535,11 @@ export default function SchedulingPage() {
                             {stats.arrived}✓
                           </span>
                         )}
+                        {stats.noShow > 0 && (
+                          <span className="text-[9px] text-rose-600 font-medium">
+                            {stats.noShow}✗
+                          </span>
+                        )}
                         {stats.scheduled > 0 && (
                           <span className="text-[9px] text-blue-500 font-medium">
                             {stats.scheduled}◦
@@ -408,6 +553,7 @@ export default function SchedulingPage() {
               {/* Legend */}
               <div className="flex items-center justify-center gap-4 mt-3 text-[10px] text-slate-400">
                 <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-green-400 inline-block" /> Arrived / Seen</span>
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-rose-400 inline-block" /> No-Show</span>
                 <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-blue-300 inline-block" /> Awaiting</span>
               </div>
             </>
@@ -467,6 +613,12 @@ export default function SchedulingPage() {
                   {arrivedCount} arrived
                 </span>
               )}
+              {noShowCount > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full">
+                  <XCircle className="h-3 w-3" />
+                  {noShowCount} no-show
+                </span>
+              )}
               {scheduledCount > 0 && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
                   <Clock className="h-3 w-3" />
@@ -477,6 +629,103 @@ export default function SchedulingPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ==================== Overdue Patients Banner ==================== */}
+      {overduePatients.length > 0 && (
+        <Card className="border-rose-200 bg-rose-50/50 overflow-hidden">
+          <CardHeader className="pb-2 bg-gradient-to-r from-rose-50 to-orange-50 border-b border-rose-200">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-rose-600" />
+              <CardTitle className="text-base text-rose-900">
+                Overdue – Patients Not Yet Arrived ({overduePatients.length})
+              </CardTitle>
+            </div>
+            <p className="text-xs text-rose-700 mt-1">
+              These patients were scheduled on a past date but still have &quot;Scheduled&quot; status. Mark them as No-Show or contact them to reschedule.
+            </p>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y divide-rose-100">
+              {overduePatients.map((p) => {
+                const daysOverdue = Math.floor(
+                  (new Date().getTime() - new Date(p.expected_arrival as string).getTime()) / (1000 * 60 * 60 * 24)
+                );
+
+                return (
+                  <Link
+                    key={p.id as string}
+                    href={`/lop/patients/${p.id}`}
+                    className="flex items-center justify-between px-4 py-3 transition-all hover:bg-rose-100/50 group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-9 w-9 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        {(p.first_name as string)?.[0]}{(p.last_name as string)?.[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-slate-900 truncate">
+                          {p.first_name as string} {p.last_name as string}
+                        </p>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 flex-wrap">
+                          <span className="text-rose-600 font-medium">
+                            {daysOverdue} day{daysOverdue !== 1 ? "s" : ""} overdue
+                          </span>
+                          <span className="text-slate-300">·</span>
+                          <span>
+                            Expected {new Date(p.expected_arrival as string).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </span>
+                          <span className="text-slate-300">·</span>
+                          <span className="font-medium text-slate-600">
+                            {(p.lop_facilities as Record<string, unknown>)?.name as string ?? ""}
+                          </span>
+                          {(p.lop_law_firms as Record<string, unknown>)?.name && (
+                            <>
+                              <span className="text-slate-300">·</span>
+                              <span>{(p.lop_law_firms as Record<string, unknown>)?.name as string}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                      {canEdit && (
+                        <>
+                          {p.phone && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 text-blue-700 border-blue-300 bg-white hover:bg-blue-50"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(`tel:${p.phone as string}`); }}
+                            >
+                              <PhoneCall className="h-3.5 w-3.5" />
+                              Call
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-rose-700 border-rose-300 bg-white hover:bg-rose-50 hover:text-rose-800 hover:border-rose-400 shadow-sm"
+                            disabled={markingNoShow === (p.id as string)}
+                            onClick={(e) =>
+                              handleMarkNoShow(e, p.id as string, p.facility_id as string)
+                            }
+                          >
+                            {markingNoShow === (p.id as string) ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5" />
+                            )}
+                            No-Show
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ==================== Timeline ==================== */}
       {loading ? (
@@ -527,7 +776,8 @@ export default function SchedulingPage() {
                   <div className="divide-y divide-slate-100">
                     {slotPatients.map((p) => {
                       const status = p.case_status as LopCaseStatus;
-                      const isArrived = status !== "scheduled";
+                      const isArrived = status !== "scheduled" && status !== "no_show";
+                      const isNoShow = status === "no_show";
 
                       return (
                         <Link
@@ -535,7 +785,9 @@ export default function SchedulingPage() {
                           href={`/lop/patients/${p.id}`}
                           className={`
                             flex items-center justify-between px-4 py-3 transition-all group
-                            ${isArrived
+                            ${isNoShow
+                              ? "bg-rose-50/40 hover:bg-rose-50"
+                              : isArrived
                               ? "bg-green-50/40 hover:bg-green-50"
                               : "bg-white hover:bg-blue-50/50"
                             }
@@ -544,7 +796,9 @@ export default function SchedulingPage() {
                           <div className="flex items-center gap-3 min-w-0">
                             <div className={`
                               h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors
-                              ${isArrived
+                              ${isNoShow
+                                ? "bg-rose-100 text-rose-700"
+                                : isArrived
                                 ? "bg-green-100 text-green-700"
                                 : "bg-blue-100 text-blue-700 group-hover:bg-blue-200"
                               }
@@ -580,27 +834,73 @@ export default function SchedulingPage() {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                             {canEdit && status === "scheduled" && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 text-green-700 border-green-300 bg-white hover:bg-green-50 hover:text-green-800 hover:border-green-400 shadow-sm"
+                                  disabled={markingArrived === (p.id as string)}
+                                  onClick={(e) =>
+                                    handleMarkArrived(
+                                      e,
+                                      p.id as string,
+                                      p.facility_id as string
+                                    )
+                                  }
+                                >
+                                  {markingArrived === (p.id as string) ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  ) : (
+                                    <CheckCircle2 className="h-3.5 w-3.5" />
+                                  )}
+                                  {markingArrived === (p.id as string)
+                                    ? "Updating…"
+                                    : "Mark Arrived"}
+                                </Button>
+                                {isPastDate && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5 text-rose-700 border-rose-300 bg-white hover:bg-rose-50 hover:text-rose-800 hover:border-rose-400 shadow-sm"
+                                    disabled={markingNoShow === (p.id as string)}
+                                    onClick={(e) =>
+                                      handleMarkNoShow(
+                                        e,
+                                        p.id as string,
+                                        p.facility_id as string
+                                      )
+                                    }
+                                  >
+                                    {markingNoShow === (p.id as string) ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <XCircle className="h-3.5 w-3.5" />
+                                    )}
+                                    No-Show
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                            {canEdit && status === "no_show" && (
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1.5 text-green-700 border-green-300 bg-white hover:bg-green-50 hover:text-green-800 hover:border-green-400 shadow-sm"
-                                disabled={markingArrived === (p.id as string)}
+                                className="gap-1.5 text-blue-700 border-blue-300 bg-white hover:bg-blue-50 hover:text-blue-800 hover:border-blue-400 shadow-sm"
+                                disabled={markingNoShow === (p.id as string)}
                                 onClick={(e) =>
-                                  handleMarkArrived(
+                                  handleReschedule(
                                     e,
                                     p.id as string,
                                     p.facility_id as string
                                   )
                                 }
                               >
-                                {markingArrived === (p.id as string) ? (
+                                {markingNoShow === (p.id as string) ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                 ) : (
-                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                  <Calendar className="h-3.5 w-3.5" />
                                 )}
-                                {markingArrived === (p.id as string)
-                                  ? "Updating…"
-                                  : "Mark Arrived"}
+                                Reschedule
                               </Button>
                             )}
                             <span

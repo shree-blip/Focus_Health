@@ -248,6 +248,8 @@ export default function PatientDetailPage({
           medical_records_status: form.medical_records_status,
           bill_charges: form.bill_charges || null,
           amount_collected: form.amount_collected || null,
+          reduction_amount: form.reduction_amount || null,
+          billing_date: form.billing_date || null,
           date_paid: form.date_paid || null,
           billing_tags: form.billing_tags ?? [],
           medical_record_tags: form.medical_record_tags ?? [],
@@ -269,6 +271,10 @@ export default function PatientDetailPage({
         changes.bill_charges = form.bill_charges;
       if (patient.amount_collected !== form.amount_collected)
         changes.amount_collected = form.amount_collected;
+      if (patient.reduction_amount !== form.reduction_amount)
+        changes.reduction_amount = form.reduction_amount;
+      if (patient.billing_date !== form.billing_date)
+        changes.billing_date = form.billing_date;
 
       await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
@@ -862,37 +868,78 @@ export default function PatientDetailPage({
               <CardTitle className="text-base">Billing</CardTitle>
             </CardHeader>
             {canViewFinancial ? (
-              <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <Label>Bill Charges ($)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={(form.bill_charges as string) ?? ""}
-                    onChange={(e) => updateForm("bill_charges", e.target.value)}
-                    disabled={!canEditBilling}
-                  />
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Bill Charges ($)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={(form.bill_charges as string) ?? ""}
+                      onChange={(e) => updateForm("bill_charges", e.target.value)}
+                      disabled={!canEditBilling}
+                    />
+                  </div>
+                  <div>
+                    <Label>Amount Collected ($)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={(form.amount_collected as string) ?? ""}
+                      onChange={(e) =>
+                        updateForm("amount_collected", e.target.value)
+                      }
+                      disabled={!canEditBilling}
+                    />
+                  </div>
+                  <div>
+                    <Label>Reduction Amount ($)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Must match reduction letter"
+                      value={(form.reduction_amount as string) ?? ""}
+                      onChange={(e) => updateForm("reduction_amount", e.target.value)}
+                      disabled={!canEditBilling}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label>Amount Collected ($)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={(form.amount_collected as string) ?? ""}
-                    onChange={(e) =>
-                      updateForm("amount_collected", e.target.value)
-                    }
-                    disabled={!canEditBilling}
-                  />
-                </div>
-                <div>
-                  <Label>Date Paid</Label>
-                  <Input
-                    type="date"
-                    value={(form.date_paid as string) ?? ""}
-                    onChange={(e) => updateForm("date_paid", e.target.value)}
-                    disabled={!canEditBilling}
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Billing Date</Label>
+                    <Input
+                      type="date"
+                      value={(form.billing_date as string) ?? ""}
+                      onChange={(e) => updateForm("billing_date", e.target.value)}
+                      disabled={!canEditBilling}
+                    />
+                  </div>
+                  <div>
+                    <Label>Date Paid</Label>
+                    <Input
+                      type="date"
+                      value={(form.date_paid as string) ?? ""}
+                      onChange={(e) => updateForm("date_paid", e.target.value)}
+                      disabled={!canEditBilling}
+                    />
+                  </div>
+                  <div>
+                    <Label>Outstanding Days</Label>
+                    <div className="mt-1">
+                      {(() => {
+                        if (form.date_paid) return <span className="text-sm text-green-700 font-medium bg-green-50 px-2.5 py-1.5 rounded-md inline-block">Paid</span>;
+                        if (!form.billing_date) return <span className="text-sm text-slate-400 italic">Set billing date to calculate</span>;
+                        const days = Math.floor((Date.now() - new Date(form.billing_date as string).getTime()) / (1000 * 60 * 60 * 24));
+                        const category = days <= 30 ? '0–30' : days <= 60 ? '31–60' : days <= 90 ? '61–90' : days <= 180 ? '91–180' : '180+';
+                        const color = days <= 30 ? 'text-green-700 bg-green-50' : days <= 60 ? 'text-blue-700 bg-blue-50' : days <= 90 ? 'text-yellow-700 bg-yellow-50' : days <= 180 ? 'text-orange-700 bg-orange-50' : 'text-red-700 bg-red-50';
+                        return (
+                          <span className={`text-sm font-medium px-2.5 py-1.5 rounded-md inline-flex items-center gap-1.5 ${color}`}>
+                            {days} days <span className="text-xs opacity-75">({category})</span>
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             ) : (

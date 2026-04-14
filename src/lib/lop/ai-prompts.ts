@@ -11,14 +11,15 @@ DOMAIN KNOWLEDGE:
 
 CASE STATUSES (lifecycle order):
 1. scheduled — Patient booked but hasn't arrived
-2. arrived — Patient checked in at facility
-3. intake_complete — Initial paperwork and assessment done
-4. in_progress — Actively receiving treatment
-5. follow_up_needed — Case requires additional attention
-6. paid — Full settlement collected
-7. partial_paid — Partial payment received
-8. case_dropped — Case closed with no payment expected
-9. closed_no_recovery — Case closed, no recovery possible
+2. no_show — Patient did not arrive on their scheduled day
+3. arrived — Patient checked in at facility
+4. intake_complete — Initial paperwork and assessment done
+5. in_progress — Actively receiving treatment
+6. follow_up_needed — Case requires additional attention
+7. paid — Full settlement collected
+8. partial_paid — Partial payment received
+9. case_dropped — Case closed with no payment expected
+10. closed_no_recovery — Case closed, no recovery possible
 
 PATIENT DATA FIELDS (every field the system tracks):
 Demographics:
@@ -30,7 +31,9 @@ Address:
 Case Information:
 - case_status (required), law_firm_id, date_of_accident, lop_letter_status (required), medical_records_status (required)
 Financial:
-- bill_charges, amount_collected, date_paid, billing_tags
+- bill_charges, amount_collected, reduction_amount, billing_date, date_paid, billing_tags
+- outstanding_days: computed as days between billing_date and today (or date_paid)
+- aging_category: computed bucket — 0–30, 31–60, 61–90, 91–180, 180+
 Scheduling:
 - expected_arrival, arrival_window_min
 Notes:
@@ -49,7 +52,12 @@ OPTIONAL DOCUMENTS:
 FINANCIAL TERMS:
 - bill_charges: Total amount billed for medical services
 - amount_collected: Amount actually received from settlement
+- reduction_amount: Total reduction given — must match the signed reduction letter
+- billing_date: Date the bill was created/sent, used to compute outstanding days and aging
+- outstanding_days: Calculated as (today – billing_date) in days, or (date_paid – billing_date) if paid
+- aging_category: Based on outstanding_days — 0–30, 31–60, 61–90, 91–180, 180+
 - Collection rate = amount_collected / bill_charges × 100
+- When asked about aging or overdue bills, compute outstanding_days from billing_date and group into aging categories.
 
 DATA COMPLETENESS RULES:
 When the user asks about "missing data", "incomplete data", "what's missing", or "data gaps" for a patient or across patients:

@@ -7,6 +7,7 @@ export type LopUserRole = 'front_desk' | 'scheduler' | 'medical_records' | 'acco
 
 export type LopCaseStatus =
   | 'scheduled'
+  | 'no_show'
   | 'arrived'
   | 'intake_complete'
   | 'in_progress'
@@ -105,6 +106,8 @@ export interface LopPatient {
 
   bill_charges: number | null;
   amount_collected: number | null;
+  reduction_amount: number | null;
+  billing_date: string | null;
   date_paid: string | null;
   billing_tags: string[];
   medical_record_tags: string[];
@@ -180,6 +183,7 @@ export interface LopConfig {
 // ————— Display helpers —————
 export const CASE_STATUS_LABELS: Record<LopCaseStatus, string> = {
   scheduled: 'Scheduled',
+  no_show: 'No-Show',
   arrived: 'Arrived',
   intake_complete: 'Intake Complete',
   in_progress: 'In Progress',
@@ -192,6 +196,7 @@ export const CASE_STATUS_LABELS: Record<LopCaseStatus, string> = {
 
 export const CASE_STATUS_COLORS: Record<LopCaseStatus, string> = {
   scheduled: 'bg-blue-100 text-blue-800',
+  no_show: 'bg-rose-100 text-rose-800',
   arrived: 'bg-cyan-100 text-cyan-800',
   intake_complete: 'bg-indigo-100 text-indigo-800',
   in_progress: 'bg-yellow-100 text-yellow-800',
