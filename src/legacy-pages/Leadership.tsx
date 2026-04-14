@@ -86,7 +86,7 @@ const teamMembers = [
   },
   {
     name: "Shree Gauli",
-    role: "Sr. Marketing Officer",
+    role: "Marketing Consultant & Product Manager",
     category: "Marketing",
     photo: shreeHeadshot,
     websiteUrl: "https://www.shreegauli.com/",
