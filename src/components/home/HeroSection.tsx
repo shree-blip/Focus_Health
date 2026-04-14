@@ -274,7 +274,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
   }, [heroVideoSrc]);
 
   return (
-    <section className="relative -mt-[100px] min-h-[calc(100vh+200px)] flex items-center overflow-hidden bg-background">
+    <section className="relative -mt-[100px] min-h-[100vh] md:min-h-[calc(100vh+200px)] flex items-center overflow-hidden bg-background">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full">
         <video
@@ -319,23 +319,23 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
       </div>
 
       {/* Content */}
-      <div className="container-focus relative z-10 pt-[130px]">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="container-focus relative z-10 pt-24 sm:pt-[130px] pb-8 sm:pb-0">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
           <div className="max-w-2xl">
             {/* Live indicator badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="mb-6"
+              className="mb-4 sm:mb-6"
             >
-              <span className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/10 border border-primary/20 text-sm font-medium backdrop-blur-sm">
-                <span className="relative flex h-3 w-3">
+              <span className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-primary/15 to-accent/10 border border-primary/20 text-xs sm:text-sm font-medium backdrop-blur-sm">
+                <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-accent"></span>
                 </span>
                 <span className="text-foreground">Now Accepting Strategic Partners</span>
-                <Activity size={14} className="text-accent" />
+                <Activity size={14} className="text-accent hidden sm:block" />
               </span>
             </motion.div>
 
@@ -344,7 +344,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-heading font-bold leading-[1.05] mb-4 sm:mb-6"
+              className="text-[1.75rem] sm:text-4xl md:text-5xl lg:text-7xl font-heading font-bold leading-[1.1] sm:leading-[1.05] mb-3 sm:mb-6"
             >
               <span className="block">Investing in</span>
               <motion.span 
@@ -362,7 +362,7 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed mb-4"
+              className="text-sm sm:text-lg md:text-xl text-muted-foreground leading-relaxed mb-3 sm:mb-4"
             >
               We're revolutionizing healthcare by partnering with communities and investors to build and operate high-performance medical facilities.
             </motion.p>
@@ -416,12 +416,12 @@ export const HeroSection = ({ onOpenOpportunities }: HeroSectionProps) => {
             </motion.div>
           </div>
 
-          {/* Right side - Interactive visual element */}
+          {/* Right side - Interactive visual element (hidden on mobile for cleaner layout) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex items-center justify-center relative"
+            className="hidden lg:flex items-center justify-center relative"
           >
             <div className="relative w-96 h-96">
               {/* Video Logo Central Hub */}

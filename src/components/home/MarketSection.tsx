@@ -111,7 +111,7 @@ export const MarketSection = ({ onOpenOpportunities }: MarketSectionProps) => {
           {/* Visual */}
           <ScrollReveal direction="left">
             <div className="relative">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-6">
+              <div className="aspect-[4/3] lg:aspect-square rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-6">
                 <div className="w-full h-full rounded-xl bg-card/80 border border-border p-3 sm:p-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={marketData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

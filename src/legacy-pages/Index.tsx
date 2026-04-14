@@ -118,17 +118,17 @@ const Index = () => {
       <HeroSection onOpenOpportunities={handleOpenModal} />
 
       {/* Grand Opening Videos */}
-      <section className="w-full bg-background py-10 md:py-14">
+      <section className="w-full bg-background py-8 sm:py-10 md:py-14">
         <div className="container-focus">
-          <div className="text-center mb-8">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-xs font-semibold uppercase tracking-widest mb-3">
+          <div className="text-center mb-5 sm:mb-8">
+            <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-accent/10 text-accent text-[10px] sm:text-xs font-semibold uppercase tracking-widest mb-2 sm:mb-3">
               Now Open
             </span>
-            <h2 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-foreground">
               Grand Opening Videos
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <FullscreenVideoCard
               desktopSrc="/Irving_Wellness/IHW-Event-Horizontal.mp4"
               title="Irving Health & Wellness — Grand Opening"
@@ -159,10 +159,10 @@ const Index = () => {
       <InvestmentSection />
       <SplitCTASection />
 
-      <section className="w-full bg-card py-10 md:py-14">
+      <section className="w-full bg-card py-8 sm:py-10 md:py-14">
         <div className="container-focus">
-          <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-background p-4 sm:p-5">
-            <p className="text-center text-sm sm:text-base font-heading font-bold text-foreground mb-3">
+          <div className="max-w-4xl mx-auto rounded-xl sm:rounded-2xl border border-border bg-background p-3 sm:p-4 md:p-5">
+            <p className="text-center text-xs sm:text-sm md:text-base font-heading font-bold text-foreground mb-2 sm:mb-3">
               Our Emergency Room are member of{' '}
               <a
                 href="https://nafec.org"
@@ -216,10 +216,10 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="w-full bg-background py-10 md:py-14">
+      <section className="w-full bg-background py-8 sm:py-10 md:py-14">
         <div className="container-focus">
-          <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-card p-4 sm:p-5">
-            <p className="text-center text-sm sm:text-base font-heading font-bold text-foreground mb-3">
+          <div className="max-w-4xl mx-auto rounded-xl sm:rounded-2xl border border-border bg-card p-3 sm:p-4 md:p-5">
+            <p className="text-center text-xs sm:text-sm md:text-base font-heading font-bold text-foreground mb-2 sm:mb-3">
               We are Partner with{' '}
               <a
                 href="https://cityambulance.com"
@@ -256,19 +256,19 @@ const Index = () => {
       <EarlyAccessSection />
 
       {/* Insights CTA */}
-      <section className="w-full bg-card py-10 md:py-14 border-t border-border">
+      <section className="w-full bg-card py-8 sm:py-10 md:py-14 border-t border-border">
         <div className="container-focus">
           <div className="max-w-3xl mx-auto text-center">
-            <BookOpen size={32} className="text-primary mx-auto mb-4" />
-            <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-3">
+            <BookOpen size={28} className="text-primary mx-auto mb-3 sm:mb-4" />
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold mb-2 sm:mb-3">
               Read Our Latest Healthcare Infrastructure Insights
             </h2>
-            <p className="text-muted-foreground text-lg mb-6">
+            <p className="text-muted-foreground text-sm sm:text-lg mb-4 sm:mb-6">
               Market analysis, operational updates, and strategic perspectives for healthcare investors and partners.
             </p>
             <Link
               href="/insights"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-primary text-primary-foreground text-sm sm:text-base font-medium hover:bg-primary/90 transition-colors"
             >
               Explore Insights <ArrowRight size={16} />
             </Link>

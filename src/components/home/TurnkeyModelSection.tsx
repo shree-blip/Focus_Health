@@ -45,19 +45,19 @@ export const TurnkeyModelSection = () => {
     <section className="section-padding bg-background overflow-hidden">
       <div className="container-focus">
         {/* Heading Section */}
-        <div className="max-w-3xl mb-16 mx-auto">
-          <h2 className="text-foreground font-heading text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mb-4">
+        <div className="max-w-3xl mb-8 sm:mb-16 mx-auto">
+          <h2 className="text-foreground font-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-3 sm:mb-4">
             How the Turnkey Model Works
           </h2>
-          <p className="text-primary font-medium text-lg mb-6">
+          <p className="text-primary font-medium text-base sm:text-lg mb-4 sm:mb-6">
             End-to-end delivery from site selection to operational excellence
           </p>
           <div className="w-12 h-1.5 bg-primary" />
         </div>
         {/* 5-Step Grid Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
           {steps.map((step) => (
-            <div key={step.id} className="step-card group flex flex-col p-6 sm:p-8 rounded-xl bg-primary/5 border border-border hover:border-primary/20 transition-all duration-300">
+            <div key={step.id} className="step-card group flex flex-col p-5 sm:p-6 lg:p-8 rounded-xl bg-primary/5 border border-border hover:border-primary/20 transition-all duration-300">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground">
                   <step.icon size={20} />
@@ -76,8 +76,8 @@ export const TurnkeyModelSection = () => {
           ))}
         </div>
         {/* Quote/Footer Decoration */}
-        <div className="mt-20 flex justify-center">
-          <div className="max-w-3xl bg-card border border-border p-6 sm:p-10 rounded-xl text-center shadow-sm">
+        <div className="mt-10 sm:mt-20 flex justify-center">
+          <div className="max-w-3xl bg-card border border-border p-5 sm:p-10 rounded-xl text-center shadow-sm">
             <p className="text-foreground font-sans text-base italic leading-relaxed">
               "Our Clinical Precision approach ensures every facility meets the highest standards of operational excellence through a unified architectural and clinical framework."
             </p>
