@@ -618,7 +618,10 @@ export default function SchedulingPage() {
       ) {
         setOverduePatients((current) => {
           const withoutPatient = current.filter((entry) => entry.id !== patient.id);
-          return [...withoutPatient, { ...patient, case_status: "scheduled" }].sort(
+          return [
+            ...withoutPatient,
+            { ...patient, case_status: "scheduled" as LopCaseStatus },
+          ].sort(
             (left, right) =>
               new Date(left.expected_arrival ?? "").getTime() -
               new Date(right.expected_arrival ?? "").getTime()
