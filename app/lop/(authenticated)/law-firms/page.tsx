@@ -326,7 +326,7 @@ export default function LawFirmsPage() {
       <section className="px-1 lg:px-0">
         <div className="mb-8 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <h1 className="font-heading text-4xl font-extrabold tracking-tight text-[#0B3B91] md:text-5xl">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B3B91] md:text-3xl">
               Law Firms
             </h1>
             <p className="mt-2 text-sm font-medium text-slate-500 md:text-base">

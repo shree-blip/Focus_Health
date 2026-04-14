@@ -16,13 +16,6 @@ import {
   PlusCircle,
   CheckCircle,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import Link from "next/link";
 
 interface DashboardStats {
@@ -37,7 +30,7 @@ interface DashboardStats {
 }
 
 export default function LopDashboardPage() {
-  const { lopUser, activeFacilityId, setActiveFacilityId, facilities } = useLopAuth();
+  const { lopUser, activeFacilityId } = useLopAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentPatients, setRecentPatients] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,30 +178,6 @@ export default function LopDashboardPage() {
               })}
             </span>
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Facility Selector */}
-          {facilities.length > 1 && (
-            <Select
-              value={activeFacilityId ?? "all"}
-              onValueChange={(v) =>
-                setActiveFacilityId(v === "all" ? null : v)
-              }
-            >
-              <SelectTrigger className="h-10 px-4 bg-white border border-slate-200/50 rounded-lg shadow-sm text-sm font-semibold gap-2">
-                <Building2 className="h-4 w-4 text-[#0B3B91]" />
-                <SelectValue placeholder="All Facilities" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Facilities</SelectItem>
-                {facilities.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>
-                    {f.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
         </div>
       </header>
 

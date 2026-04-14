@@ -10,7 +10,6 @@ import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,
   CASE_STATUS_COLORS,
-  ROLE_LABELS,
 } from "@/lib/lop/types";
 import type { LopCaseStatus, LopPatient } from "@/lib/lop/types";
 import { cn } from "@/lib/utils";
@@ -661,38 +660,15 @@ export default function SchedulingPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            {canUseAi && (
-              <Button
-                type="button"
-                onClick={openAiAssistant}
-                className="h-11 rounded-full bg-gradient-to-r from-[#D72638] to-[#ff4d5e] px-5 text-white shadow-[0_16px_35px_rgba(215,38,56,0.2)] hover:scale-[1.01] hover:from-[#c91f31] hover:to-[#ff4355]"
-              >
-                <Bot className="h-4 w-4" />
-                AI Assistant
-              </Button>
-            )}
-
-            {lopUser && (
-              <div className="flex items-center gap-3 rounded-full border border-white/80 bg-white/90 px-3 py-2 shadow-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B3B91] text-sm font-bold text-white">
-                  {lopUser.full_name
-                    ?.split(" ")
-                    .map((name) => name[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase()}
-                </div>
-                <div className="hidden min-w-0 text-right sm:block">
-                  <p className="truncate text-sm font-bold text-[#0B3B91]">
-                    {lopUser.full_name}
-                  </p>
-                  <p className="truncate text-[11px] text-slate-400">
-                    {ROLE_LABELS[lopUser.role]}
-                  </p>
-                </div>
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/90 border border-white/80 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+              <Calendar className="h-3.5 w-3.5 text-[#0B3B91]" />
+              {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+              <Users className="h-3 w-3" />
+              {patients.length} today
+            </span>
           </div>
         </div>
       </header>
@@ -700,7 +676,7 @@ export default function SchedulingPage() {
       <section className="px-1 lg:px-0">
         <div className="mb-8 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <h1 className="font-heading text-4xl font-extrabold tracking-tight text-[#0B3B91] md:text-5xl">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B3B91] md:text-3xl">
               Scheduling
             </h1>
             <p className="mt-2 text-sm font-medium text-slate-500 md:text-base">
@@ -942,6 +918,21 @@ export default function SchedulingPage() {
                               >
                                 <PhoneCall className="h-4 w-4" />
                                 Call
+                              </Button>
+                            )}
+                            {canUpdateSchedule && (
+                              <Button
+                                type="button"
+                                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-sm hover:from-emerald-600 hover:to-emerald-700"
+                                disabled={markingArrived === patient.id}
+                                onClick={(event) => handleMarkArrived(event, patient)}
+                              >
+                                {markingArrived === patient.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <UserCheck className="h-4 w-4" />
+                                )}
+                                Mark Arrived
                               </Button>
                             )}
                             {canUpdateSchedule && (

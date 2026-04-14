@@ -13,7 +13,15 @@ import {
   ClipboardList,
   Bot,
   Menu,
+  ChevronsUpDown,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLopAuth } from "./LopAuthProvider";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
@@ -43,7 +51,7 @@ const navItems: NavItem[] = [
 
 export function LopShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { lopUser, signOut } = useLopAuth();
+  const { lopUser, signOut, facilities, activeFacilityId, setActiveFacilityId } = useLopAuth();
 
   const visibleItems = navItems.filter(
     (item) => !item.permission || hasPermission(lopUser, item.permission)
@@ -188,7 +196,7 @@ export function LopShell({ children }: { children: ReactNode }) {
 
       <aside className="fixed left-0 top-0 hidden h-[calc(100vh-2rem)] w-72 flex-col rounded-[28px] border border-white/70 bg-slate-50/95 px-4 py-8 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:m-4 lg:flex">
         {/* Brand */}
-        <div className="mb-10 px-3">
+        <div className="mb-6 px-3">
           <Link href="/lop" className="block">
             <h1 className="font-heading text-xl font-extrabold tracking-tight text-[#0B3B91]">
               Focus Health
@@ -198,6 +206,33 @@ export function LopShell({ children }: { children: ReactNode }) {
             </p>
           </Link>
         </div>
+
+        {/* Facility Selector */}
+        {facilities.length > 1 && (
+          <div className="mb-6 px-2">
+            <label className="mb-1.5 ml-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+              Facility
+            </label>
+            <Select
+              value={activeFacilityId ?? "all"}
+              onValueChange={(v) => setActiveFacilityId(v === "all" ? null : v)}
+            >
+              <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 bg-white px-3 text-sm font-semibold shadow-sm">
+                <Building2 className="h-3.5 w-3.5 text-[#0B3B91]" />
+                <SelectValue placeholder="All Facilities" />
+                <ChevronsUpDown className="ml-auto h-3.5 w-3.5 text-slate-400" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Facilities</SelectItem>
+                {facilities.map((f) => (
+                  <SelectItem key={f.id} value={f.id}>
+                    {f.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Main Nav */}
         <nav className="flex-grow space-y-2">

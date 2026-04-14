@@ -173,28 +173,17 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {lopUser && (
-            <div className="flex items-center gap-3 rounded-full border border-white/80 bg-white/90 px-3 py-2 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B3B91] text-sm font-bold text-white">
-                {getInitials(lopUser.full_name)}
-              </div>
-              <div className="hidden min-w-0 text-right sm:block">
-                <p className="truncate text-sm font-bold text-[#0B3B91]">
-                  {lopUser.full_name}
-                </p>
-                <p className="truncate text-[11px] text-slate-400">
-                  {ROLE_LABELS[lopUser.role]}
-                </p>
-              </div>
-            </div>
-          )}
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/90 border border-white/80 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+            <Clock className="h-3.5 w-3.5 text-[#0B3B91]" />
+            {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+          </span>
         </div>
       </header>
 
       {/* ── Title + Tabs ── */}
       <section className="px-1 lg:px-0">
         <div className="mb-6">
-          <h1 className="font-heading text-4xl font-extrabold tracking-tight text-[#0B3B91] md:text-5xl">
+          <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B3B91] md:text-3xl">
             Settings
           </h1>
           <p className="mt-2 text-sm font-medium text-slate-500 md:text-base">

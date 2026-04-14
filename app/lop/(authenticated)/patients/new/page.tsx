@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
 import type { LopLawFirm } from "@/lib/lop/types";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -19,7 +17,6 @@ import {
 import {
   ArrowLeft,
   Building2,
-  CalendarClock,
   FileText,
   Loader2,
   MapPin,
@@ -191,287 +188,318 @@ export default function NewPatientPage() {
 
   return (
     <div className="pb-8 lg:pb-12">
-      {/* ── Page Header ── */}
-      <header className="mb-6 rounded-[30px] border border-white/70 bg-white/70 px-5 py-5 shadow-[0_24px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:mb-8 lg:px-8 lg:py-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link href="/lop/patients">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-2xl hover:bg-slate-100"
-              >
-                <ArrowLeft className="h-5 w-5 text-slate-500" />
-              </Button>
-            </Link>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                Patients
-              </p>
-              <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B3B91]">
-                New Patient Intake
-              </h1>
-            </div>
-          </div>
-          <Button
-            type="submit"
-            form="intake-form"
-            disabled={saving}
-            className="h-11 rounded-2xl bg-gradient-to-r from-[#D72638] to-[#ff4d5e] px-6 text-white shadow-[0_18px_38px_rgba(215,38,56,0.22)] transition-transform hover:scale-[1.02] hover:from-[#c91f31] hover:to-[#ff4355]"
+      {/* ── Page Intro ── */}
+      <div className="mb-8 flex items-center gap-4">
+        <Link href="/lop/patients">
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-[#0B3B91]"
           >
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {saving ? "Creating…" : "Create Patient"}
-          </Button>
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        </Link>
+        <div>
+          <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#002668]">
+            New Patient Intake
+          </h1>
+          <p className="mt-0.5 text-sm font-medium text-slate-500">
+            Create a new LOP patient record to initiate the clinical workflow.
+          </p>
         </div>
-      </header>
+      </div>
 
-      <form id="intake-form" onSubmit={handleSubmit} className="space-y-5">
-        {/* ── Step 1: Assignment ── */}
-        <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#0B3B91]/10">
-              <Building2 className="h-4 w-4 text-[#0B3B91]" />
+      {/* ── Bento Form Grid ── */}
+      <form id="intake-form" onSubmit={handleSubmit} className="grid max-w-5xl grid-cols-12 gap-6 lg:gap-8">
+        {/* ── Left Column: Assignment + Case Details ── */}
+        <div className="col-span-12 space-y-6 lg:col-span-4 lg:space-y-8">
+          {/* Assignment Card */}
+          <div className="relative overflow-hidden rounded-2xl bg-white p-7 shadow-[0_24px_48px_rgba(9,20,40,0.04)] lg:p-8">
+            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-[#0B3B91] to-[#2563EB]" />
+            <div className="mb-6 flex items-center gap-3">
+              <Building2 className="h-5 w-5 text-[#0B3B91]" />
+              <h3 className="font-heading text-sm font-bold tracking-tight text-[#002668]">
+                Assignment
+              </h3>
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Step 1</p>
-              <h2 className="text-sm font-bold text-[#0B3B91]">Assignment</h2>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Facility{isRequired("facility_id") ? " *" : ""}
+                </label>
+                <Select
+                  value={form.facility_id}
+                  onValueChange={(v) => update("facility_id", v)}
+                >
+                  <SelectTrigger className="h-12 rounded-xl border-none bg-[#e6e8eb] px-4 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]">
+                    <SelectValue placeholder="Select facility" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {facilities.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Law Firm{isRequired("law_firm_id") ? " *" : ""}
+                </label>
+                <Select
+                  value={form.law_firm_id}
+                  onValueChange={(v) => update("law_firm_id", v)}
+                >
+                  <SelectTrigger className="h-12 rounded-xl border-none bg-[#e6e8eb] px-4 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]">
+                    <SelectValue placeholder="Select law firm" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lawFirms.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Facility{isRequired("facility_id") ? " *" : ""}
-              </Label>
-              <Select
-                value={form.facility_id}
-                onValueChange={(v) => update("facility_id", v)}
+
+          {/* Case Details Card */}
+          <div className="relative overflow-hidden rounded-2xl bg-white p-7 shadow-[0_24px_48px_rgba(9,20,40,0.04)] lg:p-8">
+            <div className="absolute left-0 top-0 h-full w-1 bg-slate-200" />
+            <div className="mb-6 flex items-center gap-3">
+              <FileText className="h-5 w-5 text-[#0B3B91]" />
+              <h3 className="font-heading text-sm font-bold tracking-tight text-[#002668]">
+                Case Details
+              </h3>
+            </div>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Date of Accident{isRequired("date_of_accident") ? " *" : ""}
+                </label>
+                <Input
+                  type="date"
+                  className="h-12 rounded-xl border-none bg-[#e6e8eb] px-4 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                  value={form.date_of_accident}
+                  onChange={(e) => update("date_of_accident", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Expected Arrival{isRequired("expected_arrival") ? " *" : ""}
+                </label>
+                <Input
+                  type="datetime-local"
+                  className="h-12 rounded-xl border-none bg-[#e6e8eb] px-4 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                  value={form.expected_arrival}
+                  onChange={(e) => update("expected_arrival", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Intake Notes
+                </label>
+                <Textarea
+                  rows={4}
+                  className="rounded-xl border-none bg-[#e6e8eb] px-4 py-3 text-sm shadow-none placeholder:text-slate-400 focus:ring-2 focus:ring-[#0B3B91]"
+                  value={form.intake_notes}
+                  onChange={(e) => update("intake_notes", e.target.value)}
+                  placeholder="Enter patient clinical background or special requirements..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Right Column: Patient Information ── */}
+        <div className="col-span-12 lg:col-span-8">
+          <div className="relative flex h-full flex-col rounded-2xl bg-white p-7 shadow-[0_24px_48px_rgba(9,20,40,0.04)] lg:p-10">
+            {/* Header with badge */}
+            <div className="mb-8 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <UserRound className="h-5 w-5 text-[#0B3B91]" />
+                <h3 className="font-heading text-lg font-bold tracking-tight text-[#002668]">
+                  Patient Information
+                </h3>
+              </div>
+              <div className="flex items-center gap-2 rounded-full bg-[#dae2ff] px-3 py-1">
+                <div className="h-2 w-2 animate-pulse rounded-full bg-[#0B3B91]" />
+                <span className="text-[10px] font-bold uppercase tracking-tight text-[#001848]">
+                  Drafting Profile
+                </span>
+              </div>
+            </div>
+
+            {/* Core fields */}
+            <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-8">
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  First Name{isRequired("first_name") ? " *" : ""}
+                </label>
+                <Input
+                  className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                  placeholder="John"
+                  value={form.first_name}
+                  onChange={(e) => update("first_name", e.target.value)}
+                  required={isRequired("first_name")}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Last Name{isRequired("last_name") ? " *" : ""}
+                </label>
+                <Input
+                  className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                  placeholder="Doe"
+                  value={form.last_name}
+                  onChange={(e) => update("last_name", e.target.value)}
+                  required={isRequired("last_name")}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Date of Birth{isRequired("date_of_birth") ? " *" : ""}
+                </label>
+                <Input
+                  type="date"
+                  className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                  value={form.date_of_birth}
+                  onChange={(e) => update("date_of_birth", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Phone Number{isRequired("phone") ? " *" : ""}
+                </label>
+                <Input
+                  type="tel"
+                  className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                  placeholder="(555) 000-0000"
+                  value={form.phone}
+                  onChange={(e) => update("phone", e.target.value)}
+                />
+              </div>
+              <div className="col-span-1 space-y-2 sm:col-span-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Email Address{isRequired("email") ? " *" : ""}
+                </label>
+                <Input
+                  type="email"
+                  className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                  placeholder="patient.name@example.com"
+                  value={form.email}
+                  onChange={(e) => update("email", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Address section */}
+            <div className="border-t border-slate-100 pt-8">
+              <h4 className="mb-6 flex items-center gap-2 font-heading text-sm font-bold text-slate-800">
+                <MapPin className="h-4 w-4 text-slate-400" />
+                Residential Address
+              </h4>
+              <div className="grid grid-cols-6 gap-5 lg:gap-6">
+                <div className="col-span-6 space-y-2">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    Address Line 1{isRequired("address_line1") ? " *" : ""}
+                  </label>
+                  <Input
+                    className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                    placeholder="Street name and number"
+                    value={form.address_line1}
+                    onChange={(e) => update("address_line1", e.target.value)}
+                  />
+                </div>
+                <div className="col-span-6 space-y-2">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    Address Line 2 (Optional)
+                  </label>
+                  <Input
+                    className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                    placeholder="Apartment, suite, unit, etc."
+                    value={form.address_line2}
+                    onChange={(e) => update("address_line2", e.target.value)}
+                  />
+                </div>
+                <div className="col-span-6 space-y-2 sm:col-span-3">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    City
+                  </label>
+                  <Input
+                    className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                    placeholder="City"
+                    value={form.city}
+                    onChange={(e) => update("city", e.target.value)}
+                  />
+                </div>
+                <div className="col-span-3 space-y-2 sm:col-span-1">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    State
+                  </label>
+                  <Input
+                    className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                    placeholder="TX"
+                    value={form.state}
+                    onChange={(e) => update("state", e.target.value)}
+                  />
+                </div>
+                <div className="col-span-3 space-y-2 sm:col-span-2">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    ZIP Code
+                  </label>
+                  <Input
+                    className="h-[52px] rounded-xl border-none bg-[#e6e8eb] px-5 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]"
+                    placeholder="75000"
+                    value={form.zip}
+                    onChange={(e) => update("zip", e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Area */}
+            <div className="mt-12 flex items-center justify-end gap-4">
+              <Link href="/lop/patients">
+                <button
+                  type="button"
+                  className="rounded-xl px-8 py-3 font-bold text-[#002668] transition-colors hover:bg-[#dae2ff]"
+                >
+                  Cancel
+                </button>
+              </Link>
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-xl bg-gradient-to-br from-[#D72638] to-[#FF3D57] px-8 py-4 font-heading font-bold text-white shadow-[0_8px_24px_rgba(215,38,56,0.3)] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-70"
               >
-                <SelectTrigger className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm">
-                  <SelectValue placeholder="Select facility" />
-                </SelectTrigger>
-                <SelectContent>
-                  {facilities.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Law Firm{isRequired("law_firm_id") ? " *" : ""}
-              </Label>
-              <Select
-                value={form.law_firm_id}
-                onValueChange={(v) => update("law_firm_id", v)}
-              >
-                <SelectTrigger className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm">
-                  <SelectValue placeholder="Select law firm" />
-                </SelectTrigger>
-                <SelectContent>
-                  {lawFirms.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {saving ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Creating…
+                  </span>
+                ) : (
+                  "Create Patient Record"
+                )}
+              </button>
             </div>
           </div>
-        </section>
-
-        {/* ── Step 2: Patient Information ── */}
-        <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-indigo-50">
-              <UserRound className="h-4 w-4 text-indigo-600" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Step 2</p>
-              <h2 className="text-sm font-bold text-slate-900">Patient Information</h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                First Name{isRequired("first_name") ? " *" : ""}
-              </Label>
-              <Input
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.first_name}
-                onChange={(e) => update("first_name", e.target.value)}
-                required={isRequired("first_name")}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Last Name{isRequired("last_name") ? " *" : ""}
-              </Label>
-              <Input
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.last_name}
-                onChange={(e) => update("last_name", e.target.value)}
-                required={isRequired("last_name")}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Date of Birth{isRequired("date_of_birth") ? " *" : ""}
-              </Label>
-              <Input
-                type="date"
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.date_of_birth}
-                onChange={(e) => update("date_of_birth", e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Phone{isRequired("phone") ? " *" : ""}
-              </Label>
-              <Input
-                type="tel"
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.phone}
-                onChange={(e) => update("phone", e.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Email{isRequired("email") ? " *" : ""}
-              </Label>
-              <Input
-                type="email"
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.email}
-                onChange={(e) => update("email", e.target.value)}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Step 3: Address ── */}
-        <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-50">
-              <MapPin className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Step 3</p>
-              <h2 className="text-sm font-bold text-slate-900">Address</h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Address Line 1{isRequired("address_line1") ? " *" : ""}
-              </Label>
-              <Input
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.address_line1}
-                onChange={(e) => update("address_line1", e.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">Address Line 2</Label>
-              <Input
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.address_line2}
-                onChange={(e) => update("address_line2", e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">City</Label>
-              <Input
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.city}
-                onChange={(e) => update("city", e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">State</Label>
-              <Input
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.state}
-                onChange={(e) => update("state", e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">ZIP Code</Label>
-              <Input
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.zip}
-                onChange={(e) => update("zip", e.target.value)}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Step 4: Case Details ── */}
-        <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-50">
-              <CalendarClock className="h-4 w-4 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">Step 4</p>
-              <h2 className="text-sm font-bold text-slate-900">Case Details</h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Date of Accident{isRequired("date_of_accident") ? " *" : ""}
-              </Label>
-              <Input
-                type="date"
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.date_of_accident}
-                onChange={(e) => update("date_of_accident", e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">
-                Expected Arrival{isRequired("expected_arrival") ? " *" : ""}
-              </Label>
-              <Input
-                type="datetime-local"
-                className="h-11 rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.expected_arrival}
-                onChange={(e) => update("expected_arrival", e.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label className="mb-1.5 block text-xs font-semibold text-slate-600">Intake Notes</Label>
-              <Textarea
-                rows={3}
-                className="rounded-2xl border-slate-200 bg-white shadow-sm"
-                value={form.intake_notes}
-                onChange={(e) => update("intake_notes", e.target.value)}
-                placeholder="Any notes about this patient..."
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Footer Actions ── */}
-        <div className="flex items-center justify-end gap-3 pb-4">
-          <Link href="/lop/patients">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-11 rounded-2xl border-slate-200 px-6 font-semibold"
-            >
-              Cancel
-            </Button>
-          </Link>
-          <Button
-            type="submit"
-            disabled={saving}
-            className="h-11 rounded-2xl bg-gradient-to-r from-[#D72638] to-[#ff4d5e] px-6 text-white shadow-[0_18px_38px_rgba(215,38,56,0.22)] transition-transform hover:scale-[1.02] hover:from-[#c91f31] hover:to-[#ff4355]"
-          >
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {saving ? "Creating…" : "Create Patient Record"}
-          </Button>
         </div>
       </form>
+
+      {/* ── Quick Guide (Glassmorphic) ── */}
+      <div className="pointer-events-none fixed bottom-8 right-8 hidden w-64 rounded-3xl border border-white/40 bg-white/70 p-6 shadow-2xl backdrop-blur-xl xl:block">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="h-2 w-2 rounded-full bg-green-500" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+            Quick Guide
+          </span>
+        </div>
+        <p className="text-xs font-medium leading-relaxed text-slate-700">
+          Ensure the{" "}
+          <span className="font-bold text-[#002668]">Case Details</span> match
+          the official police report for seamless billing and intake
+          verification.
+        </p>
+      </div>
     </div>
   );
 }

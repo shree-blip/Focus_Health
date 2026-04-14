@@ -395,16 +395,10 @@ export default function ReportsPage() {
               <Download className="h-4 w-4" />
               Export CSV
             </Button>
-            {canUseAi && (
-              <Button
-                type="button"
-                className="h-11 rounded-full bg-gradient-to-r from-[#D72638] to-[#ff4d5e] px-5 text-white shadow-[0_16px_35px_rgba(215,38,56,0.2)] hover:scale-[1.01] hover:from-[#c91f31] hover:to-[#ff4355]"
-                onClick={() => setAiPanelOpen(true)}
-              >
-                <Sparkles className="h-4 w-4" />
-                AI Analysis
-              </Button>
-            )}
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/90 border border-white/80 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+              <CalendarDays className="h-3.5 w-3.5 text-[#0B3B91]" />
+              {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </span>
           </div>
         </div>
       </header>
@@ -412,7 +406,7 @@ export default function ReportsPage() {
       <section className="px-1 lg:px-0">
         <div className="mb-8 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <h1 className="font-heading text-4xl font-extrabold tracking-tight text-[#0B3B91] md:text-5xl">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B3B91] md:text-3xl">
               Reports
             </h1>
             <p className="mt-2 text-sm font-medium text-slate-500 md:text-base">
