@@ -2,30 +2,19 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Users,
   Calendar,
-  FileText,
   Building2,
   BarChart3,
   Settings,
   LogOut,
   ClipboardList,
   Bot,
-  ChevronDown,
 } from "lucide-react";
 import { useLopAuth } from "./LopAuthProvider";
 import { hasPermission } from "@/lib/lop/permissions";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface NavItem {
   href: string;
@@ -52,57 +41,19 @@ export function LopShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#f7f9fc]">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-30">
-        {/* Logo */}
-        <div className="p-5 border-b border-slate-200">
-          <Link href="/lop" className="flex items-center gap-2">
-            <Image
-              src="/favicon.png"
-              alt="Focus Health"
-              width={32}
-              height={32}
-              className="rounded"
-            />
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 leading-tight">
-                LOP Dashboard
-              </h1>
-              <p className="text-[11px] text-slate-500">Focus Health</p>
-            </div>
+      <aside className="fixed left-0 top-0 h-[calc(100vh-2rem)] w-64 m-4 rounded-xl bg-slate-50 shadow-xl shadow-slate-200/50 flex flex-col py-8 px-4 z-30">
+        {/* Brand */}
+        <div className="mb-10 px-4">
+          <Link href="/lop" className="block">
+            <h1 className="text-xl font-bold tracking-tighter text-[#0B3B91]">Focus Health</h1>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-1">LOP Dashboard</p>
           </Link>
         </div>
 
-        {/* Facility Selector */}
-        {facilities.length > 1 && (
-          <div className="px-4 py-3 border-b border-slate-200">
-            <label className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5 block">
-              Facility
-            </label>
-            <Select
-              value={activeFacilityId ?? "all"}
-              onValueChange={(v) =>
-                setActiveFacilityId(v === "all" ? null : v)
-              }
-            >
-              <SelectTrigger className="w-full h-9 text-sm">
-                <SelectValue placeholder="All Facilities" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Facilities</SelectItem>
-                {facilities.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>
-                    {f.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        {/* Nav links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {/* Main Nav */}
+        <nav className="flex-grow space-y-1">
           {visibleItems.map((item) => {
             const isActive =
               item.href === "/lop"
@@ -112,61 +63,64 @@ export function LopShell({ children }: { children: ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "text-[#0B3B91] font-bold border-r-4 border-[#D72638] bg-white/50"
+                    : "text-slate-500 hover:bg-white/80"
                 }`}
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <item.icon className="h-[18px] w-[18px] flex-shrink-0" />
                 <span>{item.label}</span>
               </Link>
             );
           })}
+        </nav>
 
-          {/* AI Chat – click to open floating chat panel */}
-          {hasPermission(lopUser, "ai:use") && (
-            <div className="pt-3 mt-3 border-t border-slate-200">
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 border border-indigo-100 hover:from-blue-100 hover:to-indigo-100 transition-colors cursor-pointer"
-              >
-                <Bot className="h-5 w-5 flex-shrink-0" />
-                <span>AI Assistant</span>
-                <span className="ml-auto relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-indigo-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
+        {/* AI Section */}
+        {hasPermission(lopUser, "ai:use") && (
+          <div className="mt-auto mb-6">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
+              className="w-full p-4 rounded-xl bg-gradient-to-br from-[#0B3B91] to-[#2563EB] text-white shadow-lg hover:shadow-xl transition-all cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Bot className="h-4 w-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">AI Assistant</span>
+              </div>
+              <p className="text-[11px] opacity-90 leading-relaxed">
+                Analyze LOP letters or patient docs with one click.
+              </p>
+            </button>
+          </div>
+        )}
+
+        {/* User info + Logout */}
+        <div className="space-y-3 pt-4 border-t border-slate-200">
+          {lopUser && (
+            <div className="flex items-center gap-3 px-3 py-3 bg-white rounded-lg shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-[#0B3B91]/10 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-[#0B3B91]">
+                  {lopUser.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                 </span>
+              </div>
+              <div className="flex-grow min-w-0">
+                <p className="text-xs font-bold truncate">{lopUser.full_name}</p>
+                <p className="text-[10px] text-slate-400 truncate leading-none">{lopUser.email}</p>
+              </div>
+              <button
+                onClick={signOut}
+                title="Sign out"
+                className="text-slate-400 hover:text-red-600 transition-colors flex-shrink-0"
+              >
+                <LogOut className="h-4 w-4" />
               </button>
             </div>
           )}
-        </nav>
-
-        {/* User info + Logout */}
-        <div className="p-4 border-t border-slate-200">
-          {lopUser && (
-            <div className="mb-3">
-              <p className="text-sm font-medium text-slate-900 truncate">
-                {lopUser.full_name}
-              </p>
-              <p className="text-xs text-slate-500 truncate">{lopUser.email}</p>
-              <span className="inline-block mt-1 text-[10px] font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                {lopUser.role.replace("_", " ")}
-              </span>
-            </div>
-          )}
-          <button
-            onClick={signOut}
-            className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition-colors w-full"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Sign out</span>
-          </button>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 ml-64 p-6 min-h-screen">{children}</main>
+      <main className="ml-[17.5rem] mr-8 min-h-screen">{children}</main>
     </div>
   );
 }

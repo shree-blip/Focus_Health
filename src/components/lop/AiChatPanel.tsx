@@ -87,13 +87,13 @@ export function AiChatPanel() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-105 group"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-[#D72638] to-[#FF3D57] text-white rounded-full p-3 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group"
           title="AI Assistant"
         >
           <Bot className="h-5 w-5" />
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-300 opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-400" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-75" />
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-400" />
           </span>
         </button>
       )}
@@ -102,7 +102,7 @@ export function AiChatPanel() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="w-[420px] sm:w-[460px] p-0 flex flex-col">
           {/* Header */}
-          <SheetHeader className="px-4 py-3 border-b bg-gradient-to-r from-blue-600 to-indigo-600">
+          <SheetHeader className="px-4 py-3 border-b bg-gradient-to-r from-[#0B3B91] to-[#2563EB]">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-white flex items-center gap-2 text-base">
                 <Bot className="h-5 w-5" />
