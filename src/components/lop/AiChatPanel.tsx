@@ -63,12 +63,21 @@ export function AiChatPanel() {
     }
   }, [messages]);
 
-  // Listen for sidebar "open-ai-chat" event
+  // Listen for sidebar "open-ai-chat" event (optionally with a prompt payload)
   useEffect(() => {
-    const handler = () => setOpen(true);
+    const handler = (e: Event) => {
+      setOpen(true);
+      const detail = (e as CustomEvent)?.detail;
+      if (detail?.prompt && typeof detail.prompt === "string") {
+        // Small delay so Sheet is open before appending
+        setTimeout(() => {
+          append({ role: "user", content: detail.prompt });
+        }, 150);
+      }
+    };
     window.addEventListener("open-ai-chat", handler);
     return () => window.removeEventListener("open-ai-chat", handler);
-  }, []);
+  }, [append]);
 
   // Only render for admin users
   if (!hasPermission(lopUser, "ai:use")) return null;
