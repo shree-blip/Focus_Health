@@ -48,7 +48,7 @@ export interface LopFacility {
 // ————— User —————
 export interface LopUser {
   id: string;
-  auth_user_id: string;
+  auth_user_id: string | null;
   email: string;
   full_name: string;
   role: LopUserRole;
