@@ -72,9 +72,6 @@ export const metadata: Metadata = {
       "Institutional-grade healthcare infrastructure made simple. Focus Health builds and operates high-performance freestanding emergency rooms across Texas.",
     images: [siteConfig.ogImage],
   },
-  verification: {
-    google: "a02306d78c12cfb8",
-  },
   robots: {
     index: true,
     follow: true,
@@ -89,7 +86,7 @@ export const metadata: Metadata = {
     generator: "Focus Health Platform",
   },
   verification: {
-    google: "kVTMKF1yXhHI2kXP5GGaNjc7felwVeI9NxWVsGGU8bQ",
+    google: "a02306d78c12cfb8",
   },
   alternates: {
     canonical: siteConfig.url,
