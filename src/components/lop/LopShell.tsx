@@ -247,7 +247,7 @@ export function LopShell({ children }: { children: ReactNode }) {
         )}
 
         {/* User info + Logout */}
-        <div className="space-y-3 border-t border-slate-200 pt-4">
+        <div className="space-y-2 border-t border-slate-200 pt-4">
           {lopUser && (
             <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0B3B91] text-sm font-bold text-white">
@@ -259,15 +259,15 @@ export function LopShell({ children }: { children: ReactNode }) {
                 <p className="truncate text-sm font-bold text-slate-900">{lopUser.full_name}</p>
                 <p className="truncate text-[11px] text-slate-400">{lopUser.email}</p>
               </div>
-              <button
-                onClick={signOut}
-                title="Sign out"
-                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
             </div>
           )}
+          <button
+            onClick={signOut}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </button>
         </div>
       </aside>
 
