@@ -59,12 +59,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Make it publicly readable
-    await gcsFile.makePublic();
+    // Serve files through our auth-gated proxy so bucket stays private
+    const proxyUrl = `/api/lop/file?path=${encodeURIComponent(storagePath)}`;
 
-    const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${storagePath}`;
-
-    return NextResponse.json({ url: publicUrl, storage_path: storagePath });
+    return NextResponse.json({ url: proxyUrl, storage_path: storagePath });
   } catch (err) {
     console.error("LOP upload error:", err);
     return NextResponse.json(

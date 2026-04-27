@@ -2,50 +2,73 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, ArrowLeft, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
-import {
-  type AdminBlogPost,
-  loadAdminBlogPosts,
-  saveAdminBlogPosts,
-} from '@/lib/admin-blog-store';
+import { toast } from 'sonner';
+
+type Post = {
+  id: number;
+  title: string;
+  slug: string;
+  category: string;
+  excerpt: string;
+  cover_image: string | null;
+  author: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
 export default function BlogManagementPage() {
-  const [posts, setPosts] = useState<AdminBlogPost[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setPosts(loadAdminBlogPosts());
-    setLoading(false);
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/blog?published=false');
+      const data = await res.json();
+      setPosts(Array.isArray(data) ? data : []);
+    } catch {
+      toast.error('Failed to load posts');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const persist = (next: AdminBlogPost[]) => {
-    setPosts(next);
-    saveAdminBlogPosts(next);
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  const toggleStatus = async (post: Post) => {
+    try {
+      const res = await fetch(`/api/blog/${post.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...post, published: !post.published }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setPosts((prev) => prev.map((p) => p.id === post.id ? { ...p, published: !p.published } : p));
+      toast.success(post.published ? 'Post unpublished' : 'Post published');
+    } catch {
+      toast.error('Failed to update status');
+    }
   };
 
-  const toggleStatus = (id: string) => {
-    const next = posts.map((p) =>
-      p.id === id
-        ? {
-            ...p,
-            status: (p.status === 'draft' ? 'published' : 'draft') as AdminBlogPost['status'],
-            updatedAt: new Date().toISOString(),
-          }
-        : p
-    );
-    persist(next);
-  };
-
-  const deletePost = (id: string) => {
+  const deletePost = async (id: number) => {
     if (!confirm('Delete this post permanently?')) return;
-    persist(posts.filter((p) => p.id !== id));
+    try {
+      const res = await fetch(`/api/blog/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed');
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+      toast.success('Post deleted');
+    } catch {
+      toast.error('Failed to delete post');
+    }
   };
 
   const sorted = [...posts].sort(
-    (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)
+    (a, b) => +new Date(b.updated_at) - +new Date(a.updated_at)
   );
 
   return (
@@ -89,11 +112,11 @@ export default function BlogManagementPage() {
             <Card key={post.id}>
               <CardContent className="pt-6">
                 <div className="flex gap-4">
-                  {post.coverImage && (
+                  {post.cover_image && (
                     <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-border flex-shrink-0">
                       <Image
-                        src={post.coverImage}
-                        alt={post.coverImageAlt || post.title}
+                        src={post.cover_image}
+                        alt={post.title}
                         fill
                         sizes="96px"
                         className="object-cover"
@@ -112,18 +135,18 @@ export default function BlogManagementPage() {
                       </div>
                       <span
                         className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
-                          post.status === 'published'
+                          post.published
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                             : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
                         }`}
                       >
-                        {post.status}
+                        {post.published ? 'published' : 'draft'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                       <span>{post.author || 'Focus Health Team'}</span>
                       <span>•</span>
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                      <span>{new Date(post.created_at).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-3">
                       <Button asChild variant="outline" size="sm">
@@ -132,14 +155,14 @@ export default function BlogManagementPage() {
                           Edit
                         </Link>
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => toggleStatus(post.id)}>
-                        {post.status === 'published' ? (
+                      <Button variant="outline" size="sm" onClick={() => toggleStatus(post)}>
+                        {post.published ? (
                           <><EyeOff className="h-3.5 w-3.5 mr-1.5" />Unpublish</>
                         ) : (
                           <><Eye className="h-3.5 w-3.5 mr-1.5" />Publish</>
                         )}
                       </Button>
-                      {post.status === 'published' && (
+                      {post.published && (
                         <Button asChild variant="ghost" size="sm">
                           <Link href={`/insights/${post.slug}`} target="_blank">View</Link>
                         </Button>

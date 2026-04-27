@@ -13,12 +13,6 @@ import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { INSIGHT_AUTHORS, INSIGHT_CATEGORIES, type InsightAuthor, type InsightCategory } from '@/lib/insights';
-import {
-  type AdminBlogPost,
-  loadAdminBlogPosts,
-  saveAdminBlogPosts,
-  getAdminPostById,
-} from '@/lib/admin-blog-store';
 
 function toSlug(value: string) {
   return value.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
@@ -42,23 +36,29 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const post = getAdminPostById(postId);
-    if (!post) {
-      setNotFound(true);
-      return;
+    async function loadPost() {
+      try {
+        const res = await fetch(`/api/blog/${postId}`);
+        if (res.status === 404) { setNotFound(true); return; }
+        if (!res.ok) throw new Error('Failed');
+        const post = await res.json();
+        setTitle(post.title);
+        setSlug(post.slug);
+        setCategory(post.category);
+        setAuthor(post.author || 'Focus Health Team');
+        setContent(post.content);
+        setExcerpt(post.excerpt);
+        setCoverImage(post.cover_image || '');
+        setCoverImageAlt('');
+        setMetaTitle('');
+        setMetaDescription('');
+        setStatus(post.published ? 'published' : 'draft');
+        setReady(true);
+      } catch {
+        setNotFound(true);
+      }
     }
-    setTitle(post.title);
-    setSlug(post.slug);
-    setCategory(post.category);
-    setAuthor(post.author || 'Focus Health Team');
-    setContent(post.content);
-    setExcerpt(post.excerpt);
-    setCoverImage(post.coverImage);
-    setCoverImageAlt(post.coverImageAlt || '');
-    setMetaTitle(post.metaTitle || '');
-    setMetaDescription(post.metaDescription || '');
-    setStatus(post.status);
-    setReady(true);
+    loadPost();
   }, [postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,33 +70,26 @@ export default function EditBlogPostPage({ postId }: { postId: string }) {
         return;
       }
 
-      const posts = loadAdminBlogPosts();
-      if (posts.some((p) => p.slug === slug.trim() && p.id !== postId)) {
-        toast.error('Another insight with this slug already exists');
-        return;
+      const res = await fetch(`/api/blog/${postId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          slug: slug.trim(),
+          category,
+          excerpt: excerpt.trim(),
+          content,
+          cover_image: coverImage.trim() || '/hero-market.jpg',
+          author: author.trim() || 'Focus Health Team',
+          published: status === 'published',
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed');
       }
 
-      const updatedPosts = posts.map((p): AdminBlogPost =>
-        p.id === postId
-          ? {
-              ...p,
-              title: title.trim(),
-              slug: slug.trim(),
-              category,
-              excerpt: excerpt.trim(),
-              content,
-              coverImage: coverImage.trim() || '/hero-market.jpg',
-              coverImageAlt: coverImageAlt.trim() || title.trim(),
-              metaTitle: metaTitle.trim() || title.trim(),
-              metaDescription: metaDescription.trim() || excerpt.trim(),
-              author: author.trim() || 'Focus Health Team',
-              status,
-              updatedAt: new Date().toISOString(),
-            }
-          : p
-      );
-
-      saveAdminBlogPosts(updatedPosts);
       toast.success('Insight updated!');
       router.push('/admin/blog');
     } catch (error) {

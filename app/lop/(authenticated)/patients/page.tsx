@@ -153,15 +153,19 @@ export default function PatientsListPage() {
         ? [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }]
         : [];
 
-      const { data } = await lopDb.select("lop_patients", {
-        select:
-          "*, lop_facilities(name, slug), lop_law_firms(name), lop_patient_documents(document_type, status)",
-        order: { column: "created_at", ascending: false },
-        filters,
-      });
-
-      setPatients((data as PatientListRow[]) ?? []);
-      setLoading(false);
+      try {
+        const { data } = await lopDb.select("lop_patients", {
+          select:
+            "*, lop_facilities(name, slug), lop_law_firms(name), lop_patient_documents(document_type, status)",
+          order: { column: "created_at", ascending: false },
+          filters,
+        });
+        setPatients((data as PatientListRow[]) ?? []);
+      } catch (err) {
+        console.error("Failed to load patients:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     load();

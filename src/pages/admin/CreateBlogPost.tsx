@@ -12,7 +12,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
-import { type AdminBlogPost, loadAdminBlogPosts, saveAdminBlogPosts } from '@/lib/admin-blog-store';
 import { INSIGHT_AUTHORS, INSIGHT_CATEGORIES, type InsightAuthor, type InsightCategory } from '@/lib/insights';
 
 function toSlug(value: string) {
@@ -50,30 +49,28 @@ export default function CreateBlogPostPage() {
         return;
       }
 
-      const posts = loadAdminBlogPosts();
-      if (posts.some((p) => p.slug === slug.trim())) {
-        toast.error('An insight with this slug already exists');
+      const res = await fetch('/api/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          slug: slug.trim(),
+          category,
+          excerpt: excerpt.trim(),
+          content,
+          cover_image: coverImage.trim() || '/hero-market.jpg',
+          author: author.trim() || 'Focus Health Team',
+          published: status === 'published',
+        }),
+      });
+
+      if (res.status === 409 || res.status === 400) {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to create insight');
         return;
       }
+      if (!res.ok) throw new Error('Failed');
 
-      const newPost: AdminBlogPost = {
-        id: crypto.randomUUID(),
-        title: title.trim(),
-        slug: slug.trim(),
-        category,
-        excerpt: excerpt.trim(),
-        content,
-        coverImage: coverImage.trim() || '/hero-market.jpg',
-        coverImageAlt: coverImageAlt.trim() || title.trim(),
-        metaTitle: metaTitle.trim() || title.trim(),
-        metaDescription: metaDescription.trim() || excerpt.trim(),
-        author: author.trim() || 'Focus Health Team',
-        status,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      saveAdminBlogPosts([newPost, ...posts]);
       toast.success('Insight created!');
       router.push('/admin/blog');
     } catch (error) {
