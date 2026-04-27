@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendSubmissionEmails } from "@/lib/emails/submission-emails";
+import { query } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,6 +65,16 @@ export async function POST(req: NextRequest) {
       }
     } catch {
       // Silently ignore edge function errors — data is still saved client-side
+    }
+
+    // Persist to Cloud SQL
+    try {
+      await query(
+        `INSERT INTO admin_submissions (form_type, name, email, phone, data) VALUES ($1,$2,$3,$4,$5)`,
+        ['partner', name, email, phone || null, JSON.stringify({ marketInterest, cashToInvest, partnerType, additionalInfo })]
+      );
+    } catch (dbErr) {
+      console.error('DB save failed (non-blocking):', dbErr);
     }
 
     return NextResponse.json({ success: true, submission });
