@@ -118,7 +118,7 @@ const facilities: Facility[] = [
   {
     name: "First Choice Emergency Room",
     type: "Emergency Room",
-    label: "Track Record",
+    label: "Under Construction",
     address: "1717 Eldridge Pkwy",
     city: "Houston, TX 77077",
     region: "Texas",
@@ -378,9 +378,20 @@ export function FacilitiesMapSection() {
                       >
                         <FacilityIcon size={22} />
                       </div>
-                      <span className="rounded-full border border-border/70 bg-background/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                        {facility.region}
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="rounded-full border border-border/70 bg-background/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                          {facility.region}
+                        </span>
+                        <span
+                          className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
+                            facility.label === "Under Construction"
+                              ? "border border-primary/20 bg-primary/10 text-primary"
+                              : "border border-border/70 bg-background/90 text-muted-foreground"
+                          }`}
+                        >
+                          {facility.label}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="relative mt-6">
@@ -519,6 +530,18 @@ export function FacilitiesMapSection() {
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                   {activeFacility.summary}
                 </p>
+
+                <div className="mt-4">
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${
+                      activeFacility.label === "Under Construction"
+                        ? "border border-primary/20 bg-primary/10 text-primary"
+                        : "border border-border bg-background text-muted-foreground"
+                    }`}
+                  >
+                    {activeFacility.label}
+                  </span>
+                </div>
 
                 <div className="mt-5 flex flex-wrap gap-3">
                   <a

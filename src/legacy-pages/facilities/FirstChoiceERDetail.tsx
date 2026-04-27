@@ -51,8 +51,8 @@ const highlights = [
     icon: MapPin,
   },
   {
-    title: 'Open For Investment',
-    description: 'This facility is highlighted in Focus Health track record as an active emergency-care profile with ongoing investor interest.',
+    title: 'Under Construction',
+    description: 'This facility is currently under construction as part of the Focus Health track record in a high-demand Houston submarket.',
     icon: Clock,
   },
   {
@@ -123,7 +123,7 @@ export default function FirstChoiceERDetail() {
   return (
     <>
       <PageHero
-        eyebrow="Open For Investment"
+        eyebrow="Under Construction"
         title="First Choice Emergency Room"
         description="Freestanding emergency-room profile in Houston, Texas at 1717 Eldridge Pkwy focused on rapid emergency response, 24/7 access, and high-acuity patient care."
         backgroundImage={facilityImage}
@@ -148,11 +148,11 @@ export default function FirstChoiceERDetail() {
                     This facility profile reflects a <strong>24/7 emergency-care operating model</strong> designed around immediate triage, urgent diagnostics, and high-acuity treatment support.
                   </p>
                   <p>
-                    Within the Focus Health portfolio, First Choice Emergency Room is currently <strong>under construction</strong> and presented as an <strong>Open For Investment</strong> opportunity in a high-demand Houston submarket.
+                    Within the Focus Health portfolio, First Choice Emergency Room is currently <strong>under construction</strong> in a high-demand Houston submarket.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3 mt-6">
-                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Open For Investment</span>
+                  <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Under Construction</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">24/7 Emergency Access</span>
                   <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">Houston, TX</span>
                 </div>

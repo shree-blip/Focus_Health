@@ -93,8 +93,8 @@ const healthcarePortfolio = [
     name: 'First Choice Emergency Room',
     type: 'Freestanding Emergency Room',
     location: 'Houston, TX',
-    description: 'First Choice Emergency Room is a Houston emergency facility profile located at 1717 Eldridge Pkwy, Houston, TX 77077, USA. This location is highlighted as open for investment within the Focus Health track record.',
-    badge: 'Open For Investment',
+    description: 'First Choice Emergency Room is a Houston emergency facility profile located at 1717 Eldridge Pkwy, Houston, TX 77077, USA. This location is currently under construction within the Focus Health track record.',
+    badge: 'Under Construction',
     url: '/track-record/first-choice-emergency-room',
     image: facilityFirstChoiceEr,
     address: '1717 Eldridge Pkwy, Houston, TX 77077, USA',
@@ -391,7 +391,7 @@ const TrackRecordPage = () => {
                           {facility.type}
                         </div>
                         {'badge' in facility && facility.badge && (
-                          <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-wide">
+                          <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold uppercase tracking-[0.14em]">
                             {facility.badge}
                           </div>
                         )}

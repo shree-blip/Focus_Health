@@ -25,7 +25,7 @@
    - ER of White Rock → `/facilities/er-of-white-rock`
    - ER of Lufkin → `/facilities/er-of-lufkin`
    - Naperville Health & Wellness Clinic → `/facilities/naperville-wellness-clinic`
-   - First Choice Emergency Room → `/track-record/first-choice-emergency-room` (with "Open For Investment" badge)
+   - First Choice Emergency Room → `/track-record/first-choice-emergency-room` (with "Under Construction" badge)
 
 ---
 
@@ -60,7 +60,7 @@ Demonstrating Focus Health's operational track record through portfolio of manag
 ## UX Observations
 
 - Facility cards are visually consistent and well-structured
-- "Open For Investment" badge on First Choice ER is a strong conversion signal
+- "Under Construction" badge on First Choice ER communicates current project status clearly
 - Stats grid is clear and prominent
 - Process diagram provides operational context befitting an investor audience
 - Page serves dual purpose: portfolio showcase and credibility builder

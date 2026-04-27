@@ -15,10 +15,10 @@
 
 ## Summary of Current Content
 
-1. **PageHero** — "First Choice Emergency Room" with eyebrow "Open For Investment".
-2. **Overview** — Address: 1717 Eldridge Pkwy, Houston, TX 77077. Described as "under construction" with "Open For Investment" opportunity.
+1. **PageHero** — "First Choice Emergency Room" with eyebrow "Under Construction".
+2. **Overview** — Address: 1717 Eldridge Pkwy, Houston, TX 77077. Described as "under construction" in a high-demand Houston submarket.
 3. **Core Emergency-Care Capabilities** (4): 24/7 Emergency Care, Trauma, Imaging, Paediatric.
-4. **Key Highlights** (4): Houston Energy Corridor Access, Open For Investment, Minimal Wait-Time, Freestanding ER Model.
+4. **Key Highlights** (4): Houston Energy Corridor Access, Under Construction, Minimal Wait-Time, Freestanding ER Model.
 5. **The Problem We Solve** — Long Wait Times, Access Gap, Need For Faster Triage. Three problem-solution statements.
 6. **Community Contribution** (4 cards).
 7. **Construction Images** — Seven photos of the facility under construction.
