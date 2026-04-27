@@ -230,19 +230,22 @@ export function buildSubmissionEmailPreviews(payload: SubmissionEmailPayload) {
 }
 
 export async function sendSubmissionEmails(payload: SubmissionEmailPayload) {
-  const smtpUser = process.env.SMTP_USER;          // e.g. yourname@gmail.com
-  const smtpPass = process.env.SMTP_APP_PASSWORD;  // Gmail App Password (16 chars)
-  const fromEmail = process.env.SMTP_FROM_EMAIL || smtpUser; // Display "from" address
-  const infoEmail = process.env.SMTP_INFO_EMAIL || "info@getfocushealth.com";
-  const additionalNotificationRecipients = ["jaya.r.dahal@focusyourfinance.com"];
-  const notificationRecipients = Array.from(new Set([infoEmail, ...additionalNotificationRecipients]));
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
+  const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
+  const fromEmail = smtpUser;
+  const infoEmail = "info@getfocushealth.com";
+  const notificationRecipients = [infoEmail, "jaya.r.dahal@focusyourfinance.com"];
 
   if (!smtpUser || !smtpPass) {
-    throw new Error("Missing SMTP_USER or SMTP_APP_PASSWORD environment variables");
+    throw new Error("Missing SMTP_USER or SMTP_PASS environment variables");
   }
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: smtpHost,
+    port: smtpPort,
+    secure: false,
     auth: {
       user: smtpUser,
       pass: smtpPass,
