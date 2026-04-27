@@ -20,7 +20,7 @@
  *   await lopDb.remove("lop_user_facilities", { user_id: uid });
  */
 
-interface Filter {
+export interface Filter {
   column: string;
   op: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "is" | "not_is" | "like" | "ilike";
   value: unknown;

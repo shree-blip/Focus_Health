@@ -14,12 +14,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email and password required" }, { status: 400 });
     }
 
-    // Look up auth user
+    // Look up auth user and ensure email exists in admin-managed lop_users list.
     const authRes = await pool.query(
       `SELECT la.id as auth_id, la.password_hash, lu.id as lop_id, lu.email, lu.full_name, lu.role, lu.is_active
        FROM lop_auth_users la
-       JOIN lop_users lu ON lu.auth_user_id = la.id
-       WHERE la.email = $1`,
+       JOIN lop_users lu ON LOWER(lu.email) = LOWER(la.email)
+       WHERE LOWER(la.email) = $1
+       LIMIT 1`,
       [email.toLowerCase()]
     );
 

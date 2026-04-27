@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { lopDb } from "@/lib/lop/db";
+import type { Filter as DbFilter } from "@/lib/lop/db";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,
@@ -53,6 +54,17 @@ type PatientListRow = Pick<
   | "bill_charges"
   | "amount_collected"
   | "created_at"
+  | "mrn"
+  | "date_of_service"
+  | "disposition_status"
+  | "chief_complaint"
+  | "primary_insurance"
+  | "is_lop_case"
+  | "referral_source"
+  | "llc_billed_charges"
+  | "pllc_billed_charges"
+  | "total_received_llc"
+  | "total_received_pllc"
 > & {
   lop_facilities?: { name?: string | null; slug?: string | null } | null;
   lop_law_firms?: { name?: string | null } | null;
@@ -149,18 +161,43 @@ export default function PatientsListPage() {
     const load = async () => {
       setLoading(true);
 
-      const filters = activeFacilityId
-        ? [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }]
-        : [];
-
       try {
-        const { data } = await lopDb.select("lop_patients", {
-          select:
-            "*, lop_facilities(name, slug), lop_law_firms(name), lop_patient_documents(document_type, status)",
-          order: { column: "created_at", ascending: false },
-          filters,
+        const baseSelect = "*, lop_facilities(name, slug), lop_law_firms(name), lop_patient_documents(document_type, status)";
+
+        const lopFilter: DbFilter = { column: "is_lop_case", op: "eq" as const, value: true };
+
+        if (!activeFacilityId) {
+          const { data } = await lopDb.select("lop_patients", {
+            select: baseSelect,
+            order: { column: "created_at", ascending: false },
+            filters: [lopFilter],
+          });
+          setPatients((data as PatientListRow[]) ?? []);
+          return;
+        }
+
+        const [{ data: scopedPatients }, { data: unassignedPatients }] = await Promise.all([
+          lopDb.select("lop_patients", {
+            select: baseSelect,
+            order: { column: "created_at", ascending: false },
+            filters: [lopFilter, { column: "facility_id", op: "eq" as const, value: activeFacilityId }],
+          }),
+          lopDb.select("lop_patients", {
+            select: baseSelect,
+            order: { column: "created_at", ascending: false },
+            filters: [lopFilter, { column: "facility_id", op: "is" as const, value: null }],
+          }),
+        ]);
+
+        const merged = [...((scopedPatients as PatientListRow[]) ?? []), ...((unassignedPatients as PatientListRow[]) ?? [])];
+        const deduped = Array.from(new Map(merged.map((patient) => [patient.id, patient])).values());
+        deduped.sort((a, b) => {
+          const left = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const right = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return right - left;
         });
-        setPatients((data as PatientListRow[]) ?? []);
+
+        setPatients(deduped);
       } catch (err) {
         console.error("Failed to load patients:", err);
       } finally {
@@ -191,8 +228,10 @@ export default function PatientsListPage() {
       const facilityName = (patient.lop_facilities?.name ?? "").toLowerCase();
       const phone = (patient.phone ?? "").toLowerCase();
       const reference = getPatientReference(patient.id).toLowerCase();
+      const mrn = (patient.mrn ?? "").toLowerCase();
+      const chiefComplaint = (patient.chief_complaint ?? "").toLowerCase();
 
-      return [fullName, firmName, facilityName, phone, reference].some((value) =>
+      return [fullName, firmName, facilityName, phone, reference, mrn, chiefComplaint].some((value) =>
         value.includes(term)
       );
     });
@@ -217,11 +256,21 @@ export default function PatientsListPage() {
 
   const metrics = useMemo(() => {
     const totalBilled = filtered.reduce(
-      (sum, patient) => sum + (Number(patient.bill_charges) || 0),
+      (sum, patient) => {
+        const llc = Number(patient.llc_billed_charges) || 0;
+        const pllc = Number(patient.pllc_billed_charges) || 0;
+        const legacy = Number(patient.bill_charges) || 0;
+        return sum + (llc + pllc > 0 ? llc + pllc : legacy);
+      },
       0
     );
     const totalCollected = filtered.reduce(
-      (sum, patient) => sum + (Number(patient.amount_collected) || 0),
+      (sum, patient) => {
+        const llc = Number(patient.total_received_llc) || 0;
+        const pllc = Number(patient.total_received_pllc) || 0;
+        const legacy = Number(patient.amount_collected) || 0;
+        return sum + (llc + pllc > 0 ? llc + pllc : legacy);
+      },
       0
     );
     const arrivedCount = filtered.filter((patient) => patient.case_status === "arrived").length;
@@ -511,7 +560,8 @@ export default function PatientsListPage() {
                               </p>
                               <p className="text-xs text-slate-500">
                                 ID: {getPatientReference(patient.id)}{" "}
-                                {patient.phone ? `• ${patient.phone}` : ""}
+                                  {patient.mrn ? `• MRN: ${patient.mrn}` : ""}
+                                  {patient.phone ? ` • ${patient.phone}` : ""}
                               </p>
                             </div>
                           </div>
@@ -545,10 +595,10 @@ export default function PatientsListPage() {
                           </div>
                           <div>
                             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                              Accident Date
+                              {patient.date_of_service ? "Date of Service" : "Accident Date"}
                             </p>
                             <p className="mt-1 text-slate-600">
-                              {formatDate(patient.date_of_accident)}
+                              {formatDate(patient.date_of_service ?? patient.date_of_accident)}
                             </p>
                           </div>
                           <div>
@@ -590,10 +640,16 @@ export default function PatientsListPage() {
                                 Billed
                               </p>
                               <p className="mt-1 font-heading text-lg font-bold text-[#0B3B91]">
-                                {formatCurrency(patient.bill_charges)}
+                                {formatCurrency(
+                                  (Number(patient.llc_billed_charges) || 0) + (Number(patient.pllc_billed_charges) || 0) ||
+                                  patient.bill_charges
+                                )}
                               </p>
                               <p className="text-[11px] text-slate-400">
-                                Collected {formatCurrency(collectedAmount)}
+                                Rcvd {formatCurrency(
+                                  (Number(patient.total_received_llc) || 0) + (Number(patient.total_received_pllc) || 0) ||
+                                  collectedAmount
+                                )}
                               </p>
                             </div>
                           )}
@@ -615,11 +671,17 @@ export default function PatientsListPage() {
               </div>
 
               <div className="hidden overflow-x-auto lg:block">
-                <table className="w-full min-w-[980px] border-collapse text-left">
+                <table className="w-full min-w-[1200px] border-collapse text-left">
                   <thead>
                     <tr className="bg-slate-50/80">
                       <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
                         Patient
+                      </th>
+                      <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                        MRN
+                      </th>
+                      <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                        DOS
                       </th>
                       <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
                         Facility
@@ -628,7 +690,7 @@ export default function PatientsListPage() {
                         Law Firm
                       </th>
                       <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-                        Accident Date
+                        Chief Complaint
                       </th>
                       <th className="px-6 py-5 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
                         Status
@@ -676,11 +738,16 @@ export default function PatientsListPage() {
                                   {patient.first_name} {patient.last_name}
                                 </Link>
                                 <p className="text-xs text-slate-500">
-                                  ID: {getPatientReference(patient.id)}
-                                  {patient.phone ? ` • ${patient.phone}` : " • No phone on file"}
+                                  {patient.phone ? patient.phone : "No phone"}
                                 </p>
                               </div>
                             </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-mono text-slate-600">
+                            {patient.mrn ?? "—"}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-500">
+                            {formatDate(patient.date_of_service ?? patient.date_of_accident)}
                           </td>
                           <td className="px-6 py-4 text-sm font-medium text-slate-700">
                             {patient.lop_facilities?.name ?? "—"}
@@ -688,8 +755,8 @@ export default function PatientsListPage() {
                           <td className="px-6 py-4 text-sm text-slate-600">
                             {patient.lop_law_firms?.name ?? "—"}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-500">
-                            {formatDate(patient.date_of_accident)}
+                          <td className="px-6 py-4 text-sm text-slate-500 max-w-[160px] truncate" title={patient.chief_complaint ?? undefined}>
+                            {patient.chief_complaint ?? "—"}
                           </td>
                           <td className="px-6 py-4">
                             <span
@@ -727,10 +794,16 @@ export default function PatientsListPage() {
                           {canViewFinancial && (
                             <td className="px-6 py-4">
                               <p className="text-sm font-bold text-[#0B3B91]">
-                                {formatCurrency(patient.bill_charges)}
+                                {formatCurrency(
+                                  (Number(patient.llc_billed_charges) || 0) + (Number(patient.pllc_billed_charges) || 0) ||
+                                  patient.bill_charges
+                                )}
                               </p>
                               <p className="text-xs text-slate-400">
-                                Collected {formatCurrency(patient.amount_collected)}
+                                Rcvd {formatCurrency(
+                                  (Number(patient.total_received_llc) || 0) + (Number(patient.total_received_pllc) || 0) ||
+                                  patient.amount_collected
+                                )}
                               </p>
                             </td>
                           )}

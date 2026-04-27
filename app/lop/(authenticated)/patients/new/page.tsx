@@ -123,6 +123,11 @@ export default function NewPatientPage() {
       return;
     }
 
+    if (!form.facility_id?.toString().trim()) {
+      toast.error("Facility is required.");
+      return;
+    }
+
     setSaving(true);
     try {
       const { data, error } = await lopDb.insert(

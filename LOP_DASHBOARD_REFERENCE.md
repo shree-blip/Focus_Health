@@ -1,6 +1,6 @@
 # LOP Dashboard — Complete Implementation Reference
 
-> **Last updated:** April 15, 2026 (v5 — Config tab, enhanced audit log, PRD cleanup)
+> **Last updated:** April 27, 2026 (v6 — Cloud Run + Cloud SQL + GCS migration)
 > **Purpose:** Avoid re-crawling files in future sessions. Read this first.
 
 ---
@@ -10,12 +10,12 @@
 | Layer | Tech | Details |
 |-------|------|---------|
 | Framework | Next.js 15 (App Router) | Root: `/Users/focus/Desktop/App-FullStack/focus-health/` |
-| Database | Supabase (PostgreSQL) | Ref `dgmkjjwmnjiefsvbhujq` — `https://dgmkjjwmnjiefsvbhujq.supabase.co` |
-| Auth | Supabase Google OAuth (PKCE) + **TOTP MFA** | `flowType: 'pkce'`, `@supabase/ssr` cookie-based client, AAL2 enforced |
+| Database | Cloud SQL PostgreSQL 16 | Instance: `focus-health-db` · DB: `focus_health` · User: `focus_app` |
+| Auth | Google OAuth + HMAC session cookies | Cookies: `lop_session`, `focus_admin_session`; signing via `LOP_JWT_SECRET` |
 | AI | OpenAI GPT-4o via Vercel AI SDK | `@ai-sdk/openai` + `ai` package, streaming responses |
-| Hosting | Vercel | Production: `https://www.getfocushealth.com` |
-| Cron | Vercel Cron | `vercel.json` — daily at `0 14 * * *` (auto-reminder emails) |
-| Storage | Supabase Storage | Bucket: `lop-documents` |
+| Hosting | Google Cloud Run | Service: `focus-health-new` · Region: `us-central1` · URL: `https://focus-health-new-1075627982134.us-central1.run.app` |
+| Cron | Cloud Scheduler | Protected cron routes via `CRON_SECRET` |
+| Storage | Google Cloud Storage | Bucket: `focus-health-assets-adept-box-494606-s9` (private, served via `/api/lop/file`) |
 | Styling | Tailwind + shadcn/ui | UI primitives in `src/components/ui/` |
 | Email | nodemailer (SMTP) | Used by send-reminder, auto-remind, schedule-notify APIs |
 
@@ -23,24 +23,32 @@
 
 ## 2. Environment Variables
 
-### Vercel Production
+### Cloud Run Runtime Environment
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://dgmkjjwmnjiefsvbhujq.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=<key>   # NOTE: "DEFAULT" variant on Vercel
-SUPABASE_SERVICE_ROLE_KEY=<key>
-SMTP_USER=<email>
-SMTP_APP_PASSWORD=<app-password>
-OPENAI_API_KEY=<key>                                  # Required for AI assistant
-```
-
-### Local `.env`
-```
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_FvuSPk5KfBlj-1EZKnmvgg_e8mznTYD
-OPENAI_API_KEY=<key>
+DB_USER=focus_app
+DB_NAME=focus_health
+CLOUD_SQL_CONNECTION_NAME=adept-box-494606-s9:us-central1:focus-health-db
+LOP_JWT_SECRET=<value>
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=540299638751-0ghd0f3n4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=info@getfocushealth.com
 ```
 
-### CRITICAL: Env Var Name Mismatch
-Vercel uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` but local uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. All files have a `??` fallback checking both. **Never remove the fallback.**
+### Secret Manager (mounted into Cloud Run)
+```
+DB_PASSWORD=focus-db-password:latest
+GOOGLE_CLIENT_SECRET=google-client-secret:latest
+SMTP_PASS=smtp-pass:latest
+OPENAI_API_KEY=openai-api-key:latest
+CRON_SECRET=cron-secret:latest
+```
+
+### Infrastructure IDs
+- GCP Project: `adept-box-494606-s9`
+- Cloud Run service: `focus-health-new`
+- Cloud SQL instance: `focus-health-db`
+- Runtime service account: `1075627982134-compute@developer.gserviceaccount.com`
 
 ---
 
@@ -89,10 +97,9 @@ Vercel uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` but local uses `NEXT_
 
 ## 4. Database Schema
 
-**Migration file:** `supabase/migrations/20260410_lop_dashboard.sql`
-**Notification cols migration:** `supabase/migrations/20260410_facility_notification_emails.sql`
+**Migration source files:** `supabase/migrations/20260410_lop_dashboard.sql`, `supabase/migrations/20260410_facility_notification_emails.sql`
 
-> MFA factors are stored in Supabase Auth's built-in `auth.mfa_factors` / `auth.mfa_challenges` tables (managed by Supabase, no custom migration needed).
+> Migration SQL files are retained in-repo for history. Live schema now runs on Cloud SQL PostgreSQL.
 
 ### Tables (9)
 1. **`lop_facilities`** — id, name, slug, type, address, phone, director_email, front_desk_email, is_active, created_at, updated_at
@@ -106,7 +113,7 @@ Vercel uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` but local uses `NEXT_
 9. **`lop_config`** — key (unique), value, description, updated_at, updated_by
 
 ### DB Columns Added (April 10 2026)
-Via Supabase Management API:
+Applied to PostgreSQL schema:
 - `lop_facilities.phone TEXT`
 - `lop_facilities.director_email TEXT`
 - `lop_facilities.front_desk_email TEXT`
@@ -120,9 +127,9 @@ Via Supabase Management API:
 - 1 admin: `info@getfocushealth.com` (auto-linked on first Google login)
 
 ### RLS
-- All tables have RLS enabled; policies allow authenticated users
-- **Server-side proxy** (`/api/lop/db`) uses service-role key, bypassing RLS entirely
-- `lop_config` has separate read/write policies
+- Access control is enforced at the application layer (`requireLopAuth()` + `TABLE_WRITE_RULES`)
+- Server-side DB proxy (`/api/lop/db`) executes with trusted backend DB credentials
+- `lop_config` remains write-restricted to admin workflows
 
 ---
 
@@ -136,9 +143,7 @@ Via Supabase Management API:
 | `app/lop/mfa-setup/page.tsx` | 328 | **NEW** — TOTP MFA enrollment & verification. QR code display, manual secret, 6-digit code input. Redirects to dashboard on success |
 | `app/lop/auth/callback/route.ts` | 22 | PKCE code exchange, sets cookies, redirects to `/lop` |
 | `app/lop/layout.tsx` | 10 | Minimal root layout for `/lop` |
-| `src/integrations/supabase/client.ts` | 43 | Shared Supabase client (lazy Proxy, PKCE, env fallback) |
-| `src/lib/lop/client.ts` | 13 | Re-exports `supabase` as `lopClient` (any-typed) |
-| `src/lib/lop/server-auth.ts` | 108 | **NEW** — Server-side auth: `getAuthenticatedUser()` (cookie-based), `getAdminClient()`, `getLopUser()`, `requireLopAuth()` (enforces AAL2) |
+| `src/lib/lop/server-auth.ts` | 108 | **NEW** — Server-side auth: HMAC cookie verification + LOP user resolution via `requireLopAuth()` |
 | `src/components/lop/LopAuthProvider.tsx` | 158 | Auth context: lopUser, facilities, signOut. 3-step user resolution |
 
 ### Authenticated Pages (`app/lop/(authenticated)/`)
@@ -171,10 +176,12 @@ Via Supabase Management API:
 ### API Routes
 | Route | File | Lines | Purpose |
 |-------|------|-------|---------|
-| `POST /api/lop/ai/chat` | `app/api/lop/ai/chat/route.ts` | 261 | **NEW** — AI chat streaming endpoint. Cookie-auth (AAL2), admin-only, GPT-4o, PHI de-identification, audit logging |
-| `POST /api/lop/db` | `app/api/lop/db/route.ts` | 237 | Server-side DB proxy (service-role). **Now uses `requireLopAuth()` cookie-based auth (not header-based)**. PHI read audit logging |
+| `POST /api/lop/ai/chat` | `app/api/lop/ai/chat/route.ts` | 261 | **NEW** — AI chat streaming endpoint. Cookie-auth, admin-only, GPT-4o, PHI de-identification, audit logging |
+| `POST /api/lop/db` | `app/api/lop/db/route.ts` | 237 | Server-side DB proxy for Cloud SQL. Uses `requireLopAuth()` cookie auth (not header-based). PHI read audit logging |
+| `GET /api/lop/file` | `app/api/lop/file/route.ts` | 1xx | **NEW** — Auth-gated private file proxy for GCS objects |
+| `POST /api/lop/upload` | `app/api/lop/upload/route.ts` | 1xx | Uploads documents to private GCS bucket and returns `/api/lop/file?path=...` URL |
 | `POST /api/lop/send-reminder` | `app/api/lop/send-reminder/route.ts` | 124 | Manual reminder email via SMTP |
-| `GET /api/lop/auto-remind` | `app/api/lop/auto-remind/route.ts` | 143 | Vercel Cron — daily auto-reminder emails |
+| `GET /api/lop/auto-remind` | `app/api/lop/auto-remind/route.ts` | 143 | Cloud Scheduler target — daily auto-reminder emails (protected by `CRON_SECRET`) |
 | `POST /api/lop/schedule-notify` | `app/api/lop/schedule-notify/route.ts` | 208 | Scheduling notification emails (director, front desk, patient) |
 | `POST /api/lop/provision` | `app/api/lop/provision/route.ts` | 139 | Server-side user provisioning (bypasses RLS) |
 
@@ -184,7 +191,7 @@ Via Supabase Management API:
 | `src/lib/lop/permissions.ts` | 79 | **23-action** permission matrix (was 19 — added `ai:use`, `config:manage`, `facilities:manage`, `audit:read`), `hasPermission()`, `hasGlobalAccess()`, `isAllowedDomain()` |
 | `src/lib/lop/types.ts` | 277 | All TS interfaces, display helpers (labels, colors), `getMissingDocuments()` |
 | `src/lib/lop/db.ts` | 129 | `lopDb` helper — calls `/api/lop/db` proxy with role in headers |
-| `src/lib/lop/supabase.ts` | 29 | Server-side Supabase client (service-role) |
+| `src/lib/lop/supabase.ts` | 29 | Legacy helper (kept for compatibility; Cloud SQL is the active backend) |
 | `src/lib/lop/index.ts` | 3 | Barrel re-export |
 
 ---
@@ -224,13 +231,13 @@ Via Supabase Management API:
 ## 7. Server-Side DB Proxy (`/api/lop/db`)
 
 All client pages call `lopDb()` (from `src/lib/lop/db.ts`) which POSTs to `/api/lop/db`. The API route:
-1. **HIPAA: Authenticates from session cookie** via `requireLopAuth()` (verifies AAL2 MFA) — no longer trusts `x-lop-user-id` header
+1. **HIPAA: Authenticates from session cookie** via `requireLopAuth()` — no longer trusts `x-lop-user-id` header
 2. For write operations, checks `TABLE_WRITE_RULES` (maps table to allowed role list)
-3. Executes the query using the **service-role** Supabase client (bypasses RLS)
+3. Executes the query using backend Cloud SQL credentials
 4. **PHI read audit logging** — SELECT on `lop_patients`, `lop_patient_documents`, `lop_reminder_emails` fires audit log insert (fire-and-forget)
 5. Returns result as JSON
 
-This means RLS policies are not the primary access control — `TABLE_WRITE_RULES` in the API route is.
+This means API-level authorization is the primary access control — `TABLE_WRITE_RULES` in the API route is.
 
 ---
 
@@ -250,15 +257,12 @@ New users from these domains get auto-provisioned as `front_desk` role on first 
 
 ---
 
-## 9. HIPAA Compliance & MFA
+## 9. HIPAA Compliance & Auth
 
-### MFA (TOTP) Enforcement
-- **All LOP routes require AAL2** (Authenticator Assurance Level 2 = multi-factor).
-- Middleware (`middleware.ts`) checks `mfa.getAuthenticatorAssuranceLevel()` on every `/lop/*` request.
-- If user is at AAL1 with enrolled factors → redirect to `/lop/mfa-setup?step=verify`.
-- If user is at AAL1 with NO factors → redirect to `/lop/mfa-setup?step=enroll`.
-- MFA setup page uses `supabase.auth.mfa.enroll({ factorType: 'totp' })` → shows QR code → user verifies with 6-digit code → session promoted to AAL2.
-- Server-side auth (`requireLopAuth()` in `server-auth.ts`) also rejects AAL1 sessions.
+### Session & OAuth Enforcement
+- LOP routes are protected by signed HTTP-only session cookies.
+- Google OAuth is used for identity; app access is authorized by `lop_users` role + active status.
+- `requireLopAuth()` is the server-side gate used by protected APIs.
 
 ### PHI De-Identification (AI Route)
 - Before sending patient data to OpenAI, the AI chat route runs `deidentifyPhi()`:
@@ -274,8 +278,8 @@ New users from these domains get auto-provisioned as `front_desk` role on first 
 - Logs include: user_id, IP address, entity_type, entity_id, operation metadata.
 
 ### Session Cookie Auth (server-auth.ts)
-- `getAuthenticatedUser()` — reads Supabase session from HTTP cookies using `createServerClient`.
-- `requireLopAuth()` — full pipeline: cookie → auth user → AAL2 check → LOP user lookup.
+- `getAuthenticatedUser()` — validates signed session from HTTP cookies.
+- `requireLopAuth()` — full pipeline: cookie verification → user lookup in DB → active role checks.
 - Used by both `/api/lop/db` and `/api/lop/ai/chat` routes.
 - **HIPAA**: Never trusts client-supplied `auth_user_id` — always derived from cookie.
 
@@ -325,11 +329,11 @@ Built-in `AiMarkdown` component handles: headers, bold, italic, code, lists (ord
 
 ## 11. Key Design Decisions & Fixes
 
-### Supabase Client — Lazy Proxy Pattern
-Client uses `new Proxy({} as SupabaseClient, { get... })` to defer creation until first property access. Prevents `supabaseKey is required` errors during Vercel static page generation.
+### Cloud SQL + API-first Access
+LOP pages persist data through internal API routes (for example `/api/lop/db`, `/api/blog`) backed by Cloud SQL. This avoids browser-local persistence and keeps state durable across Cloud Run instances.
 
-### PKCE Flow
-`flowType: 'pkce'` with `@supabase/ssr` cookie-based auth. The callback route uses `exchangeCodeForSession(code)`. Do NOT change to implicit flow.
+### OAuth Callback Flow
+Google OAuth callback sets/refreshes app session cookies. Do NOT bypass server-side cookie issuance.
 
 ### Middleware Auth Exclusions
 `middleware.ts` skips auth check for:
@@ -370,7 +374,7 @@ The AI chat panel (`AiChatPanel.tsx`) renders only if `hasPermission(lopUser, 'a
 ### AI PHI Safety
 All patient context sent to OpenAI is de-identified via `deidentifyPhi()`. This is an additional safety layer; for full compliance also obtain a BAA from OpenAI (or use Azure OpenAI).
 
-### Vercel AI SDK Streaming
+### AI SDK Streaming
 The AI chat endpoint uses `streamText()` from the `ai` package and returns `result.toDataStreamResponse()` for streaming. The client uses `useChat()` from `ai/react`.
 
 ---
@@ -424,6 +428,7 @@ Patient detail tabs use shadcn `<Tabs>`. The `<TabsList>` should use `rounded-2x
 | `4dc9b91` | Lazy-init Supabase client (Vercel build fix) |
 | `64159ea` | LOP PRD compliance: all fields, doc upload, tags, mark arrived, metrics, CSV export |
 | `5034580` | Add LOP Dashboard: patient management, scheduling, law firms, reports, settings |
+| `948c2dc` | Cloud Run fixes: private GCS file proxy, upload path fix, patients loading guard, blog admin persistence via API |
 
 ---
 
@@ -433,38 +438,35 @@ Patient detail tabs use shadcn `<Tabs>`. The `<TabsList>` should use `rounded-2x
 # Build locally
 npx next build
 
-# Deploy to Vercel production
-npx vercel --prod --yes
+# Deploy to Cloud Run (production)
+gcloud run deploy focus-health-new --source . --region us-central1 --project adept-box-494606-s9 --platform managed --allow-unauthenticated --add-cloudsql-instances adept-box-494606-s9:us-central1:focus-health-db --set-env-vars "DB_USER=focus_app,DB_NAME=focus_health,CLOUD_SQL_CONNECTION_NAME=adept-box-494606-s9:us-central1:focus-health-db,LOP_JWT_SECRET=lop-focus-health-2024-secure,NEXT_PUBLIC_GOOGLE_CLIENT_ID=540299638751-0ghd0f3n4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com,SMTP_HOST=smtp.gmail.com,SMTP_PORT=587,SMTP_USER=info@getfocushealth.com" --set-secrets "DB_PASSWORD=focus-db-password:latest,GOOGLE_CLIENT_SECRET=google-client-secret:latest,SMTP_PASS=smtp-pass:latest,OPENAI_API_KEY=openai-api-key:latest,CRON_SECRET=cron-secret:latest" --quiet
 
 # Commit and push
 git add -A && git commit -m "message" && git push
 ```
 
-### Supabase Management API (for direct SQL when CLI fails)
+### Cloud SQL direct SQL (manual schema change)
 ```bash
-# Run SQL against live DB
-curl -s -X POST \
-  "https://api.supabase.com/v1/projects/dgmkjjwmnjiefsvbhujq/database/query" \
-  -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "SELECT 1;"}'
+# Example: run SQL through psql using Cloud SQL credentials
+psql "host=/cloudsql/adept-box-494606-s9:us-central1:focus-health-db dbname=focus_health user=focus_app password=<DB_PASSWORD>" -c "SELECT 1;"
 ```
-Token stored in macOS Keychain under service "Supabase CLI".
+Prefer committed migration SQL files for reproducibility.
 
 ---
 
 ## 14. Known Issues / Watch Items
 
-1. **Env var fallback** — Must always check BOTH `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` with `??`
+1. **Cloud SQL attachment** — Cloud Run deploy must include `--add-cloudsql-instances adept-box-494606-s9:us-central1:focus-health-db`.
 2. **Seeded admin UUID** — `info@getfocushealth.com` was seeded with a placeholder `auth_user_id`. Auto-link-by-email handles this on first Google login.
-3. **`supabase db push` fails** — CLI login role gets permission denied (42501). Use Supabase Management API direct SQL instead.
-4. **RLS vs TABLE_WRITE_RULES** — RLS policies exist but the DB proxy uses service-role (bypasses RLS). Actual write-gating is in `TABLE_WRITE_RULES` in `/api/lop/db`.
-5. **Vercel deployment** — Sometimes `npx vercel --prod --yes` fails silently. Check output with `2>&1 | tail -20`.
-6. **OPENAI_API_KEY** — Must be set on Vercel for AI assistant to function. If missing, `/api/lop/ai/chat` returns 500.
-7. **MFA enrollment** — First-time login requires MFA setup; user cannot bypass. If QR enrollment fails, user can manually enter the TOTP secret.
-8. **PHI de-identification** — The `deidentifyPhi()` function uses regex patterns; exotic name formats or multi-word names may slip through. Consider a BAA with OpenAI for full HIPAA compliance.
-9. **Settings page** — Now fully rebuilt with 4 tabs: Users, Facilities, Configuration (`lop_config` CRUD), and Audit Log (expandable change-diff view with user names and action filters).
-10. **`no_show` status** — `no_show` is fully implemented in `LopCaseStatus`, `CASE_STATUS_LABELS` (→ "No-Show"), and `CASE_STATUS_COLORS` (`bg-rose-100 text-rose-800`). No action needed.
+3. **DB credential secrets** — `DB_PASSWORD` is loaded from Secret Manager (`focus-db-password`). Do not hardcode DB passwords in code or local scripts.
+4. **App-layer authorization** — Write authorization is enforced via `TABLE_WRITE_RULES` in `/api/lop/db`; keep this matrix synced with role policy.
+5. **GCS public ACLs blocked** — Bucket policy prevents `allUsers` grants. Keep uploads private and serve documents through `/api/lop/file`.
+6. **Service account storage IAM** — Runtime SA must keep `roles/storage.objectAdmin` on `focus-health-assets-adept-box-494606-s9` for upload operations.
+7. **OPENAI_API_KEY** — Must be set in Cloud Run secrets for AI assistant to function. If missing, `/api/lop/ai/chat` returns 500.
+8. **Cloud Scheduler auth** — Cron calls must include valid `CRON_SECRET`.
+9. **PHI de-identification** — The `deidentifyPhi()` function uses regex patterns; exotic name formats or multi-word names may slip through. Consider a BAA with OpenAI for full HIPAA compliance.
+10. **Settings page** — Now fully rebuilt with 4 tabs: Users, Facilities, Configuration (`lop_config` CRUD), and Audit Log (expandable change-diff view with user names and action filters).
+11. **`no_show` status** — `no_show` is fully implemented in `LopCaseStatus`, `CASE_STATUS_LABELS` (→ "No-Show"), and `CASE_STATUS_COLORS` (`bg-rose-100 text-rose-800`). No action needed.
 
 ---
 

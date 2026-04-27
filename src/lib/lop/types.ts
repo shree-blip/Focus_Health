@@ -112,6 +112,19 @@ export interface LopPatient {
   billing_tags: string[];
   medical_record_tags: string[];
 
+  // White Rock CSV import fields
+  mrn: string | null;
+  date_of_service: string | null;
+  disposition_status: string | null;
+  chief_complaint: string | null;
+  primary_insurance: string | null;
+  is_lop_case: boolean | null;
+  referral_source: string | null;
+  llc_billed_charges: number | null;
+  pllc_billed_charges: number | null;
+  total_received_llc: number | null;
+  total_received_pllc: number | null;
+
   follow_up_note: string | null;
   intake_notes: string | null;
 

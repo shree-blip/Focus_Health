@@ -11,7 +11,6 @@ import {
   Settings,
   LogOut,
   ClipboardList,
-  Bot,
   Menu,
   ChevronsUpDown,
 } from "lucide-react";
@@ -99,27 +98,6 @@ export function LopShell({ children }: { children: ReactNode }) {
     );
   };
 
-  const renderAssistantButton = () => (
-    <button
-      type="button"
-      onClick={() => window.dispatchEvent(new CustomEvent("open-ai-chat"))}
-      className="w-full rounded-2xl bg-gradient-to-br from-[#D72638] via-[#ef4444] to-[#ff6b6b] p-4 text-left text-white shadow-[0_18px_40px_rgba(215,38,56,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(215,38,56,0.28)]"
-    >
-      <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">
-          <Bot className="h-4 w-4" />
-        </div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.22em]">AI Assistant</p>
-          <p className="text-[11px] text-white/80">Document insights</p>
-        </div>
-      </div>
-      <p className="text-xs leading-relaxed text-white/90">
-        Analyze LOP letters, missing docs, and patient readiness in one place.
-      </p>
-    </button>
-  );
-
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(37,99,235,0.09),_transparent_28%),linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)]">
       <header className="sticky top-0 z-30 border-b border-white/70 bg-[#f7f9fc]/90 px-4 py-4 backdrop-blur-xl lg:hidden">
@@ -160,10 +138,6 @@ export function LopShell({ children }: { children: ReactNode }) {
                 <nav className="mt-6 space-y-2">
                   {visibleItems.map((item) => renderNavLink(item, true))}
                 </nav>
-
-                {hasPermission(lopUser, "ai:use") && (
-                  <div className="mt-6">{renderAssistantButton()}</div>
-                )}
 
                 <div className="mt-auto space-y-3 border-t border-slate-200 pt-4">
                   {lopUser && (
@@ -239,15 +213,8 @@ export function LopShell({ children }: { children: ReactNode }) {
           {visibleItems.map((item) => renderNavLink(item))}
         </nav>
 
-        {/* AI Section */}
-        {hasPermission(lopUser, "ai:use") && (
-          <div className="mt-auto mb-6">
-            {renderAssistantButton()}
-          </div>
-        )}
-
         {/* User info + Logout */}
-        <div className="space-y-2 border-t border-slate-200 pt-4">
+        <div className="mt-auto space-y-2 border-t border-slate-200 pt-4">
           {lopUser && (
             <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0B3B91] text-sm font-bold text-white">
