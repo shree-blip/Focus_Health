@@ -556,7 +556,7 @@ function UsersTab() {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-10 w-10 rounded-2xl text-slate-500 hover:bg-white"
+                      className="h-10 w-10 rounded-2xl text-slate-500 hover:bg-slate-100 hover:text-[#0B3B91]"
                       onClick={() => openDialog(user)}
                     >
                       <Edit3 className="h-4 w-4" />
@@ -978,7 +978,7 @@ function FacilitiesTab() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-2xl text-slate-500 hover:bg-white"
+                    className="h-10 w-10 rounded-2xl text-slate-500 hover:bg-slate-100 hover:text-[#0B3B91]"
                     onClick={() => openDialog(facility)}
                   >
                     <Edit3 className="h-4 w-4" />

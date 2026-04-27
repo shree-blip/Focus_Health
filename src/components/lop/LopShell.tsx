@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,6 +14,9 @@ import {
   ClipboardList,
   Menu,
   ChevronsUpDown,
+  KeyRound,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   Select,
@@ -21,6 +25,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { useLopAuth } from "./LopAuthProvider";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
@@ -51,6 +64,67 @@ const navItems: NavItem[] = [
 export function LopShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { lopUser, signOut, facilities, activeFacilityId, setActiveFacilityId } = useLopAuth();
+
+  // Profile / password-change dialog state
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [pwdSaving, setPwdSaving] = useState(false);
+  const [pwdError, setPwdError] = useState("");
+  const [pwdSuccess, setPwdSuccess] = useState("");
+
+  const initials = lopUser?.full_name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() ?? "?";
+
+  function openProfile() {
+    setCurrentPwd("");
+    setNewPwd("");
+    setConfirmPwd("");
+    setPwdError("");
+    setPwdSuccess("");
+    setProfileOpen(true);
+  }
+
+  async function handleSavePassword() {
+    setPwdError("");
+    setPwdSuccess("");
+    if (newPwd.length < 8) {
+      setPwdError("New password must be at least 8 characters.");
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setPwdError("Passwords do not match.");
+      return;
+    }
+    setPwdSaving(true);
+    try {
+      const res = await fetch("/api/lop/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: currentPwd || undefined, newPassword: newPwd }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPwdError(data.error ?? "Failed to update password.");
+      } else {
+        setPwdSuccess("Password updated successfully!");
+        setCurrentPwd("");
+        setNewPwd("");
+        setConfirmPwd("");
+      }
+    } catch {
+      setPwdError("Network error. Please try again.");
+    } finally {
+      setPwdSaving(false);
+    }
+  }
 
   const visibleItems = navItems.filter(
     (item) => !item.permission || hasPermission(lopUser, item.permission)
@@ -141,15 +215,20 @@ export function LopShell({ children }: { children: ReactNode }) {
 
                 <div className="mt-auto space-y-3 border-t border-slate-200 pt-4">
                   {lopUser && (
-                    <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B3B91] text-sm font-bold text-white">
-                        {lopUser.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                    <button
+                      type="button"
+                      onClick={openProfile}
+                      className="flex w-full items-center gap-3 rounded-2xl bg-white p-3 shadow-sm transition-colors hover:bg-slate-50 text-left"
+                    >
+                      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0B3B91] text-sm font-bold text-white">
+                        {initials}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-bold text-slate-900">{lopUser.full_name}</p>
                         <p className="truncate text-xs text-slate-500">{lopUser.email}</p>
                       </div>
-                    </div>
+                      <KeyRound className="h-4 w-4 flex-shrink-0 text-slate-400" />
+                    </button>
                   )}
 
                   <SheetClose asChild>
@@ -216,17 +295,20 @@ export function LopShell({ children }: { children: ReactNode }) {
         {/* User info + Logout */}
         <div className="mt-auto space-y-2 border-t border-slate-200 pt-4">
           {lopUser && (
-            <div className="flex items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
+            <button
+              type="button"
+              onClick={openProfile}
+              className="flex w-full items-center gap-3 rounded-2xl bg-white px-3 py-3 shadow-sm transition-colors hover:bg-slate-50 text-left"
+            >
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0B3B91] text-sm font-bold text-white">
-                <span>
-                  {lopUser.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-                </span>
+                {initials}
               </div>
               <div className="min-w-0 flex-grow">
                 <p className="truncate text-sm font-bold text-slate-900">{lopUser.full_name}</p>
                 <p className="truncate text-[11px] text-slate-400">{lopUser.email}</p>
               </div>
-            </div>
+              <KeyRound className="h-4 w-4 flex-shrink-0 text-slate-400" />
+            </button>
           )}
           <button
             onClick={signOut}
@@ -242,6 +324,110 @@ export function LopShell({ children }: { children: ReactNode }) {
       <main className="min-h-screen px-4 pb-8 pt-4 lg:ml-80 lg:mr-8 lg:px-0 lg:pb-10 lg:pt-0">
         {children}
       </main>
+
+      {/* Profile / Password Dialog */}
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-[#0B3B91]">My Profile</DialogTitle>
+          </DialogHeader>
+
+          {/* Avatar + info */}
+          <div className="flex items-center gap-4 rounded-2xl bg-slate-50 p-4">
+            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[#0B3B91] text-lg font-bold text-white">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-bold text-slate-900">{lopUser?.full_name}</p>
+              <p className="truncate text-sm text-slate-500">{lopUser?.email}</p>
+              <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-[#0B3B91]/70">
+                {lopUser?.role}
+              </p>
+            </div>
+          </div>
+
+          {/* Password change */}
+          <div className="space-y-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Change Password</p>
+
+            <div className="space-y-1">
+              <Label htmlFor="current-pwd" className="text-sm font-medium text-slate-700">
+                Current Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="current-pwd"
+                  type={showCurrent ? "text" : "password"}
+                  placeholder="Leave blank if not set"
+                  value={currentPwd}
+                  onChange={(e) => setCurrentPwd(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrent((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                >
+                  {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="new-pwd" className="text-sm font-medium text-slate-700">
+                New Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="new-pwd"
+                  type={showNew ? "text" : "password"}
+                  placeholder="Min. 8 characters"
+                  value={newPwd}
+                  onChange={(e) => setNewPwd(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                >
+                  {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="confirm-pwd" className="text-sm font-medium text-slate-700">
+                Confirm New Password
+              </Label>
+              <Input
+                id="confirm-pwd"
+                type="password"
+                placeholder="Re-enter new password"
+                value={confirmPwd}
+                onChange={(e) => setConfirmPwd(e.target.value)}
+              />
+            </div>
+
+            {pwdError && (
+              <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{pwdError}</p>
+            )}
+            {pwdSuccess && (
+              <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-600">{pwdSuccess}</p>
+            )}
+
+            <Button
+              onClick={handleSavePassword}
+              disabled={pwdSaving || !newPwd}
+              className="w-full bg-[#0B3B91] hover:bg-[#0a3280] text-white rounded-xl"
+            >
+              {pwdSaving ? "Saving…" : "Save Password"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

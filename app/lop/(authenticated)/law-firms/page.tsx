@@ -84,7 +84,7 @@ export default function LawFirmsPage() {
       const [firmsResponse, patientsResponse] = await Promise.all([
         lopDb.select("lop_law_firms", { order: { column: "name" } }),
         lopDb.select("lop_patients", {
-          select: "law_firm_id, amount_collected",
+          select: "law_firm_id, llc_billed_charges, pllc_billed_charges",
         }),
       ]);
 
@@ -100,7 +100,7 @@ export default function LawFirmsPage() {
         }
 
         metricSeed[firmId].count += 1;
-        metricSeed[firmId].total += Number(patient.amount_collected) || 0;
+        metricSeed[firmId].total += (Number(patient.llc_billed_charges) || 0) + (Number(patient.pllc_billed_charges) || 0);
       }
 
       const computedMetrics: Record<string, FirmMetric> = {};
@@ -232,10 +232,16 @@ export default function LawFirmsPage() {
 
   const handleDelete = async () => {
     if (!editingFirm) return;
-    if (!window.confirm(`Delete "${editingFirm.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete "${editingFirm.name}"? Patients linked to this firm will be unlinked. This cannot be undone.`)) return;
 
     setDeleting(true);
     try {
+      // Null out FK on patients first to satisfy the constraint
+      await lopDb.update(
+        "lop_patients",
+        { law_firm_id: null },
+        { law_firm_id: editingFirm.id }
+      );
       await lopDb.remove("lop_law_firms", { id: editingFirm.id });
       await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
@@ -507,7 +513,7 @@ export default function LawFirmsPage() {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-xl text-slate-400 hover:bg-white"
+                              className="h-8 w-8 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-[#0B3B91]"
                               onClick={() => openDialog(firm)}
                             >
                               <Edit3 className="h-3.5 w-3.5" />

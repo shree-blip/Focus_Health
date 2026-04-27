@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { lopDb } from "@/lib/lop/db";
-import type { Filter as DbFilter } from "@/lib/lop/db";
+
 import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,
@@ -164,13 +164,10 @@ export default function PatientsListPage() {
       try {
         const baseSelect = "*, lop_facilities(name, slug), lop_law_firms(name), lop_patient_documents(document_type, status)";
 
-        const lopFilter: DbFilter = { column: "is_lop_case", op: "eq" as const, value: true };
-
         if (!activeFacilityId) {
           const { data } = await lopDb.select("lop_patients", {
             select: baseSelect,
             order: { column: "created_at", ascending: false },
-            filters: [lopFilter],
           });
           setPatients((data as PatientListRow[]) ?? []);
           return;
@@ -180,12 +177,12 @@ export default function PatientsListPage() {
           lopDb.select("lop_patients", {
             select: baseSelect,
             order: { column: "created_at", ascending: false },
-            filters: [lopFilter, { column: "facility_id", op: "eq" as const, value: activeFacilityId }],
+            filters: [{ column: "facility_id", op: "eq" as const, value: activeFacilityId }],
           }),
           lopDb.select("lop_patients", {
             select: baseSelect,
             order: { column: "created_at", ascending: false },
-            filters: [lopFilter, { column: "facility_id", op: "is" as const, value: null }],
+            filters: [{ column: "facility_id", op: "is" as const, value: null }],
           }),
         ]);
 
@@ -810,7 +807,7 @@ export default function PatientsListPage() {
                           <td className="px-6 py-4 text-right">
                             <Link
                               href={`/lop/patients/${patient.id}`}
-                              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-slate-400 transition-colors group-hover:bg-white group-hover:text-[#0B3B91]"
+                              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl text-slate-400 transition-colors group-hover:bg-slate-100 group-hover:text-[#0B3B91]"
                               aria-label={`Open patient ${patient.first_name} ${patient.last_name}`}
                             >
                               <ChevronRight className="h-5 w-5" />
