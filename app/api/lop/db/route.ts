@@ -54,6 +54,49 @@ const TABLE_WRITE_RULES: Record<string, Role[]> = {
 // Tables containing PHI — read access will be audit-logged
 const PHI_TABLES = ["lop_patients", "lop_patient_documents", "lop_reminder_emails"];
 
+/**
+ * Supabase-style relational query resolver.
+ * Parses "tablename(col1, col2)" patterns from selectCols and resolves them
+ * via secondary queries after the main query runs.
+ *
+ * 1:1  — main table has FK column pointing to join table → embeds as object
+ * 1:many — join table has FK pointing back to main table → embeds as array
+ */
+
+// FK on main table pointing to join table (1:1 embed)
+const FK_OWN: Record<string, Record<string, string>> = {
+  lop_patients:          { lop_facilities: "facility_id",  lop_law_firms: "law_firm_id", lop_users: "created_by" },
+  lop_patient_documents: { lop_patients: "patient_id",     lop_users: "uploaded_by" },
+  lop_reminder_emails:   { lop_patients: "patient_id",     lop_law_firms: "law_firm_id", lop_users: "sent_by" },
+  lop_audit_log:         { lop_users: "user_id",           lop_facilities: "facility_id" },
+  lop_user_facilities:   { lop_users: "user_id",           lop_facilities: "facility_id" },
+};
+
+// FK on join table pointing back to main table (1:many embed)
+const FK_REVERSE: Record<string, Record<string, string>> = {
+  lop_patients: { lop_patient_documents: "patient_id" },
+  lop_users:    { lop_user_facilities:   "user_id"    },
+};
+
+interface JoinSpec { joinTable: string; cols: string[]; type: "one" | "many"; fkCol: string; fkIsOnMain: boolean; }
+
+function parseJoinSpecs(mainTable: string, selectStr: string): { cleanSelect: string; joins: JoinSpec[] } {
+  const joinPattern = /\b(\w+)\(([^)]+)\)/g;
+  const joins: JoinSpec[] = [];
+  const cleanSelect = selectStr.replace(joinPattern, (_, jTable: string, colsStr: string) => {
+    const cols = colsStr.split(",").map((c: string) => c.trim()).filter(Boolean);
+    const ownFk = FK_OWN[mainTable]?.[jTable];
+    const revFk = FK_REVERSE[mainTable]?.[jTable];
+    if (ownFk) {
+      joins.push({ joinTable: jTable, cols, type: "one",  fkCol: ownFk, fkIsOnMain: true  });
+    } else if (revFk) {
+      joins.push({ joinTable: jTable, cols, type: "many", fkCol: revFk, fkIsOnMain: false });
+    }
+    return ""; // strip from main select
+  }).replace(/,\s*,/g, ",").replace(/,\s*$/, "").replace(/^\s*,/, "").trim() || "*";
+  return { cleanSelect: cleanSelect === "" ? "*" : cleanSelect, joins };
+}
+
 export async function POST(request: NextRequest) {
   try {
     // HIPAA: Authenticate from session cookie — not client-supplied ID
@@ -147,13 +190,66 @@ export async function POST(request: NextRequest) {
 
     switch (operation) {
       case "select": {
-        const cols = selectCols && selectCols !== "*" ? selectCols : "*";
+        // Parse Supabase-style join syntax out of selectCols
+        const rawCols = selectCols && selectCols !== "*" ? selectCols : "*";
+        const { cleanSelect, joins } = parseJoinSpecs(table, rawCols);
+
         const { text: whereText, values } = buildWhere(filters);
-        let sql = `SELECT ${cols} FROM "${table}" ${whereText}`;
+        let sql = `SELECT ${cleanSelect} FROM "${table}" ${whereText}`;
         if (order) sql += ` ORDER BY "${order.column}" ${(order.ascending ?? true) ? "ASC" : "DESC"}`;
         if (queryLimit) sql += ` LIMIT ${parseInt(queryLimit, 10)}`;
         const res = await pool.query(sql, values);
         rows = res.rows;
+
+        // Resolve relational joins
+        if (joins.length > 0 && rows.length > 0) {
+          for (const join of joins) {
+            const colList = join.cols.join(", ");
+            if (join.type === "one") {
+              // 1:1: gather FK values from main rows, batch-query related table
+              const fkValues = [...new Set(
+                (rows as Record<string, unknown>[]).map(r => r[join.fkCol]).filter(v => v != null)
+              )];
+              if (fkValues.length > 0) {
+                const relRes = await pool.query(
+                  `SELECT id, ${colList} FROM "${join.joinTable}" WHERE id = ANY($1)`,
+                  [fkValues]
+                );
+                const relMap = new Map((relRes.rows as Record<string, unknown>[]).map(r => [r.id, r]));
+                rows = (rows as Record<string, unknown>[]).map(r => ({
+                  ...r,
+                  [join.joinTable]: relMap.get(r[join.fkCol] as string) ?? null,
+                }));
+              } else {
+                rows = (rows as Record<string, unknown>[]).map(r => ({ ...r, [join.joinTable]: null }));
+              }
+            } else {
+              // 1:many: gather main IDs, batch-query related table
+              const mainIds = [...new Set(
+                (rows as Record<string, unknown>[]).map(r => r.id).filter(v => v != null)
+              )];
+              if (mainIds.length > 0) {
+                const relRes = await pool.query(
+                  `SELECT ${join.fkCol}, ${colList} FROM "${join.joinTable}" WHERE "${join.fkCol}" = ANY($1)`,
+                  [mainIds]
+                );
+                const relMap = new Map<string, Record<string, unknown>[]>();
+                for (const r of relRes.rows as Record<string, unknown>[]) {
+                  const key = r[join.fkCol] as string;
+                  if (!relMap.has(key)) relMap.set(key, []);
+                  relMap.get(key)!.push(r);
+                }
+                rows = (rows as Record<string, unknown>[]).map(r => ({
+                  ...r,
+                  [join.joinTable]: relMap.get(r.id as string) ?? [],
+                }));
+              } else {
+                rows = (rows as Record<string, unknown>[]).map(r => ({ ...r, [join.joinTable]: [] }));
+              }
+            }
+          }
+        }
+
         if (single) {
           return NextResponse.json({ data: rows[0] ?? null });
         }
@@ -213,14 +309,18 @@ export async function POST(request: NextRequest) {
       case "upsert": {
         const record = Array.isArray(data) ? data : [data];
         const upserted: unknown[] = [];
+        // Determine conflict column: use 'key' for lop_config (text PK), else 'id'
+        const conflictCol = table === "lop_config" ? "key" : "id";
         for (const row of record) {
           const entries = Object.entries(row as Record<string, unknown>);
           const keys = entries.map(([k]) => `"${k}"`).join(", ");
           const vals = entries.map((_, i) => `$${i + 1}`).join(", ");
           const values = entries.map(([, v]) => v);
-          const setClauses = entries.map(([k]) => `"${k}" = EXCLUDED."${k}"`).join(", ");
+          const setClauses = entries
+            .filter(([k]) => k !== conflictCol)
+            .map(([k]) => `"${k}" = EXCLUDED."${k}"`).join(", ");
           const res = await pool.query(
-            `INSERT INTO "${table}" (${keys}) VALUES (${vals}) ON CONFLICT DO UPDATE SET ${setClauses} RETURNING *`,
+            `INSERT INTO "${table}" (${keys}) VALUES (${vals}) ON CONFLICT ("${conflictCol}") DO UPDATE SET ${setClauses} RETURNING *`,
             values
           );
           upserted.push(res.rows[0]);

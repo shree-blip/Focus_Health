@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
-import { lopClient } from "@/lib/lop/client";
+// lopClient removed — file upload now uses /api/lop/upload
 import { lopDb } from "@/lib/lop/db";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
@@ -365,17 +365,22 @@ export default function PatientDetailPage({
       if (docFile) {
         const ext = docFile.name.split(".").pop();
         const storagePath = `${id}/${Date.now()}-${docForm.document_type}.${ext}`;
-        const { error: uploadErr } = await lopClient.storage
-          .from("lop-documents")
-          .upload(storagePath, docFile);
-        if (uploadErr) throw uploadErr;
-
-        filePath = storagePath;
+        const uploadForm = new FormData();
+        uploadForm.append("file", docFile);
+        uploadForm.append("path", storagePath);
+        const uploadRes = await fetch("/api/lop/upload", {
+          method: "POST",
+          credentials: "same-origin",
+          body: uploadForm,
+        });
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json();
+          throw new Error(err.error ?? "Upload failed");
+        }
+        const uploadData = await uploadRes.json();
+        filePath = uploadData.storage_path;
         fileName = docFile.name;
-        const { data: urlData } = lopClient.storage
-          .from("lop-documents")
-          .getPublicUrl(storagePath);
-        fileUrl = urlData?.publicUrl ?? null;
+        fileUrl = uploadData.url;
       }
 
       const { error } = await lopDb.insert("lop_patient_documents", {
@@ -424,7 +429,12 @@ export default function PatientDetailPage({
     setDeletingDocId(docId);
     try {
       if (storagePath) {
-        await lopClient.storage.from("lop-documents").remove([storagePath]);
+        await fetch("/api/lop/upload", {
+          method: "DELETE",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ storage_path: storagePath }),
+        }).catch(console.warn); // non-fatal if file already gone
       }
       await lopDb.remove("lop_patient_documents", { id: docId });
       toast.success("Document deleted.");
