@@ -3,6 +3,9 @@ import { siteConfig } from "@/lib/metadata";
 import { BLOG_POSTS } from "@/lib/blog-posts";
 import pool from "@/lib/db";
 
+// Force dynamic so this is never pre-rendered at build time
+export const dynamic = "force-dynamic";
+
 const routes = [
   "",
   "/contact",
