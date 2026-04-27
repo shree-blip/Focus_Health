@@ -13,6 +13,7 @@ export async function GET() {
       email: auth.lopUser.email,
       full_name: auth.lopUser.full_name,
       role: auth.lopUser.role,
+      is_active: auth.lopUser.is_active,
     },
   });
 }
