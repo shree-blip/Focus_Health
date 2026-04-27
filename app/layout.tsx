@@ -86,7 +86,7 @@ export const metadata: Metadata = {
     generator: "Focus Health Platform",
   },
   verification: {
-    google: "a02306d78c12cfb8",
+    google: "kVTMKF1yXhHI2kXP5GGaNjc7felwVeI9NxWVsGGU8bQ",
   },
   alternates: {
     canonical: siteConfig.url,
