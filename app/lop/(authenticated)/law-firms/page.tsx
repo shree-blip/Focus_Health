@@ -236,7 +236,7 @@ export default function LawFirmsPage() {
 
     setDeleting(true);
     try {
-      await lopDb.delete("lop_law_firms", { id: editingFirm.id });
+      await lopDb.remove("lop_law_firms", { id: editingFirm.id });
       await lopDb.insert("lop_audit_log", {
         user_id: lopUser?.id,
         action: "law_firm_deleted",
