@@ -6,6 +6,8 @@
  * This stub prevents import errors in files not yet updated.
  */
 
+const storageNotImpl = () => { throw new Error("Supabase storage removed. Use Cloud Storage API instead."); };
+
 // No-op stub for any remaining references
 export const lopClient = {
   auth: {
@@ -13,4 +15,12 @@ export const lopClient = {
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     signOut: () => Promise.resolve({ error: null }),
   },
-} as unknown as ReturnType<typeof import("@supabase/supabase-js").createClient<never>>;
+  storage: {
+    from: (_bucket: string) => ({
+      upload: storageNotImpl,
+      getPublicUrl: storageNotImpl,
+      remove: storageNotImpl,
+    }),
+  },
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any;
