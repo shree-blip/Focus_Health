@@ -28,6 +28,7 @@ import {
   Plus,
   Search,
   ShieldCheck,
+  Trash2,
   UserRound,
   Users,
 } from "lucide-react";
@@ -227,6 +228,33 @@ export default function LawFirmsPage() {
     }
   };
 
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!editingFirm) return;
+    if (!window.confirm(`Delete "${editingFirm.name}"? This cannot be undone.`)) return;
+
+    setDeleting(true);
+    try {
+      await lopDb.delete("lop_law_firms", { id: editingFirm.id });
+      await lopDb.insert("lop_audit_log", {
+        user_id: lopUser?.id,
+        action: "law_firm_deleted",
+        entity_type: "law_firm",
+        entity_id: editingFirm.id,
+        old_values: { name: editingFirm.name },
+      });
+      toast.success(`"${editingFirm.name}" deleted.`);
+      setDialogOpen(false);
+      await loadFirms();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete law firm.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const filteredFirms = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return firms;
@@ -398,7 +426,7 @@ export default function LawFirmsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
               {filteredFirms.map((firm) => {
                 const metric = firmMetrics[firm.id] ?? { count: 0, avgCollected: 0 };
                 const active = firm.is_active;
@@ -407,7 +435,7 @@ export default function LawFirmsPage() {
                   <div
                     key={firm.id}
                     className={cn(
-                      "overflow-hidden rounded-[30px] shadow-[0_24px_48px_rgba(9,20,40,0.06)] transition-all duration-300 hover:-translate-y-1",
+                      "overflow-hidden rounded-[24px] shadow-[0_8px_24px_rgba(9,20,40,0.07)] transition-all duration-300 hover:-translate-y-0.5",
                       active
                         ? "border border-white/70 bg-white/80 backdrop-blur-xl"
                         : "border border-slate-200 bg-slate-100/85"
@@ -415,42 +443,42 @@ export default function LawFirmsPage() {
                   >
                     <div
                       className={cn(
-                        "h-2",
+                        "h-1.5",
                         active ? "bg-gradient-to-r from-[#0B3B91] to-[#2563EB]" : "bg-slate-300"
                       )}
                     />
-                    <div className="p-8">
-                      <div className="mb-8 flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-4">
+                    <div className="p-5">
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
                           <div
                             className={cn(
-                              "flex h-16 w-16 items-center justify-center rounded-[22px]",
+                              "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
                               active
                                 ? "bg-slate-100 text-[#0B3B91]"
                                 : "bg-slate-200 text-slate-400"
                             )}
                           >
-                            <Building2 className="h-8 w-8" />
+                            <Building2 className="h-5 w-5" />
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <h3
                               className={cn(
-                                "font-heading text-3xl font-bold",
+                                "font-heading text-base font-bold leading-tight",
                                 active ? "text-slate-900" : "text-slate-500"
                               )}
                             >
                               {firm.name}
                             </h3>
-                            <div className="mt-2 flex items-center gap-2">
+                            <div className="mt-1 flex items-center gap-1.5">
                               <span
                                 className={cn(
-                                  "h-2.5 w-2.5 rounded-full",
+                                  "h-2 w-2 rounded-full",
                                   active ? "bg-emerald-500" : "bg-slate-400"
                                 )}
                               />
                               <span
                                 className={cn(
-                                  "text-xs font-bold uppercase tracking-[0.22em]",
+                                  "text-[10px] font-bold uppercase tracking-[0.18em]",
                                   active ? "text-emerald-600" : "text-slate-400"
                                 )}
                               >
@@ -460,17 +488,17 @@ export default function LawFirmsPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-center gap-1">
                           <div className="text-right">
                             <p
                               className={cn(
-                                "font-heading text-4xl font-black",
+                                "font-heading text-xl font-black",
                                 active ? "text-[#0B3B91]" : "text-slate-400"
                               )}
                             >
                               {formatCurrency(metric.avgCollected)}
                             </p>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
                               Avg Collected
                             </p>
                           </div>
@@ -479,61 +507,53 @@ export default function LawFirmsPage() {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-10 w-10 rounded-2xl text-slate-500 hover:bg-white"
+                              className="h-8 w-8 rounded-xl text-slate-400 hover:bg-white"
                               onClick={() => openDialog(firm)}
                             >
-                              <Edit3 className="h-4 w-4" />
+                              <Edit3 className="h-3.5 w-3.5" />
                             </Button>
                           )}
                         </div>
                       </div>
 
-                      <div className="mb-8 grid grid-cols-2 gap-6">
-                        <div className="rounded-2xl bg-slate-100/90 p-4">
-                          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                      <div className="mb-4 grid grid-cols-2 gap-3">
+                        <div className="rounded-xl bg-slate-100/90 px-3 py-2.5">
+                          <span className="mb-0.5 block text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
                             Total Patients
                           </span>
-                          <span className="font-heading text-3xl font-bold text-slate-900">
+                          <span className="font-heading text-xl font-bold text-slate-900">
                             {metric.count}
                           </span>
                         </div>
-                        <div className="rounded-2xl bg-slate-100/90 p-4">
-                          <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                        <div className="rounded-xl bg-slate-100/90 px-3 py-2.5">
+                          <span className="mb-0.5 block text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
                             Engagement
                           </span>
-                          <span className="font-heading text-3xl font-bold text-slate-900">
+                          <span className="font-heading text-xl font-bold text-slate-900">
                             {getEngagementLabel(metric.count)}
                           </span>
                         </div>
                       </div>
 
-                      <div className="space-y-4 border-t border-slate-100 pt-6">
-                        <div className="flex items-center gap-4">
-                          <UserRound className="h-4 w-4 text-slate-400" />
-                          <span className="text-sm font-medium text-slate-600">
-                            Contact:{" "}
-                            <span className="text-slate-900">
-                              {firm.primary_contact || "No contact person assigned"}
-                            </span>
+                      <div className="space-y-2.5 border-t border-slate-100 pt-4">
+                        <div className="flex items-center gap-2.5">
+                          <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                          <span className="truncate text-xs font-medium text-slate-600">
+                            {firm.primary_contact || "No contact person assigned"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <Mail className="h-4 w-4 text-slate-400" />
-                          <span className="text-sm font-medium text-slate-600">
+                        <div className="flex items-center gap-2.5">
+                          <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                          <span className="truncate text-xs text-slate-500">
                             {firm.intake_email || firm.escalation_email || "No email on file"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <Phone className="h-4 w-4 text-slate-400" />
-                          <span className="text-sm font-medium text-slate-600">
+                        <div className="flex items-center gap-2.5">
+                          <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                          <span className="truncate text-xs text-slate-500">
                             {firm.primary_phone || "No phone on file"}
                           </span>
                         </div>
-                        {firm.notes && (
-                          <p className="rounded-2xl bg-white/70 px-4 py-3 text-sm leading-6 text-slate-500">
-                            {firm.notes}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -733,24 +753,42 @@ export default function LawFirmsPage() {
               <Label>Active firm</Label>
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-2xl"
-                onClick={() => setDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                className="rounded-2xl bg-gradient-to-r from-[#0B3B91] to-[#2563EB] text-white hover:from-[#09337c] hover:to-[#1f57d6]"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {editingFirm ? "Update" : "Add"} Firm
-              </Button>
+            <div className="flex items-center justify-between gap-3 pt-2">
+              {editingFirm && canManage && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="rounded-2xl text-red-500 hover:bg-red-50 hover:text-red-600"
+                  onClick={handleDelete}
+                  disabled={deleting || saving}
+                >
+                  {deleting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="mr-2 h-4 w-4" />
+                  )}
+                  Delete Firm
+                </Button>
+              )}
+              <div className="ml-auto flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-2xl"
+                  onClick={() => setDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  className="rounded-2xl bg-gradient-to-r from-[#0B3B91] to-[#2563EB] text-white hover:from-[#09337c] hover:to-[#1f57d6]"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {editingFirm ? "Update" : "Add"} Firm
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
