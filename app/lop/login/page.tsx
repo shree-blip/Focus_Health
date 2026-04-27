@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
+// Google Client ID is a public value — safe to hardcode
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "540299638751-0ghd0f3n4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
