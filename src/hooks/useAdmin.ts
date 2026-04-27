@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import type { User } from '@supabase/supabase-js';
+
+type AdminUser = { id: string; email: string } | null;
 
 export const useAdmin = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AdminUser>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const checkingRef = useRef(false);
@@ -27,12 +28,7 @@ export const useAdmin = () => {
       const payload = (await response.json()) as { isAdmin: boolean; email?: string };
 
       if (payload.isAdmin) {
-        setUser(
-          {
-            id: 'admin-session',
-            email: payload.email || 'info@getfocushealth.com',
-          } as User,
-        );
+        setUser({ id: 'admin-session', email: payload.email || 'info@getfocushealth.com' });
         setIsAdmin(true);
       } else {
         setUser(null);

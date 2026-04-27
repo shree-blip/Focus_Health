@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
-import { createClient } from "@supabase/supabase-js";
 import { siteConfig } from "@/lib/metadata";
 import { BLOG_POSTS } from "@/lib/blog-posts";
+import pool from "@/lib/db";
 
 const routes = [
   "",
@@ -43,30 +43,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_VITE_SUPABASE_URL;
-  const supabaseKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || process.env.NEXT_PUBLIC_VITE_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    return [...staticEntries, ...fallbackInsightEntries];
-  }
-
   try {
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
+    const res = await pool.query(
+      `SELECT slug, updated_at, published_at FROM blog_posts WHERE status = 'published' AND published = TRUE ORDER BY published_at DESC`
+    );
+    const posts = res.rows;
 
-    const { data: posts, error } = await supabase
-      .from("blog_posts")
-      .select("slug, updated_at, published_at, status, published")
-      .eq("status", "published")
-      .eq("published", true)
-      .order("published_at", { ascending: false });
-
-    if (error || !posts) {
+    if (!posts.length) {
       return [...staticEntries, ...fallbackInsightEntries];
     }
 

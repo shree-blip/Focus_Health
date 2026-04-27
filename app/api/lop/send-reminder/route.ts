@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createLopServerClient } from "@/lib/lop/supabase";
 import { requireLopAuth } from "@/lib/lop/server-auth";
+import pool from "@/lib/db";
 import nodemailer from "nodemailer";
 
 export async function POST(request: NextRequest) {
@@ -29,35 +29,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createLopServerClient();
-
-    // Fetch patient
-    const { data: patient } = await supabase
-      .from("lop_patients")
-      .select("first_name, last_name, facility_id, lop_facilities(name)")
-      .eq("id", patientId)
-      .single();
-
-    if (!patient) {
-      return NextResponse.json({ error: "Patient not found." }, { status: 404 });
-    }
+    // Fetch patient with facility name
+    const patientRes = await pool.query(
+      `SELECT p.first_name, p.last_name, p.facility_id, f.name AS facility_name
+       FROM lop_patients p
+       LEFT JOIN lop_facilities f ON f.id = p.facility_id
+       WHERE p.id = $1`,
+      [patientId]
+    );
+    const patient = patientRes.rows[0];
+    if (!patient) return NextResponse.json({ error: "Patient not found." }, { status: 404 });
 
     // Fetch law firm
-    const { data: firm } = await supabase
-      .from("lop_law_firms")
-      .select("name, intake_email, escalation_email")
-      .eq("id", lawFirmId)
-      .single();
-
+    const firmRes = await pool.query(
+      `SELECT name, intake_email, escalation_email FROM lop_law_firms WHERE id = $1`,
+      [lawFirmId]
+    );
+    const firm = firmRes.rows[0];
     if (!firm?.intake_email) {
-      return NextResponse.json(
-        { error: "Law firm has no intake email." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Law firm has no intake email." }, { status: 400 });
     }
 
-    const facilityName =
-      (patient.lop_facilities as unknown as { name: string } | null)?.name ?? "Focus Health ER";
+    const facilityName = patient.facility_name ?? "Focus Health ER";
     const patientName = `${patient.first_name} ${patient.last_name}`;
 
     // Send email
@@ -104,14 +97,11 @@ export async function POST(request: NextRequest) {
 
     // HIPAA: Log the reminder action with IP
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-    await supabase.from("lop_audit_log").insert({
-      user_id: auth.lopUser.id,
-      action: "send_lop_reminder",
-      entity_type: "patient",
-      entity_id: patientId,
-      ip_address: ip,
-      new_values: { law_firm_id: lawFirmId, recipient: firm.intake_email },
-    });
+    await pool.query(
+      `INSERT INTO lop_audit_log (user_id, action, entity_type, entity_id, ip_address, new_values)
+       VALUES ($1, 'send_lop_reminder', 'patient', $2, $3, $4)`,
+      [auth.lopUser.id, patientId, ip, JSON.stringify({ law_firm_id: lawFirmId, recipient: firm.intake_email })]
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

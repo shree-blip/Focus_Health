@@ -1,13 +1,16 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
- * Client-side Supabase client re-exported as an `any`-typed instance
- * so LOP table queries compile before the generated types are updated.
- * This file is safe to import from client components only.
+ * Legacy file — lopClient was the Supabase browser client.
+ * Now LOP uses API routes backed by Cloud SQL.
+ * This stub prevents import errors in files not yet updated.
  */
-export const lopClient = supabase as ReturnType<typeof createClient<any>>;
+
+// No-op stub for any remaining references
+export const lopClient = {
+  auth: {
+    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signOut: () => Promise.resolve({ error: null }),
+  },
+} as unknown as ReturnType<typeof import("@supabase/supabase-js").createClient<never>>;

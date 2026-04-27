@@ -14,7 +14,8 @@ import {
   buildDateFilteredContext,
 } from "@/lib/lop/ai-context";
 import { parseDateExpression } from "@/lib/lop/ai-utils";
-import { requireLopAuth, getAdminClient } from "@/lib/lop/server-auth";
+import { requireLopAuth } from "@/lib/lop/server-auth";
+import pool from "@/lib/db";
 
 type ContextType = "general" | "dashboard_briefing" | "patient_summary" | "reports_analysis";
 
@@ -125,15 +126,12 @@ export async function POST(request: NextRequest) {
 
     // HIPAA: Audit log the AI query (fire-and-forget)
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-    const adminDb = getAdminClient();
-    void adminDb.from("lop_audit_log").insert({
-      user_id: auth.lopUser.id,
-      action: `ai_query:${ctxType}`,
-      entity_type: context_id ? "patient" : "dashboard",
-      entity_id: context_id ?? null,
-      ip_address: ip,
-      new_values: { context_type: ctxType, message_count: (messages ?? []).length },
-    });
+    pool.query(
+      `INSERT INTO lop_audit_log (user_id, action, entity_type, entity_id, ip_address, new_values)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [auth.lopUser.id, `ai_query:${ctxType}`, context_id ? "patient" : "dashboard", context_id ?? null, ip,
+       JSON.stringify({ context_type: ctxType, message_count: (messages ?? []).length })]
+    ).catch(console.error);
 
     // Stream the response
     const result = streamText({

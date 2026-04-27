@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createLopServerClient } from "@/lib/lop/supabase";
 import { requireLopAuth } from "@/lib/lop/server-auth";
+import pool from "@/lib/db";
 import nodemailer from "nodemailer";
 import twilio from "twilio";
 
@@ -50,31 +50,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createLopServerClient();
-
     // Fetch patient with facility and law firm info
-    const { data: patient } = await supabase
-      .from("lop_patients")
-      .select(
-        "first_name, last_name, email, phone, expected_arrival, arrival_window_min, facility_id, lop_facilities(name, director_email, front_desk_email), lop_law_firms(name)",
-      )
-      .eq("id", patientId)
-      .single();
+    const patientRes = await pool.query(
+      `SELECT p.first_name, p.last_name, p.email, p.phone, p.expected_arrival, p.arrival_window_min, p.facility_id,
+              f.name AS facility_name, f.director_email, f.front_desk_email, lf.name AS law_firm_name
+       FROM lop_patients p
+       LEFT JOIN lop_facilities f ON f.id = p.facility_id
+       LEFT JOIN lop_law_firms lf ON lf.id = p.law_firm_id
+       WHERE p.id = $1`,
+      [patientId]
+    );
+    const patient = patientRes.rows[0];
+    if (!patient) return NextResponse.json({ error: "Patient not found." }, { status: 404 });
 
-    if (!patient) {
-      return NextResponse.json({ error: "Patient not found." }, { status: 404 });
-    }
-
-    const facility = patient.lop_facilities as unknown as {
-      name: string;
-      director_email: string | null;
-      front_desk_email: string | null;
-    } | null;
-
-    const facilityName = facility?.name ?? "Focus Health ER";
-    const lawFirmName =
-      (patient.lop_law_firms as unknown as { name: string } | null)?.name ?? "N/A";
+    const facilityName = patient.facility_name ?? "Focus Health ER";
+    const lawFirmName = patient.law_firm_name ?? "N/A";
     const patientName = `${patient.first_name} ${patient.last_name}`;
+    const facility = { name: facilityName, director_email: patient.director_email, front_desk_email: patient.front_desk_email };
 
     // Format arrival time
     const arrivalDate = patient.expected_arrival
@@ -215,20 +207,11 @@ export async function POST(request: NextRequest) {
 
         // Audit log the SMS
         const ipSms = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-        await supabase.from("lop_audit_log").insert({
-          user_id: auth.lopUser.id,
-          action: "schedule_sms_sent",
-          entity_type: "patient",
-          entity_id: patientId,
-          facility_id: patient.facility_id,
-          ip_address: ipSms,
-          new_values: {
-            recipient_type: "patient_sms",
-            phone: patientPhone,
-            twilio_sid: msg.sid,
-            expected_arrival: patient.expected_arrival,
-          },
-        });
+        pool.query(
+          `INSERT INTO lop_audit_log (user_id, action, entity_type, entity_id, facility_id, ip_address, new_values)
+           VALUES ($1, 'schedule_sms_sent', 'patient', $2, $3, $4, $5)`,
+          [auth.lopUser.id, patientId, patient.facility_id, ipSms, JSON.stringify({ recipient_type: "patient_sms", phone: patientPhone, twilio_sid: msg.sid, expected_arrival: patient.expected_arrival })]
+        ).catch(console.error);
       } catch (smsErr: unknown) {
         // Log full Twilio error details
         const errMsg = smsErr instanceof Error ? smsErr.message : String(smsErr);
@@ -238,20 +221,11 @@ export async function POST(request: NextRequest) {
 
         // Also log the failure to the audit log so admin can see it
         const ipSmsErr = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-        await supabase.from("lop_audit_log").insert({
-          user_id: auth.lopUser.id,
-          action: "schedule_sms_failed",
-          entity_type: "patient",
-          entity_id: patientId,
-          facility_id: patient.facility_id,
-          ip_address: ipSmsErr,
-          new_values: {
-            recipient_type: "patient_sms",
-            phone: patientPhone,
-            error: errMsg,
-            twilio_error_code: errCode,
-          },
-        });
+        pool.query(
+          `INSERT INTO lop_audit_log (user_id, action, entity_type, entity_id, facility_id, ip_address, new_values)
+           VALUES ($1, 'schedule_sms_failed', 'patient', $2, $3, $4, $5)`,
+          [auth.lopUser.id, patientId, patient.facility_id, ipSmsErr, JSON.stringify({ recipient_type: "patient_sms", phone: patientPhone, error: errMsg, twilio_error_code: errCode })]
+        ).catch(console.error);
       }
     } else {
       console.warn("[SMS DEBUG] SMS skipped — missing config or phone. twilioSid?", !!twilioSid, "twilioToken?", !!twilioToken, "twilioFrom?", !!twilioFrom, "patientPhone?", patientPhone);
@@ -260,19 +234,11 @@ export async function POST(request: NextRequest) {
     // HIPAA: Log each notification with user + IP
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
     for (const r of recipients) {
-      await supabase.from("lop_audit_log").insert({
-        user_id: auth.lopUser.id,
-        action: "schedule_notification_sent",
-        entity_type: "patient",
-        entity_id: patientId,
-        facility_id: patient.facility_id,
-        ip_address: ip,
-        new_values: {
-          recipient_type: r.type,
-          recipient_email: r.email,
-          expected_arrival: patient.expected_arrival,
-        },
-      });
+      pool.query(
+        `INSERT INTO lop_audit_log (user_id, action, entity_type, entity_id, facility_id, ip_address, new_values)
+         VALUES ($1, 'schedule_notification_sent', 'patient', $2, $3, $4, $5)`,
+        [auth.lopUser.id, patientId, patient.facility_id, ip, JSON.stringify({ recipient_type: r.type, recipient_email: r.email, expected_arrival: patient.expected_arrival })]
+      ).catch(console.error);
     }
 
     return NextResponse.json({ success: true, sent: sentCount });

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { requireLopAuth, getAdminClient } from "@/lib/lop/server-auth";
+import { requireLopAuth } from "@/lib/lop/server-auth";
+import pool from "@/lib/db";
 
 /**
  * General-purpose LOP database proxy.
@@ -93,8 +94,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const admin = getAdminClient();
-
     // Server-side role check for write operations
     if (operation !== "select") {
       const ruleKey = `${table}:${operation}`;
@@ -107,126 +106,153 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Execute the operation
-    let result: { data: unknown; error: unknown };
+    // Build and execute pg query
+    let rows: unknown[];
+
+    // Helper to build WHERE clause from filters or match object
+    const buildWhere = (
+      fArr?: { column: string; op: string; value: unknown }[],
+      matchObj?: Record<string, unknown>
+    ): { text: string; values: unknown[] } => {
+      const parts: string[] = [];
+      const values: unknown[] = [];
+      if (fArr) {
+        for (const f of fArr) {
+          const idx = values.length + 1;
+          switch (f.op) {
+            case "eq": parts.push(`"${f.column}" = $${idx}`); values.push(f.value); break;
+            case "neq": parts.push(`"${f.column}" != $${idx}`); values.push(f.value); break;
+            case "gt": parts.push(`"${f.column}" > $${idx}`); values.push(f.value); break;
+            case "gte": parts.push(`"${f.column}" >= $${idx}`); values.push(f.value); break;
+            case "lt": parts.push(`"${f.column}" < $${idx}`); values.push(f.value); break;
+            case "lte": parts.push(`"${f.column}" <= $${idx}`); values.push(f.value); break;
+            case "in": parts.push(`"${f.column}" = ANY($${idx})`); values.push(f.value); break;
+            case "is": parts.push(`"${f.column}" IS ${f.value === null ? "NULL" : `$${idx}`}`); if (f.value !== null) values.push(f.value); break;
+            case "not_is": parts.push(`"${f.column}" IS NOT ${f.value === null ? "NULL" : `$${idx}`}`); if (f.value !== null) values.push(f.value); break;
+            case "like": parts.push(`"${f.column}" LIKE $${idx}`); values.push(f.value); break;
+            case "ilike": parts.push(`"${f.column}" ILIKE $${idx}`); values.push(f.value); break;
+          }
+        }
+      }
+      if (matchObj) {
+        for (const [key, val] of Object.entries(matchObj)) {
+          const idx = values.length + 1;
+          parts.push(`"${key}" = $${idx}`);
+          values.push(val);
+        }
+      }
+      const text = parts.length ? `WHERE ${parts.join(" AND ")}` : "";
+      return { text, values };
+    };
 
     switch (operation) {
       case "select": {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let q: any = admin.from(table).select(selectCols || "*");
-        if (filters) {
-          for (const f of filters) {
-            if (f.op === "eq") q = q.eq(f.column, f.value);
-            else if (f.op === "neq") q = q.neq(f.column, f.value);
-            else if (f.op === "gt") q = q.gt(f.column, f.value);
-            else if (f.op === "gte") q = q.gte(f.column, f.value);
-            else if (f.op === "lt") q = q.lt(f.column, f.value);
-            else if (f.op === "lte") q = q.lte(f.column, f.value);
-            else if (f.op === "in") q = q.in(f.column, f.value);
-            else if (f.op === "is") q = q.is(f.column, f.value);
-            else if (f.op === "not_is") q = q.not(f.column, "is", f.value);
-            else if (f.op === "like") q = q.like(f.column, f.value);
-            else if (f.op === "ilike") q = q.ilike(f.column, f.value);
-          }
-        }
-        if (order) {
-          q = q.order(order.column, {
-            ascending: order.ascending ?? true,
-          });
-        }
-        if (queryLimit) q = q.limit(queryLimit);
+        const cols = selectCols && selectCols !== "*" ? selectCols : "*";
+        const { text: whereText, values } = buildWhere(filters);
+        let sql = `SELECT ${cols} FROM "${table}" ${whereText}`;
+        if (order) sql += ` ORDER BY "${order.column}" ${(order.ascending ?? true) ? "ASC" : "DESC"}`;
+        if (queryLimit) sql += ` LIMIT ${parseInt(queryLimit, 10)}`;
+        const res = await pool.query(sql, values);
+        rows = res.rows;
         if (single) {
-          result = await q.single();
-        } else {
-          result = await q;
+          return NextResponse.json({ data: rows[0] ?? null });
         }
         break;
       }
 
       case "insert": {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let q: any = admin.from(table).insert(data);
-        if (selectCols) q = q.select(selectCols);
-        if (single) {
-          result = await q.single();
-        } else {
-          result = await q;
+        const record = Array.isArray(data) ? data : [data];
+        const inserted: unknown[] = [];
+        for (const row of record) {
+          const entries = Object.entries(row as Record<string, unknown>);
+          const keys = entries.map(([k]) => `"${k}"`).join(", ");
+          const vals = entries.map((_, i) => `$${i + 1}`).join(", ");
+          const values = entries.map(([, v]) => v);
+          const res = await pool.query(
+            `INSERT INTO "${table}" (${keys}) VALUES (${vals}) RETURNING *`,
+            values
+          );
+          inserted.push(res.rows[0]);
         }
+        rows = inserted;
+        if (single) return NextResponse.json({ data: rows[0] ?? null });
         break;
       }
 
       case "update": {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let q: any = admin.from(table).update(data);
-        if (match) {
-          for (const [key, val] of Object.entries(match)) {
-            q = q.eq(key, val as string);
-          }
+        if (!match || Object.keys(match).length === 0) {
+          return NextResponse.json({ error: "match is required for update" }, { status: 400 });
         }
-        if (selectCols) q = q.select(selectCols);
-        if (single) {
-          result = await q.single();
-        } else {
-          result = await q;
-        }
+        const setEntries = Object.entries(data as Record<string, unknown>);
+        const setClauses = setEntries.map(([k], i) => `"${k}" = $${i + 1}`).join(", ");
+        const setValues = setEntries.map(([, v]) => v);
+        const { text: whereText, values: whereValues } = buildWhere(undefined, match);
+        const offsetValues = whereValues.map((v, i) => ({ v, i: setEntries.length + i + 1 }));
+        const offsetWhere = offsetValues.length
+          ? `WHERE ${Object.keys(match).map((k, i) => `"${k}" = $${setEntries.length + i + 1}`).join(" AND ")}`
+          : "";
+        const sql = `UPDATE "${table}" SET ${setClauses} ${offsetWhere} RETURNING *`;
+        const allValues = [...setValues, ...whereValues];
+        const res = await pool.query(sql, allValues);
+        rows = res.rows;
+        void offsetValues; // silence unused warning
+        if (single) return NextResponse.json({ data: rows[0] ?? null });
         break;
       }
 
       case "delete": {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let q: any = admin.from(table).delete();
-        if (match) {
-          for (const [key, val] of Object.entries(match)) {
-            q = q.eq(key, val as string);
-          }
+        if (!match || Object.keys(match).length === 0) {
+          return NextResponse.json({ error: "match is required for delete" }, { status: 400 });
         }
-        result = await q;
+        const { text: whereText, values } = buildWhere(undefined, match);
+        await pool.query(`DELETE FROM "${table}" ${whereText}`, values);
+        rows = [];
         break;
       }
 
       case "upsert": {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let q: any = admin.from(table).upsert(data);
-        if (selectCols) q = q.select(selectCols);
-        if (single) {
-          result = await q.single();
-        } else {
-          result = await q;
+        const record = Array.isArray(data) ? data : [data];
+        const upserted: unknown[] = [];
+        for (const row of record) {
+          const entries = Object.entries(row as Record<string, unknown>);
+          const keys = entries.map(([k]) => `"${k}"`).join(", ");
+          const vals = entries.map((_, i) => `$${i + 1}`).join(", ");
+          const values = entries.map(([, v]) => v);
+          const setClauses = entries.map(([k]) => `"${k}" = EXCLUDED."${k}"`).join(", ");
+          const res = await pool.query(
+            `INSERT INTO "${table}" (${keys}) VALUES (${vals}) ON CONFLICT DO UPDATE SET ${setClauses} RETURNING *`,
+            values
+          );
+          upserted.push(res.rows[0]);
         }
+        rows = upserted;
+        if (single) return NextResponse.json({ data: rows[0] ?? null });
         break;
       }
 
       default:
-        return NextResponse.json(
-          { error: `Unknown operation: ${operation}` },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: `Unknown operation: ${operation}` }, { status: 400 });
     }
 
-    if (result.error) {
-      console.error(`LOP DB error [${table}.${operation}]:`, result.error);
-      return NextResponse.json(
-        { error: (result.error as { message?: string }).message || "Database error" },
-        { status: 500 },
-      );
-    }
-
-    // HIPAA: Log PHI read access
+    // HIPAA: Log PHI read access (fire-and-forget)
     if (operation === "select" && PHI_TABLES.includes(table)) {
-      // Fire-and-forget — don't block the response
       const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
-      void admin.from("lop_audit_log").insert({
-        user_id: lopUser.id,
-        action: `phi_read:${table}`,
-        entity_type: table.replace("lop_", ""),
-        entity_id: (filters?.find((f: { column: string; op: string; value: string }) => f.column === "id" && f.op === "eq")?.value) ?? null,
-        facility_id: (filters?.find((f: { column: string; op: string; value: string }) => f.column === "facility_id" && f.op === "eq")?.value) ?? null,
-        ip_address: ip,
-        new_values: { select: selectCols ?? "*", filter_count: filters?.length ?? 0 },
-      });
+      pool.query(
+        `INSERT INTO lop_audit_log (user_id, action, entity_type, entity_id, facility_id, ip_address, new_values)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          lopUser.id,
+          `phi_read:${table}`,
+          table.replace("lop_", ""),
+          filters?.find((f: { column: string; op: string }) => f.column === "id" && f.op === "eq")?.value ?? null,
+          filters?.find((f: { column: string; op: string }) => f.column === "facility_id" && f.op === "eq")?.value ?? null,
+          ip,
+          JSON.stringify({ select: selectCols ?? "*", filter_count: filters?.length ?? 0 }),
+        ]
+      ).catch(console.error);
     }
 
-    return NextResponse.json({ data: result.data });
+    return NextResponse.json({ data: rows });
   } catch (err) {
     console.error("LOP DB proxy error:", err);
     return NextResponse.json(

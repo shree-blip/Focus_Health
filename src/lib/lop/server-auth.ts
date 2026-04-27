@@ -1,109 +1,81 @@
-import { createServerClient } from "@supabase/ssr";
+/**
+ * LOP server-side auth helpers — Cloud SQL only, no Supabase.
+ */
 import { cookies } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
+import { queryOne, query } from "@/lib/db";
+import { LOP_SESSION_COOKIE, verifyLopSessionToken } from "./lop-auth";
+
+export interface LopUser {
+  id: string;
+  auth_user_id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  is_active: boolean;
+}
 
 /**
- * Verify the authenticated user from the session cookie (server-side).
- * This is the ONLY trusted way to identify a user in API routes.
- *
- * HIPAA: Never trust client-supplied auth_user_id — always verify from the cookie.
- *
- * Returns { authUserId, email, aal } or null if not authenticated.
+ * Verify auth from session cookie and return basic session info (no extra DB lookup).
  */
-export async function getAuthenticatedUser(): Promise<{
-  authUserId: string;
-  email: string;
-  aal: string;
-} | null> {
+export async function getAuthenticatedUser(): Promise<{ authUserId: string; email: string; lopUserId: string } | null> {
   try {
     const cookieStore = await cookies();
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY)!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll() {
-            // API routes are read-only for cookies in this context
-          },
-        },
-      },
-    );
-
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-
-    if (error || !user) return null;
-
-    // HIPAA: Check MFA assurance level
-    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    const aal = aalData?.currentLevel ?? "aal1";
-
-    return {
-      authUserId: user.id,
-      email: user.email ?? "",
-      aal,
-    };
+    const token = cookieStore.get(LOP_SESSION_COOKIE)?.value;
+    const session = verifyLopSessionToken(token);
+    if (!session) return null;
+    return { authUserId: session.lopUserId, email: session.email, lopUserId: session.lopUserId };
   } catch {
     return null;
   }
 }
 
 /**
- * Get the admin (service-role) Supabase client.
- * Bypasses RLS — use only on the server after authentication.
+ * Run a raw query against lop_* tables (replaces getAdminClient()).
  */
-export function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+export async function lopDbQuery<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]> {
+  return query<T>(sql, params);
+}
+
+export async function lopDbQueryOne<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T | null> {
+  return queryOne<T>(sql, params);
+}
+
+/** @deprecated Use lopDbQuery/lopDbQueryOne instead */
+export function getAdminClient(): never {
+  throw new Error("getAdminClient is removed. Use lopDbQuery from server-auth instead.");
+}
+
+/**
+ * Get a LOP user by their id from Cloud SQL.
+ */
+export async function getLopUser(lopUserId: string) {
+  return queryOne<LopUser>(
+    `SELECT id, auth_user_id, email, full_name, role, is_active
+     FROM lop_users WHERE id = $1 AND is_active = TRUE`,
+    [lopUserId]
   );
 }
 
 /**
- * Verify a user is an active LOP user and return their record.
- * Uses the admin client to query lop_users by auth_user_id.
- */
-export async function getLopUser(authUserId: string) {
-  const admin = getAdminClient();
-  const { data } = await admin
-    .from("lop_users")
-    .select("id, role, is_active, email, full_name")
-    .eq("auth_user_id", authUserId)
-    .single();
-
-  if (!data || !data.is_active) return null;
-  return data as {
-    id: string;
-    role: string;
-    is_active: boolean;
-    email: string;
-    full_name: string;
-  };
-}
-
-/**
- * Full auth check: cookie → auth user → LOP user lookup.
+ * Full auth check: cookie → session verify → LOP user lookup.
  * Returns { authUserId, lopUser } or null.
- *
- * NOTE: MFA (AAL2) enforcement is handled by middleware.ts which CAN
- * read/write cookies for token refresh. API routes have read-only cookies
- * (setAll is a no-op), so getAuthenticatorAssuranceLevel() can return
- * stale AAL1 after a token refresh. Enforcing AAL2 here would block
- * all data fetching for users who already passed the middleware MFA check.
  */
-export async function requireLopAuth() {
-  const authUser = await getAuthenticatedUser();
-  if (!authUser) return null;
+export async function requireLopAuth(): Promise<{ authUserId: string; lopUser: LopUser } | null> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(LOP_SESSION_COOKIE)?.value;
+    const session = verifyLopSessionToken(token);
+    if (!session) return null;
 
-  const lopUser = await getLopUser(authUser.authUserId);
-  if (!lopUser) return null;
+    const lopUser = await queryOne<LopUser>(
+      `SELECT id, auth_user_id, email, full_name, role, is_active
+       FROM lop_users WHERE id = $1 AND is_active = TRUE`,
+      [session.lopUserId]
+    );
+    if (!lopUser) return null;
 
-  return { authUserId: authUser.authUserId, lopUser };
+    return { authUserId: session.lopUserId, lopUser };
+  } catch {
+    return null;
+  }
 }

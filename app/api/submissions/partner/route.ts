@@ -49,24 +49,6 @@ export async function POST(req: NextRequest) {
       console.error("Email send failed (non-blocking):", emailError);
     }
 
-    // Optionally forward to Supabase Edge Function (best-effort)
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
-      if (supabaseUrl && supabaseKey) {
-        await fetch(`${supabaseUrl}/functions/v1/send-investor-request`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({ name, firm: marketInterest, email, phone }),
-        });
-      }
-    } catch {
-      // Silently ignore edge function errors — data is still saved client-side
-    }
-
     // Persist to Cloud SQL
     try {
       await query(

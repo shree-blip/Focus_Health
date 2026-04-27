@@ -1,4 +1,4 @@
-import { createLopServerClient } from "./supabase";
+import pool from "@/lib/db";
 import {
   analyzePatientCompleteness,
   formatMissingFields,
@@ -7,29 +7,40 @@ import {
 
 /**
  * Server-side AI context builders.
- * These fetch data from Supabase using the service-role client
- * and format it into structured text for the LLM system prompt.
+ * Fetch data from Cloud SQL (pg) and format for the LLM system prompt.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Rec = Record<string, any>;
 
 export async function buildDashboardContext(facilityId?: string | null): Promise<string> {
-  const db = createLopServerClient();
-
-  // Patients with docs
-  let query = db
-    .from("lop_patients")
-    .select("*, lop_patient_documents(document_type, status), lop_facilities(name), lop_law_firms(name)");
-  if (facilityId) query = query.eq("facility_id", facilityId);
-  const { data: patients } = await query;
-  const all: Rec[] = patients ?? [];
-
-  // Facilities
-  const { data: facilities } = await db.from("lop_facilities").select("id, name, is_active");
-
-  // Law firms
-  const { data: lawFirms } = await db.from("lop_law_firms").select("id, name, is_active");
+  const patientSql = facilityId
+    ? `SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name,
+              json_agg(DISTINCT jsonb_build_object('document_type', pd.document_type, 'status', pd.status)) FILTER (WHERE pd.id IS NOT NULL) AS lop_patient_documents
+       FROM lop_patients p
+       LEFT JOIN lop_facilities f ON f.id = p.facility_id
+       LEFT JOIN lop_law_firms lf ON lf.id = p.law_firm_id
+       LEFT JOIN lop_patient_documents pd ON pd.patient_id = p.id
+       WHERE p.facility_id = $1 GROUP BY p.id, f.name, lf.name`
+    : `SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name,
+              json_agg(DISTINCT jsonb_build_object('document_type', pd.document_type, 'status', pd.status)) FILTER (WHERE pd.id IS NOT NULL) AS lop_patient_documents
+       FROM lop_patients p
+       LEFT JOIN lop_facilities f ON f.id = p.facility_id
+       LEFT JOIN lop_law_firms lf ON lf.id = p.law_firm_id
+       LEFT JOIN lop_patient_documents pd ON pd.patient_id = p.id
+       GROUP BY p.id, f.name, lf.name`;
+  const [patientRes, facilityRes, firmRes] = await Promise.all([
+    pool.query(patientSql, facilityId ? [facilityId] : []),
+    pool.query(`SELECT id, name, is_active FROM lop_facilities`),
+    pool.query(`SELECT id, name, is_active FROM lop_law_firms`),
+  ]);
+  const all: Rec[] = patientRes.rows.map((p) => ({
+    ...p,
+    lop_facilities: { name: p.facility_name },
+    lop_law_firms: { name: p.law_firm_name },
+  }));
+  const facilities = facilityRes.rows;
+  const lawFirms = firmRes.rows;
 
   // Today's date
   const today = new Date().toISOString().split("T")[0];
@@ -167,33 +178,30 @@ ${all.map((p) => {
 }
 
 export async function buildPatientContext(patientId: string): Promise<string> {
-  const db = createLopServerClient();
+  const [patientRes, reminderRes, auditRes] = await Promise.all([
+    pool.query(
+      `SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name, lf.primary_contact AS law_firm_contact, lf.intake_email AS law_firm_email,
+              json_agg(DISTINCT jsonb_build_object('id', pd.id, 'document_type', pd.document_type, 'status', pd.status, 'file_name', pd.file_name)) FILTER (WHERE pd.id IS NOT NULL) AS lop_patient_documents
+       FROM lop_patients p
+       LEFT JOIN lop_facilities f ON f.id = p.facility_id
+       LEFT JOIN lop_law_firms lf ON lf.id = p.law_firm_id
+       LEFT JOIN lop_patient_documents pd ON pd.patient_id = p.id
+       WHERE p.id = $1 GROUP BY p.id, f.name, lf.name, lf.primary_contact, lf.intake_email`,
+      [patientId]
+    ),
+    pool.query(`SELECT * FROM lop_reminder_emails WHERE patient_id = $1 ORDER BY sent_at DESC LIMIT 20`, [patientId]),
+    pool.query(`SELECT * FROM lop_audit_log WHERE entity_id = $1 AND entity_type = 'patient' ORDER BY created_at DESC LIMIT 30`, [patientId]),
+  ]);
 
-  // Full patient with relations
-  const { data: patient } = await db
-    .from("lop_patients")
-    .select("*, lop_facilities(name), lop_law_firms(name, primary_contact, intake_email), lop_patient_documents(*)")
-    .eq("id", patientId)
-    .single();
-
-  if (!patient) return "Patient not found.";
-
-  // Reminders
-  const { data: reminders } = await db
-    .from("lop_reminder_emails")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("sent_at", { ascending: false })
-    .limit(20);
-
-  // Audit log
-  const { data: auditLogs } = await db
-    .from("lop_audit_log")
-    .select("*")
-    .eq("entity_id", patientId)
-    .eq("entity_type", "patient")
-    .order("created_at", { ascending: false })
-    .limit(30);
+  if (!patientRes.rows[0]) return "Patient not found.";
+  const raw = patientRes.rows[0];
+  const patient: Rec = {
+    ...raw,
+    lop_facilities: { name: raw.facility_name },
+    lop_law_firms: { name: raw.law_firm_name, primary_contact: raw.law_firm_contact, intake_email: raw.law_firm_email },
+  };
+  const reminders = reminderRes.rows;
+  const auditLogs = auditRes.rows;
 
   const docs: Rec[] = Array.isArray(patient.lop_patient_documents) ? patient.lop_patient_documents : [];
   const requiredTypes = ["lop_letter", "medical_record", "bill_llc"];
@@ -311,53 +319,27 @@ export async function buildDateFilteredContext(
   dateFrom: string,
   dateTo: string,
 ): Promise<string> {
-  const db = createLopServerClient();
   const nowISO = new Date().toISOString();
-
-  // End-of-day for the "to" date
   const dateToEnd = `${dateTo}T23:59:59`;
 
-  // Patients created in range
-  let createdQuery = db
-    .from("lop_patients")
-    .select("*, lop_facilities(name), lop_law_firms(name)")
-    .gte("created_at", dateFrom)
-    .lte("created_at", dateToEnd);
-  if (facilityId) createdQuery = createdQuery.eq("facility_id", facilityId);
-  const { data: createdPatients } = await createdQuery;
-  const created: Rec[] = createdPatients ?? [];
+  const baseJoin = `FROM lop_patients p LEFT JOIN lop_facilities f ON f.id = p.facility_id LEFT JOIN lop_law_firms lf ON lf.id = p.law_firm_id`;
+  const facFilter = facilityId ? ` AND p.facility_id = '${facilityId}'` : "";
 
-  // Patients with expected arrival in range
-  let arrivalQuery = db
-    .from("lop_patients")
-    .select("*, lop_facilities(name), lop_law_firms(name)")
-    .gte("expected_arrival", dateFrom)
-    .lte("expected_arrival", dateToEnd);
-  if (facilityId) arrivalQuery = arrivalQuery.eq("facility_id", facilityId);
-  const { data: arrivalPatients } = await arrivalQuery;
-  const arrivals: Rec[] = arrivalPatients ?? [];
+  const [createdRes, arrivalsRes, paidRes, auditRes] = await Promise.all([
+    pool.query(`SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name ${baseJoin} WHERE p.created_at >= $1 AND p.created_at <= $2${facFilter}`, [dateFrom, dateToEnd]),
+    pool.query(`SELECT p.*, f.name AS facility_name ${baseJoin} WHERE p.expected_arrival >= $1 AND p.expected_arrival <= $2${facFilter}`, [dateFrom, dateToEnd]),
+    pool.query(`SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name ${baseJoin} WHERE p.date_paid >= $1 AND p.date_paid <= $2${facFilter}`, [dateFrom, dateToEnd]),
+    pool.query(
+      `SELECT * FROM lop_audit_log WHERE created_at >= $1 AND created_at <= $2${facilityId ? ` AND facility_id = '${facilityId}'` : ""} ORDER BY created_at DESC LIMIT 50`,
+      [dateFrom, dateToEnd]
+    ),
+  ]);
 
-  // Patients paid in range
-  let paidQuery = db
-    .from("lop_patients")
-    .select("*, lop_facilities(name), lop_law_firms(name)")
-    .gte("date_paid", dateFrom)
-    .lte("date_paid", dateToEnd);
-  if (facilityId) paidQuery = paidQuery.eq("facility_id", facilityId);
-  const { data: paidPatients } = await paidQuery;
-  const paid: Rec[] = paidPatients ?? [];
-
-  // Audit log events in range
-  let auditQuery = db
-    .from("lop_audit_log")
-    .select("*")
-    .gte("created_at", dateFrom)
-    .lte("created_at", dateToEnd)
-    .order("created_at", { ascending: false })
-    .limit(50);
-  if (facilityId) auditQuery = auditQuery.eq("facility_id", facilityId);
-  const { data: auditLogs } = await auditQuery;
-  const audits: Rec[] = auditLogs ?? [];
+  const mapRow = (p: Rec) => ({ ...p, lop_facilities: { name: p.facility_name }, lop_law_firms: { name: p.law_firm_name } });
+  const created: Rec[] = createdRes.rows.map(mapRow);
+  const arrivals: Rec[] = arrivalsRes.rows.map(mapRow);
+  const paid: Rec[] = paidRes.rows.map(mapRow);
+  const audits: Rec[] = auditRes.rows;
 
   const totalBilledCreated = created.reduce((s, p) => s + (Number(p.bill_charges) || 0), 0);
   const totalCollectedPaid = paid.reduce((s, p) => s + (Number(p.amount_collected) || 0), 0);

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getAuthenticatedUser, getAdminClient } from "@/lib/lop/server-auth";
+import { getAuthenticatedUser } from "@/lib/lop/server-auth";
+import pool from "@/lib/db";
 
 const ALLOWED_DOMAINS = [
   "getfocushealth.com",
@@ -16,107 +17,64 @@ function isDomainAllowed(email: string): boolean {
 
 export async function POST(_request: NextRequest) {
   try {
-    // HIPAA: Authenticate from session cookie — not client-supplied ID
     const authUser = await getAuthenticatedUser();
     if (!authUser) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
     const auth_user_id = authUser.authUserId;
     const normalizedEmail = authUser.email.toLowerCase();
-    const full_name = normalizedEmail.split("@")[0];
-
-    const admin = getAdminClient();
 
     // Step 1: Check by auth_user_id
-    const { data: existingById } = await admin
-      .from("lop_users")
-      .select("*")
-      .eq("auth_user_id", auth_user_id)
-      .single();
-
-    if (existingById) {
-      return NextResponse.json({ user: existingById });
-    }
+    const byId = await pool.query(
+      `SELECT * FROM lop_users WHERE auth_user_id = $1 LIMIT 1`,
+      [auth_user_id]
+    );
+    if (byId.rows[0]) return NextResponse.json({ user: byId.rows[0] });
 
     // Step 2: Check by email and link auth_user_id
-    if (normalizedEmail) {
-      const { data: existingByEmail } = await admin
-        .from("lop_users")
-        .select("*")
-        .eq("email", normalizedEmail)
-        .single();
-
-      if (existingByEmail) {
-        const { data: linked } = await admin
-          .from("lop_users")
-          .update({ auth_user_id })
-          .eq("id", existingByEmail.id)
-          .select("*")
-          .single();
-
-        return NextResponse.json({ user: linked || existingByEmail });
-      }
+    const byEmail = await pool.query(
+      `SELECT * FROM lop_users WHERE email = $1 LIMIT 1`,
+      [normalizedEmail]
+    );
+    if (byEmail.rows[0]) {
+      const linked = await pool.query(
+        `UPDATE lop_users SET auth_user_id = $1 WHERE id = $2 RETURNING *`,
+        [auth_user_id, byEmail.rows[0].id]
+      );
+      return NextResponse.json({ user: linked.rows[0] || byEmail.rows[0] });
     }
 
     // Step 3: Auto-provision if domain is allowed
-    if (normalizedEmail && isDomainAllowed(normalizedEmail)) {
-      const { data: newUser, error: insertError } = await admin
-        .from("lop_users")
-        .insert({
-          auth_user_id,
-          email: normalizedEmail,
-          full_name: full_name || normalizedEmail.split("@")[0],
-          role: "front_desk",
-          is_active: true,
-        })
-        .select("*")
-        .single();
+    if (isDomainAllowed(normalizedEmail)) {
+      const newUser = await pool.query(
+        `INSERT INTO lop_users (auth_user_id, email, full_name, role, is_active)
+         VALUES ($1, $2, $3, 'front_desk', TRUE) RETURNING *`,
+        [auth_user_id, normalizedEmail, normalizedEmail.split("@")[0]]
+      );
 
-      if (insertError) {
-        console.error("Provision insert error:", insertError);
-        return NextResponse.json(
-          { error: "Failed to create account: " + insertError.message },
-          { status: 500 },
-        );
+      if (newUser.rows[0]) {
+        pool.query(
+          `INSERT INTO lop_audit_log (action, entity_type, entity_id, new_values)
+           VALUES ($1, 'user', $2, $3)`,
+          [
+            "user_auto_provisioned",
+            newUser.rows[0].id,
+            JSON.stringify({ email: normalizedEmail, role: "front_desk", note: "Auto-provisioned — awaiting admin facility assignment" }),
+          ]
+        ).catch(console.error);
+
+        return NextResponse.json({ user: newUser.rows[0] });
       }
-
-      // HIPAA: Do NOT auto-assign all facilities.
-      // New users start with zero facility access.
-      // An admin must explicitly assign facilities (minimum-necessary principle).
-      // Log the auto-provisioning event.
-      if (newUser) {
-        await admin.from("lop_audit_log").insert({
-          action: "user_auto_provisioned",
-          entity_type: "user",
-          entity_id: newUser.id,
-          new_values: {
-            email: normalizedEmail,
-            role: "front_desk",
-            note: "Auto-provisioned — awaiting admin facility assignment",
-          },
-        });
-      }
-
-      return NextResponse.json({ user: newUser });
     }
 
-    // Domain not allowed
     return NextResponse.json(
-      {
-        error:
-          "Your email domain is not authorized for the LOP Dashboard. Contact your administrator.",
-      },
-      { status: 403 },
+      { error: "Your email domain is not authorized for the LOP Dashboard. Contact your administrator." },
+      { status: 403 }
     );
   } catch (err) {
     console.error("Provision error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+

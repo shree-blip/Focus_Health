@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createLopServerClient } from "@/lib/lop/supabase";
+import pool from "@/lib/db";
 import nodemailer from "nodemailer";
 
 /**
@@ -16,55 +16,37 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createLopServerClient();
-
   // Fetch configured delay (defaults to 5 days)
-  const { data: configRows } = await supabase
-    .from("lop_config")
-    .select("value")
-    .eq("key", "reminder_delay_days")
-    .single();
-  const delayDays = Number(configRows?.value ?? 5);
+  const configRes = await pool.query(`SELECT value FROM lop_config WHERE key = 'reminder_delay_days' LIMIT 1`);
+  const delayDays = Number(configRes.rows[0]?.value ?? 5);
 
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - delayDays);
 
   // Find patients missing LOP letter whose created_at is older than cutoff
-  const { data: rawPatients } = await supabase
-    .from("lop_patients")
-    .select(
-      "id, first_name, last_name, facility_id, law_firm_id, lop_letter_on_file, created_at, " +
-        "lop_facilities(name), lop_law_firms(name, intake_email, escalation_email)"
-    )
-    .eq("lop_letter_on_file", false)
-    .neq("case_status", "dropped")
-    .lt("created_at", cutoff.toISOString());
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patients = (rawPatients ?? []) as any[];
+  const patientsRes = await pool.query(
+    `SELECT p.id, p.first_name, p.last_name, p.facility_id, p.law_firm_id, p.lop_letter_on_file, p.created_at,
+            f.name AS facility_name, lf.name AS law_firm_name, lf.intake_email, lf.escalation_email
+     FROM lop_patients p
+     LEFT JOIN lop_facilities f ON f.id = p.facility_id
+     LEFT JOIN lop_law_firms lf ON lf.id = p.law_firm_id
+     WHERE p.lop_letter_on_file = FALSE AND p.case_status != 'dropped' AND p.created_at < $1`,
+    [cutoff.toISOString()]
+  );
+  const patients = patientsRes.rows;
 
   if (!patients.length) {
     return NextResponse.json({ sent: 0, message: "No reminders needed." });
   }
 
   // Check if we already sent a reminder within the last `delayDays` period
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patientIds = patients.map((p: any) => p.id);
-  const { data: rawReminders } = await supabase
-    .from("lop_reminder_emails")
-    .select("patient_id, sent_at")
-    .in("patient_id", patientIds)
-    .gte("sent_at", cutoff.toISOString());
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recentReminders = (rawReminders ?? []) as any[];
-
-  const recentlyRemindedIds = new Set(
-    recentReminders.map((r: { patient_id: string }) => r.patient_id)
+  const patientIds = patients.map((p) => p.id);
+  const remindersRes = await pool.query(
+    `SELECT patient_id FROM lop_reminder_emails WHERE patient_id = ANY($1) AND sent_at >= $2`,
+    [patientIds, cutoff.toISOString()]
   );
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const toRemind = patients.filter((p: any) => !recentlyRemindedIds.has(p.id));
+  const recentlyRemindedIds = new Set(remindersRes.rows.map((r) => r.patient_id));
+  const toRemind = patients.filter((p) => !recentlyRemindedIds.has(p.id));
 
   if (!toRemind.length) {
     return NextResponse.json({
@@ -84,16 +66,9 @@ export async function GET(request: NextRequest) {
   const errors: string[] = [];
 
   for (const patient of toRemind) {
-    const firm = patient.lop_law_firms as unknown as {
-      name: string;
-      intake_email: string | null;
-      escalation_email: string | null;
-    };
-    if (!firm?.intake_email) continue;
-
-    const facilityName =
-      (patient.lop_facilities as unknown as { name: string })?.name ??
-      "Focus Health ER";
+    if (!patient.intake_email) continue;
+    const firm = { name: patient.law_firm_name ?? "Law Firm", intake_email: patient.intake_email, escalation_email: patient.escalation_email };
+    const facilityName = patient.facility_name ?? "Focus Health ER";
     const patientName = `${patient.first_name} ${patient.last_name}`;
 
     try {
@@ -126,12 +101,10 @@ export async function GET(request: NextRequest) {
       });
 
       // Log the reminder
-      await supabase.from("lop_reminder_emails").insert({
-        patient_id: patient.id,
-        law_firm_id: patient.law_firm_id,
-        sent_to: firm.intake_email,
-        email_type: "lop_request",
-      });
+      await pool.query(
+        `INSERT INTO lop_reminder_emails (patient_id, law_firm_id, sent_to, email_type) VALUES ($1, $2, $3, 'lop_request')`,
+        [patient.id, patient.law_firm_id, firm.intake_email]
+      );
 
       sent++;
     } catch (err) {
