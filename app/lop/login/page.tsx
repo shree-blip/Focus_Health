@@ -3,10 +3,13 @@
 import { Suspense, useState } from "react";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
+import { GoogleOAuthProvider, GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -17,6 +20,39 @@ function LoginForm() {
   const router = useRouter();
   const redirect = searchParams.get("redirect") || "/lop";
 
+  // ── Google login ──────────────────────────────────────────────────────────
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError("Google sign-in failed. Please try again.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/lop/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      if (res.ok) {
+        router.push(redirect);
+      } else {
+        const { error: msg } = await res.json();
+        setError(msg || "Google sign-in failed. Your account may not have LOP access.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google sign-in was cancelled or failed. Please try again.");
+  };
+
+  // ── Email/password login ──────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -51,11 +87,34 @@ function LoginForm() {
             <Image src="/favicon.png" alt="Focus Health" width={56} height={56} className="rounded-xl" />
           </div>
           <h1 className="text-2xl font-bold text-center text-slate-900 mb-1">LOP Dashboard</h1>
-          <p className="text-sm text-center text-slate-500 mb-8">Sign in with your work credentials</p>
+          <p className="text-sm text-center text-slate-500 mb-8">Sign in to your account</p>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-4">{error}</div>
           )}
+
+          {/* Google Sign-In */}
+          <div className="flex justify-center mb-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              theme="outline"
+              size="large"
+              width="368"
+              text="signin_with"
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-xs text-slate-400 uppercase">
+              <span className="bg-white px-3">or sign in with email</span>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -101,8 +160,16 @@ function LoginForm() {
 
 export default function LopLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>}>
-      <LoginForm />
-    </Suspense>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          </div>
+        }
+      >
+        <LoginForm />
+      </Suspense>
+    </GoogleOAuthProvider>
   );
 }
