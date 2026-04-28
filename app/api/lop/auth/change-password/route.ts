@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const existing = authRes.rows[0] as { password_hash: string } | undefined;
 
     // If they already have a password, require current password verification
-    if (existing) {
+    if (existing?.password_hash) {
       if (!currentPassword) {
         return NextResponse.json(
           { error: "Current password is required" },

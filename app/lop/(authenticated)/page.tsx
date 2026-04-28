@@ -5,6 +5,7 @@ import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
 import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 import { hasPermission } from "@/lib/lop/permissions";
+import { patientBilled, patientCollected } from "@/lib/lop/finance";
 import { CASE_STATUS_LABELS, CASE_STATUS_COLORS, getMissingDocuments } from "@/lib/lop/types";
 import type { LopCaseStatus } from "@/lib/lop/types";
 import {
@@ -61,13 +62,20 @@ export default function LopDashboardPage() {
           return arrival >= todayStart && arrival <= todayEnd;
         }).length;
 
-        // Financial
-        const totalBilled = all.reduce(
-          (sum: number, p) => sum + (Number(p.bill_charges) || 0),
+        // Financial — MTD (current calendar month)
+        const now2 = new Date();
+        const mtdStart = new Date(now2.getFullYear(), now2.getMonth(), 1);
+        const mtdPatients = all.filter((p) => {
+          const ds = p.date_of_service || p.billing_date || p.created_at;
+          if (!ds) return true; // include if no date
+          return new Date(ds as string) >= mtdStart;
+        });
+        const totalBilled = mtdPatients.reduce(
+          (sum: number, p) => sum + patientBilled(p),
           0
         );
-        const totalCollected = all.reduce(
-          (sum: number, p) => sum + (Number(p.amount_collected) || 0),
+        const totalCollected = mtdPatients.reduce(
+          (sum: number, p) => sum + patientCollected(p),
           0
         );
 

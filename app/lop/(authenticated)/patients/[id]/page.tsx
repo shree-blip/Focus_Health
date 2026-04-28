@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, use } from "react";
+import { useEffect, useState, useCallback, useRef, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
@@ -44,6 +44,7 @@ import {
   ArrowLeft,
   Loader2,
   Save,
+  Search,
   Upload,
   Mail,
   FileText,
@@ -59,6 +60,57 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAiChat } from "@/hooks/lop/useAiChat";
+
+/* ------------------------------------------------------------------ */
+/*  Law Firm Searchable Select                                         */
+/* ------------------------------------------------------------------ */
+function LawFirmSelect({
+  lawFirms,
+  value,
+  onChange,
+  disabled,
+}: {
+  lawFirms: { id: string; name: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  return (
+    <Select
+      value={value}
+      onValueChange={(v) => { onChange(v); setSearch(""); }}
+      onOpenChange={(open) => { if (open) setTimeout(() => searchRef.current?.focus(), 50); else setSearch(""); }}
+      disabled={disabled}
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Select law firm" />
+      </SelectTrigger>
+      <SelectContent>
+        <div className="flex items-center gap-2 border-b border-slate-100 px-3 pb-2 pt-1">
+          <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+          <input
+            ref={searchRef}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
+            placeholder="Search law firm…"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+          />
+        </div>
+        {lawFirms
+          .filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
+          .map((f) => (
+            <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+          ))}
+        {lawFirms.filter((f) => f.name.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+          <div className="py-3 text-center text-xs text-slate-400">No law firms found</div>
+        )}
+      </SelectContent>
+    </Select>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  Tag Input                                                          */
@@ -764,22 +816,12 @@ export default function PatientDetailPage({
               </div>
               <div>
                 <Label>Law Firm</Label>
-                <Select
+                <LawFirmSelect
+                  lawFirms={lawFirms}
                   value={(form.law_firm_id as string) ?? ""}
-                  onValueChange={(v) => updateForm("law_firm_id", v)}
+                  onChange={(v) => updateForm("law_firm_id", v)}
                   disabled={!canEdit}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select law firm" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lawFirms.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>
-                        {f.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
               <div>
                 <Label>Expected Arrival</Label>

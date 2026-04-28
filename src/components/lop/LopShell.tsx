@@ -76,6 +76,7 @@ export function LopShell({ children }: { children: ReactNode }) {
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdError, setPwdError] = useState("");
   const [pwdSuccess, setPwdSuccess] = useState("");
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null);
 
   const initials = lopUser?.full_name
     ?.split(" ")
@@ -93,7 +94,12 @@ export function LopShell({ children }: { children: ReactNode }) {
     setShowConfirm(false);
     setPwdError("");
     setPwdSuccess("");
+    setHasPassword(null);
     setProfileOpen(true);
+    fetch("/api/lop/auth/has-password")
+      .then((r) => r.json())
+      .then((d) => setHasPassword(!!d.hasPassword))
+      .catch(() => setHasPassword(false));
   }
 
   async function handleSavePassword() {
@@ -119,6 +125,7 @@ export function LopShell({ children }: { children: ReactNode }) {
         setPwdError(data.error ?? "Failed to update password.");
       } else {
         setPwdSuccess("Password updated successfully!");
+        setHasPassword(true);
         setCurrentPwd("");
         setNewPwd("");
         setConfirmPwd("");
@@ -354,6 +361,8 @@ export function LopShell({ children }: { children: ReactNode }) {
           <div className="space-y-3">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Change Password</p>
 
+            {/* Current password — only shown when one is already set */}
+            {hasPassword && (
             <div className="space-y-1">
               <Label htmlFor="current-pwd" className="text-sm font-medium text-slate-700">
                 Current Password
@@ -377,6 +386,7 @@ export function LopShell({ children }: { children: ReactNode }) {
                 </button>
               </div>
             </div>
+            )}
 
             <div className="space-y-1">
               <Label htmlFor="new-pwd" className="text-sm font-medium text-slate-700">

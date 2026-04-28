@@ -270,7 +270,7 @@ export default function ReportsPage() {
           metric.patientCount > 0 &&
           metric.totalCollected / metric.patientCount < lowThreshold,
       }))
-      .sort((left, right) => right.totalCollected - left.totalCollected);
+      .sort((left, right) => right.totalBilled - left.totalBilled);
 
     const facilityMap: Record<
       string,

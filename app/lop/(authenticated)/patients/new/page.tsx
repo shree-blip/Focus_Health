@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
@@ -20,6 +20,7 @@ import {
   FileText,
   Loader2,
   MapPin,
+  Search,
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
@@ -29,6 +30,8 @@ export default function NewPatientPage() {
   const router = useRouter();
   const { lopUser, facilities, activeFacilityId } = useLopAuth();
   const [lawFirms, setLawFirms] = useState<LopLawFirm[]>([]);
+  const [lawFirmSearch, setLawFirmSearch] = useState("");
+  const lawFirmSearchRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [mandatoryFields, setMandatoryFields] = useState<string[]>([
     "first_name",
@@ -251,15 +254,32 @@ export default function NewPatientPage() {
                 </label>
                 <Select
                   value={form.law_firm_id}
-                  onValueChange={(v) => update("law_firm_id", v)}
+                  onValueChange={(v) => { update("law_firm_id", v); setLawFirmSearch(""); }}
+                  onOpenChange={(open) => { if (open) setTimeout(() => lawFirmSearchRef.current?.focus(), 50); else setLawFirmSearch(""); }}
                 >
                   <SelectTrigger className="h-12 rounded-xl border-none bg-[#e6e8eb] px-4 text-sm shadow-none focus:ring-2 focus:ring-[#0B3B91]">
                     <SelectValue placeholder="Select law firm" />
                   </SelectTrigger>
                   <SelectContent>
-                    {lawFirms.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                    ))}
+                    <div className="flex items-center gap-2 border-b border-slate-100 px-3 pb-2 pt-1">
+                      <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                      <input
+                        ref={lawFirmSearchRef}
+                        value={lawFirmSearch}
+                        onChange={(e) => setLawFirmSearch(e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        placeholder="Search law firm…"
+                        className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                      />
+                    </div>
+                    {lawFirms
+                      .filter((f) => f.name.toLowerCase().includes(lawFirmSearch.toLowerCase()))
+                      .map((f) => (
+                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                      ))}
+                    {lawFirms.filter((f) => f.name.toLowerCase().includes(lawFirmSearch.toLowerCase())).length === 0 && (
+                      <div className="py-3 text-center text-xs text-slate-400">No law firms found</div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
