@@ -156,6 +156,20 @@ export async function POST(request: NextRequest) {
     // Build and execute pg query
     let rows: unknown[];
 
+    /**
+     * SECURITY: Validate that a column/identifier name is safe before interpolating
+     * into SQL.  Allows only letters, digits, and underscores — never quotes,
+     * semicolons, spaces, or any other characters that could break the query.
+     * Throws 400 if the name is invalid, preventing SQL injection via column names.
+     */
+    const SAFE_IDENT_RE = /^[a-z_][a-z0-9_]*$/i;
+    const safeCol = (name: string, context = "column"): string => {
+      if (!SAFE_IDENT_RE.test(name)) {
+        throw Object.assign(new Error(`Invalid ${context} name: "${name}"`), { status: 400 });
+      }
+      return name;
+    };
+
     // Helper to build WHERE clause from filters or match object
     const buildWhere = (
       fArr?: { column: string; op: string; value: unknown }[],
@@ -165,26 +179,28 @@ export async function POST(request: NextRequest) {
       const values: unknown[] = [];
       if (fArr) {
         for (const f of fArr) {
+          const col = safeCol(f.column);
           const idx = values.length + 1;
           switch (f.op) {
-            case "eq": parts.push(`"${f.column}" = $${idx}`); values.push(f.value); break;
-            case "neq": parts.push(`"${f.column}" != $${idx}`); values.push(f.value); break;
-            case "gt": parts.push(`"${f.column}" > $${idx}`); values.push(f.value); break;
-            case "gte": parts.push(`"${f.column}" >= $${idx}`); values.push(f.value); break;
-            case "lt": parts.push(`"${f.column}" < $${idx}`); values.push(f.value); break;
-            case "lte": parts.push(`"${f.column}" <= $${idx}`); values.push(f.value); break;
-            case "in": parts.push(`"${f.column}" = ANY($${idx})`); values.push(f.value); break;
-            case "is": parts.push(`"${f.column}" IS ${f.value === null ? "NULL" : `$${idx}`}`); if (f.value !== null) values.push(f.value); break;
-            case "not_is": parts.push(`"${f.column}" IS NOT ${f.value === null ? "NULL" : `$${idx}`}`); if (f.value !== null) values.push(f.value); break;
-            case "like": parts.push(`"${f.column}" LIKE $${idx}`); values.push(f.value); break;
-            case "ilike": parts.push(`"${f.column}" ILIKE $${idx}`); values.push(f.value); break;
+            case "eq": parts.push(`"${col}" = $${idx}`); values.push(f.value); break;
+            case "neq": parts.push(`"${col}" != $${idx}`); values.push(f.value); break;
+            case "gt": parts.push(`"${col}" > $${idx}`); values.push(f.value); break;
+            case "gte": parts.push(`"${col}" >= $${idx}`); values.push(f.value); break;
+            case "lt": parts.push(`"${col}" < $${idx}`); values.push(f.value); break;
+            case "lte": parts.push(`"${col}" <= $${idx}`); values.push(f.value); break;
+            case "in": parts.push(`"${col}" = ANY($${idx})`); values.push(f.value); break;
+            case "is": parts.push(`"${col}" IS ${f.value === null ? "NULL" : `$${idx}`}`); if (f.value !== null) values.push(f.value); break;
+            case "not_is": parts.push(`"${col}" IS NOT ${f.value === null ? "NULL" : `$${idx}`}`); if (f.value !== null) values.push(f.value); break;
+            case "like": parts.push(`"${col}" LIKE $${idx}`); values.push(f.value); break;
+            case "ilike": parts.push(`"${col}" ILIKE $${idx}`); values.push(f.value); break;
           }
         }
       }
       if (matchObj) {
         for (const [key, val] of Object.entries(matchObj)) {
+          const col = safeCol(key, "match key");
           const idx = values.length + 1;
-          parts.push(`"${key}" = $${idx}`);
+          parts.push(`"${col}" = $${idx}`);
           values.push(val);
         }
       }
@@ -197,10 +213,16 @@ export async function POST(request: NextRequest) {
         // Parse Supabase-style join syntax out of selectCols
         const rawCols = selectCols && selectCols !== "*" ? selectCols : "*";
         const { cleanSelect, joins } = parseJoinSpecs(table, rawCols);
+        // Validate the flattened column list — each token must be * or a safe identifier
+        if (cleanSelect !== "*") {
+          cleanSelect.split(",").map(c => c.trim()).filter(Boolean).forEach(c => {
+            if (c !== "*") safeCol(c, "select column");
+          });
+        }
 
         const { text: whereText, values } = buildWhere(filters);
         let sql = `SELECT ${cleanSelect} FROM "${table}" ${whereText}`;
-        if (order) sql += ` ORDER BY "${order.column}" ${(order.ascending ?? true) ? "ASC" : "DESC"}`;
+        if (order) sql += ` ORDER BY "${safeCol(order.column, "order column")}" ${(order.ascending ?? true) ? "ASC" : "DESC"}`;
         if (queryLimit) sql += ` LIMIT ${parseInt(queryLimit, 10)}`;
         const res = await pool.query(sql, values);
         rows = res.rows;
@@ -208,7 +230,7 @@ export async function POST(request: NextRequest) {
         // Resolve relational joins
         if (joins.length > 0 && rows.length > 0) {
           for (const join of joins) {
-            const colList = join.cols.join(", ");
+            const colList = join.cols.map(c => `"${safeCol(c, "select column")}"`).join(", ");
             if (join.type === "one") {
               // 1:1: gather FK values from main rows, batch-query related table
               const fkValues = [...new Set(
@@ -265,7 +287,7 @@ export async function POST(request: NextRequest) {
         const inserted: unknown[] = [];
         for (const row of record) {
           const entries = Object.entries(row as Record<string, unknown>);
-          const keys = entries.map(([k]) => `"${k}"`).join(", ");
+          const keys = entries.map(([k]) => `"${safeCol(k, "data key")}"`).join(", ");
           const vals = entries.map((_, i) => `$${i + 1}`).join(", ");
           const values = entries.map(([, v]) => v);
           const res = await pool.query(
@@ -284,12 +306,12 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: "match is required for update" }, { status: 400 });
         }
         const setEntries = Object.entries(data as Record<string, unknown>);
-        const setClauses = setEntries.map(([k], i) => `"${k}" = $${i + 1}`).join(", ");
+        const setClauses = setEntries.map(([k], i) => `"${safeCol(k, "data key")}" = $${i + 1}`).join(", ");
         const setValues = setEntries.map(([, v]) => v);
         const { text: whereText, values: whereValues } = buildWhere(undefined, match);
         const offsetValues = whereValues.map((v, i) => ({ v, i: setEntries.length + i + 1 }));
         const offsetWhere = offsetValues.length
-          ? `WHERE ${Object.keys(match).map((k, i) => `"${k}" = $${setEntries.length + i + 1}`).join(" AND ")}`
+          ? `WHERE ${Object.keys(match).map((k, i) => `"${safeCol(k, "match key")}" = $${setEntries.length + i + 1}`).join(" AND ")}`
           : "";
         const sql = `UPDATE "${table}" SET ${setClauses} ${offsetWhere} RETURNING *`;
         const allValues = [...setValues, ...whereValues];
@@ -317,12 +339,12 @@ export async function POST(request: NextRequest) {
         const conflictCol = table === "lop_config" ? "key" : "id";
         for (const row of record) {
           const entries = Object.entries(row as Record<string, unknown>);
-          const keys = entries.map(([k]) => `"${k}"`).join(", ");
+          const keys = entries.map(([k]) => `"${safeCol(k, "data key")}"`).join(", ");
           const vals = entries.map((_, i) => `$${i + 1}`).join(", ");
           const values = entries.map(([, v]) => v);
           const setClauses = entries
             .filter(([k]) => k !== conflictCol)
-            .map(([k]) => `"${k}" = EXCLUDED."${k}"`).join(", ");
+            .map(([k]) => `"${safeCol(k, "data key")}" = EXCLUDED."${safeCol(k, "data key")}"`).join(", ");
           const res = await pool.query(
             `INSERT INTO "${table}" (${keys}) VALUES (${vals}) ON CONFLICT ("${conflictCol}") DO UPDATE SET ${setClauses} RETURNING *`,
             values
@@ -358,6 +380,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: rows });
   } catch (err) {
+    const httpStatus = (err instanceof Error && "status" in err && typeof (err as Error & { status?: number }).status === "number")
+      ? (err as Error & { status: number }).status
+      : 500;
+    if (httpStatus !== 500) {
+      return NextResponse.json({ error: err instanceof Error ? err.message : "Bad request" }, { status: httpStatus });
+    }
     console.error("LOP DB proxy error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Internal server error" },

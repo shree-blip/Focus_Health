@@ -4,7 +4,14 @@
  */
 import { createHmac, timingSafeEqual } from "crypto";
 
-const LOP_JWT_SECRET = process.env.LOP_JWT_SECRET || process.env.ADMIN_SESSION_SECRET || "lop-secret-change-me";
+const _rawSecret = process.env.LOP_JWT_SECRET || process.env.ADMIN_SESSION_SECRET;
+if (!_rawSecret) {
+  throw new Error(
+    "[HIPAA] LOP_JWT_SECRET environment variable is not set. " +
+    "Sessions cannot be signed — refusing to start with an insecure fallback."
+  );
+}
+const LOP_JWT_SECRET = _rawSecret;
 export const LOP_SESSION_COOKIE = "lop_session";
 const SESSION_MAX_AGE = 60 * 60 * 8; // 8 hours
 
