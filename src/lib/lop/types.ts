@@ -128,6 +128,11 @@ export interface LopPatient {
   follow_up_note: string | null;
   intake_notes: string | null;
 
+  // White Rock LOP tracker fields
+  last_date_of_contact: string | null;
+  point_of_contact: string | null;
+  mr_dept_notes: string | null;
+
   created_by: string | null;
   updated_by: string | null;
   created_at: string;

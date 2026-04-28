@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nc -z 127.0.0.1 5433)",
+      "Bash(python3 -c \"import psycopg2; print\\('psycopg2', psycopg2.__version__, 'OK'\\)\")",
+      "Bash(gcloud auth *)"
+    ]
+  }
+}

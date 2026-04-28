@@ -37,3 +37,7 @@ public/ErOfLufkin-Event-4k.mov
 public/ErOfLufkin-Event-Vertical.mov
 public/ErofLufkin-FraceMedia*.png
 public/ErOfLufkin-Event1.1 | Videos & Movies on Vimeo.html
+
+# Patient records - stored in GCS, not git
+Letter of Protections & Records/
+*.csv

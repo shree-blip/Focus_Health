@@ -339,6 +339,9 @@ export default function PatientDetailPage({
           primary_insurance: form.primary_insurance || null,
           is_lop_case: form.is_lop_case ?? false,
           referral_source: form.referral_source || null,
+          last_date_of_contact: form.last_date_of_contact || null,
+          point_of_contact: form.point_of_contact || null,
+          mr_dept_notes: form.mr_dept_notes || null,
           updated_by: lopUser?.id,
         },
         { id },
@@ -938,6 +941,41 @@ export default function PatientDetailPage({
                   className="h-4 w-4 rounded border-slate-300 accent-[#0B3B91]"
                 />
                 <Label htmlFor="is_lop_case" className="cursor-pointer">LOP Case</Label>
+              </div>
+            </div>
+          </section>
+
+          {/* Case Coordination */}
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Case Coordination</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Point of Contact</Label>
+                <Input
+                  value={(form.point_of_contact as string) ?? ""}
+                  onChange={(e) => updateForm("point_of_contact", e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="Staff member owning follow-up"
+                />
+              </div>
+              <div>
+                <Label>Last Contact Date</Label>
+                <Input
+                  type="date"
+                  value={(form.last_date_of_contact as string) ?? ""}
+                  onChange={(e) => updateForm("last_date_of_contact", e.target.value)}
+                  disabled={!canEdit}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>MR Dept Contacts</Label>
+                <Textarea
+                  rows={2}
+                  value={(form.mr_dept_notes as string) ?? ""}
+                  onChange={(e) => updateForm("mr_dept_notes", e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="Comma-separated emails for the law firm's medical-records contact(s)"
+                />
               </div>
             </div>
           </section>

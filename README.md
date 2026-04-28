@@ -131,7 +131,7 @@ gcloud scheduler jobs create http lop-auto-remind \
 psql "host=/cloudsql/adept-box-494606-s9:us-central1:focus-health-db dbname=focus_health user=focus_app password=<DB_PASSWORD>"
 ```
 
-Prefer committing migration SQL files in [supabase/migrations/](supabase/migrations/) for reproducibility — the directory name is historical; the live schema is on Cloud SQL.
+Prefer committing migration SQL files in [db/migrations/](db/migrations/) for reproducibility — applied manually to Cloud SQL on top of [db/migrations/cloud_sql_schema.sql](db/migrations/cloud_sql_schema.sql), the canonical schema.
 
 ## LOP Dashboard
 

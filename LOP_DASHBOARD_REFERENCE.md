@@ -97,9 +97,9 @@ CRON_SECRET=cron-secret:latest
 
 ## 4. Database Schema
 
-**Migration source files:** `supabase/migrations/20260410_lop_dashboard.sql`, `supabase/migrations/20260410_facility_notification_emails.sql`
+**Migration source files:** `db/migrations/cloud_sql_schema.sql` (canonical schema), plus dated patches in `db/migrations/`.
 
-> Migration SQL files are retained in-repo for history. Live schema now runs on Cloud SQL PostgreSQL.
+> Live schema runs on Cloud SQL PostgreSQL. Patches are applied manually on top of `cloud_sql_schema.sql`.
 
 ### Tables (9)
 1. **`lop_facilities`** — id, name, slug, type, address, phone, director_email, front_desk_email, is_active, created_at, updated_at
@@ -191,7 +191,6 @@ Applied to PostgreSQL schema:
 | `src/lib/lop/permissions.ts` | 79 | **23-action** permission matrix (was 19 — added `ai:use`, `config:manage`, `facilities:manage`, `audit:read`), `hasPermission()`, `hasGlobalAccess()`, `isAllowedDomain()` |
 | `src/lib/lop/types.ts` | 277 | All TS interfaces, display helpers (labels, colors), `getMissingDocuments()` |
 | `src/lib/lop/db.ts` | 129 | `lopDb` helper — calls `/api/lop/db` proxy with role in headers |
-| `src/lib/lop/supabase.ts` | 29 | Legacy helper (kept for compatibility; Cloud SQL is the active backend) |
 | `src/lib/lop/index.ts` | 3 | Barrel re-export |
 
 ---
