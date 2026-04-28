@@ -5,6 +5,15 @@ import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
 import { hasPermission } from "@/lib/lop/permissions";
 import { CASE_STATUS_LABELS } from "@/lib/lop/types";
+import {
+  AGING_BUCKETS,
+  type AgingBreakdown,
+  agingBreakdown,
+  avgDaysToPayment,
+  patientBilled,
+  patientCollected,
+  reductionStats,
+} from "@/lib/lop/finance";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -21,9 +30,11 @@ import {
   ArrowRight,
   Building2,
   CalendarDays,
+  Clock,
   Download,
   Loader2,
   Search,
+  TrendingDown,
   Users,
 } from "lucide-react";
 
@@ -100,6 +111,10 @@ interface ReportsMetrics {
   totalCollected: number;
   avgBilled: number;
   avgCollected: number;
+  avgReduction: number;
+  avgReductionPct: number;
+  avgDaysToPayment: number;
+  aging: AgingBreakdown;
   openFollowUps: number;
   droppedCases: number;
   missingLop: number;
@@ -166,7 +181,7 @@ export default function ReportsPage() {
       }
 
       const { data } = await lopDb.select("lop_patients", {
-        select: "id, first_name, last_name, case_status, lop_letter_status, facility_id, law_firm_id, created_at, date_of_service, bill_charges, amount_collected, llc_billed_charges, pllc_billed_charges, total_received_llc, total_received_pllc, mrn, disposition_status, chief_complaint, primary_insurance, referral_source, is_lop_case, lop_facilities(name), lop_law_firms(id, name)",
+        select: "id, first_name, last_name, case_status, lop_letter_status, facility_id, law_firm_id, created_at, date_of_service, bill_charges, amount_collected, reduction_amount, billing_date, date_paid, llc_billed_charges, pllc_billed_charges, total_received_llc, total_received_pllc, mrn, disposition_status, chief_complaint, primary_insurance, referral_source, is_lop_case, lop_facilities(name), lop_law_firms(id, name)",
         filters,
       });
 
@@ -198,26 +213,14 @@ export default function ReportsPage() {
 
   const metrics = useMemo<ReportsMetrics>(() => {
     const totalPatients = filteredPatients.length;
-    const totalBilled = filteredPatients.reduce(
-      (sum, patient) => {
-        const llc = Number(patient.llc_billed_charges) || 0;
-        const pllc = Number(patient.pllc_billed_charges) || 0;
-        const legacy = Number(patient.bill_charges) || 0;
-        return sum + (llc + pllc > 0 ? llc + pllc : legacy);
-      },
-      0
-    );
-    const totalCollected = filteredPatients.reduce(
-      (sum, patient) => {
-        const llc = Number(patient.total_received_llc) || 0;
-        const pllc = Number(patient.total_received_pllc) || 0;
-        const legacy = Number(patient.amount_collected) || 0;
-        return sum + (llc + pllc > 0 ? llc + pllc : legacy);
-      },
-      0
-    );
+    const totalBilled = filteredPatients.reduce((sum, p) => sum + patientBilled(p), 0);
+    const totalCollected = filteredPatients.reduce((sum, p) => sum + patientCollected(p), 0);
     const avgBilled = totalPatients > 0 ? totalBilled / totalPatients : 0;
     const avgCollected = totalPatients > 0 ? totalCollected / totalPatients : 0;
+
+    const reduction = reductionStats(filteredPatients);
+    const avgDays = avgDaysToPayment(filteredPatients);
+    const aging = agingBreakdown(filteredPatients);
 
     const openFollowUps = filteredPatients.filter(
       (patient) => patient.case_status === "follow_up_needed"
@@ -253,14 +256,8 @@ export default function ReportsPage() {
       }
 
       firmMap[firmId].patientCount += 1;
-      const fLlc = Number(patient.llc_billed_charges) || 0;
-      const fPllc = Number(patient.pllc_billed_charges) || 0;
-      const fBill = Number(patient.bill_charges) || 0;
-      firmMap[firmId].totalBilled += (fLlc + fPllc > 0 ? fLlc + fPllc : fBill);
-      const cLlc = Number(patient.total_received_llc) || 0;
-      const cPllc = Number(patient.total_received_pllc) || 0;
-      const cLegacy = Number(patient.amount_collected) || 0;
-      firmMap[firmId].totalCollected += (cLlc + cPllc > 0 ? cLlc + cPllc : cLegacy);
+      firmMap[firmId].totalBilled += patientBilled(patient);
+      firmMap[firmId].totalCollected += patientCollected(patient);
     }
 
     const firmMetrics = Object.values(firmMap)
@@ -294,14 +291,8 @@ export default function ReportsPage() {
       }
 
       facilityMap[facilityId].count += 1;
-      const fac_llc = Number(patient.llc_billed_charges) || 0;
-      const fac_pllc = Number(patient.pllc_billed_charges) || 0;
-      const fac_bill = Number(patient.bill_charges) || 0;
-      facilityMap[facilityId].billed += (fac_llc + fac_pllc > 0 ? fac_llc + fac_pllc : fac_bill);
-      const fac_cllc = Number(patient.total_received_llc) || 0;
-      const fac_cpllc = Number(patient.total_received_pllc) || 0;
-      const fac_col = Number(patient.amount_collected) || 0;
-      facilityMap[facilityId].collected += (fac_cllc + fac_cpllc > 0 ? fac_cllc + fac_cpllc : fac_col);
+      facilityMap[facilityId].billed += patientBilled(patient);
+      facilityMap[facilityId].collected += patientCollected(patient);
     }
 
     return {
@@ -310,6 +301,10 @@ export default function ReportsPage() {
       totalCollected,
       avgBilled,
       avgCollected,
+      avgReduction: reduction.avgAmount,
+      avgReductionPct: reduction.avgPct,
+      avgDaysToPayment: avgDays,
+      aging,
       openFollowUps,
       droppedCases,
       missingLop,
@@ -335,18 +330,26 @@ export default function ReportsPage() {
     : "All Facilities";
 
   const handleExportCsv = () => {
-    const rows = filteredPatients.map((patient) => ({
-      first_name: patient.first_name ?? "",
-      last_name: patient.last_name ?? "",
-      facility: (patient.lop_facilities as Record<string, unknown>)?.name ?? "",
-      law_firm: (patient.lop_law_firms as Record<string, unknown>)?.name ?? "",
-      case_status: patient.case_status ?? "",
-      lop_letter_status: patient.lop_letter_status ?? "",
-      bill_charges: patient.bill_charges ?? "",
-      amount_collected: patient.amount_collected ?? "",
-      date_of_accident: patient.date_of_accident ?? "",
-      created_at: patient.created_at ?? "",
-    }));
+    const rows = filteredPatients.map((patient) => {
+      const billed = patientBilled(patient);
+      const collected = patientCollected(patient);
+      return {
+        first_name: patient.first_name ?? "",
+        last_name: patient.last_name ?? "",
+        facility: (patient.lop_facilities as Record<string, unknown>)?.name ?? "",
+        law_firm: (patient.lop_law_firms as Record<string, unknown>)?.name ?? "",
+        case_status: patient.case_status ?? "",
+        lop_letter_status: patient.lop_letter_status ?? "",
+        billed,
+        collected,
+        outstanding: Math.max(0, billed - collected),
+        reduction_amount: patient.reduction_amount ?? "",
+        billing_date: patient.billing_date ?? "",
+        date_paid: patient.date_paid ?? "",
+        date_of_accident: patient.date_of_accident ?? "",
+        created_at: patient.created_at ?? "",
+      };
+    });
 
     const header = Object.keys(rows[0] ?? {}).join(",");
     const csv =
@@ -667,6 +670,117 @@ export default function ReportsPage() {
                   </div>
                 </div>
               </div>
+            </section>
+
+            <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="rounded-[26px] bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-[#0B3B91]" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                    Avg Reduction
+                  </p>
+                </div>
+                <div className="mt-4 flex items-end gap-3">
+                  <span className="font-heading text-3xl font-black text-[#0B3B91]">
+                    {formatCurrency(metrics.avgReduction)}
+                  </span>
+                  {metrics.avgReductionPct > 0 && (
+                    <span className="pb-1 text-sm font-semibold text-slate-500">
+                      {(metrics.avgReductionPct * 100).toFixed(1)}% of billed
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Mean across patients with a recorded reduction
+                </p>
+              </div>
+
+              <div className="rounded-[26px] bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-[#0B3B91]" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                    Avg Days to Payment
+                  </p>
+                </div>
+                <div className="mt-4 flex items-end gap-2">
+                  <span className="font-heading text-3xl font-black text-[#0B3B91]">
+                    {metrics.avgDaysToPayment > 0 ? Math.round(metrics.avgDaysToPayment) : "—"}
+                  </span>
+                  {metrics.avgDaysToPayment > 0 && (
+                    <span className="pb-1 text-xs font-medium uppercase tracking-[0.22em] text-slate-400">
+                      Days
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Billing date → date paid, paid cases only
+                </p>
+              </div>
+
+              <div className="rounded-[26px] bg-white p-6 shadow-sm md:col-span-2 xl:col-span-1">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-[#0B3B91]" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                    Outstanding (Unpaid)
+                  </p>
+                </div>
+                <div className="mt-4 flex items-end gap-3">
+                  <span className="font-heading text-3xl font-black text-[#0B3B91]">
+                    {formatCurrency(metrics.aging.totalOutstanding)}
+                  </span>
+                  <span className="pb-1 text-xs font-semibold text-slate-500">
+                    {metrics.aging.unpaidCount} case{metrics.aging.unpaidCount === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Billed minus collected, billing-dated unpaid cases
+                </p>
+              </div>
+            </section>
+
+            <section className="mb-8 overflow-hidden rounded-[30px] bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+                <h2 className="font-heading text-xl font-bold text-[#0B3B91]">
+                  Aging Breakdown
+                </h2>
+                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Days Outstanding
+                </span>
+              </div>
+              {metrics.aging.unpaidCount === 0 ? (
+                <div className="px-6 py-12 text-center text-sm text-slate-500">
+                  No unpaid cases with a billing date in this view.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-px bg-slate-100 sm:grid-cols-5">
+                  {AGING_BUCKETS.map((bucket) => {
+                    const stats = metrics.aging.buckets[bucket];
+                    const tone =
+                      bucket === "0-30"
+                        ? "text-emerald-700"
+                        : bucket === "31-60"
+                        ? "text-blue-700"
+                        : bucket === "61-90"
+                        ? "text-amber-700"
+                        : bucket === "91-180"
+                        ? "text-orange-700"
+                        : "text-rose-700";
+                    return (
+                      <div key={bucket} className="bg-white p-5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                          {bucket} days
+                        </p>
+                        <p className={cn("mt-3 font-heading text-2xl font-black", tone)}>
+                          {stats.count}
+                        </p>
+                        <p className="mt-1 text-xs font-medium text-slate-500">
+                          {formatCurrency(stats.outstanding)} outstanding
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
 
             <section className="mb-8">

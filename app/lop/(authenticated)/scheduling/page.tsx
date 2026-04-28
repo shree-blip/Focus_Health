@@ -723,7 +723,7 @@ export default function SchedulingPage() {
                 Emergency patients may change timing and treatment order. This view is a
                 live planning baseline for resource allocation, check-in readiness, and
                 facility awareness. Higher-acuity arrivals always take precedence over
-                pre-scheduled LOP visits.
+                expected LOP walk-ins.
               </p>
             </div>
           </div>

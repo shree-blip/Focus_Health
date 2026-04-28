@@ -6,6 +6,7 @@ import { lopDb } from "@/lib/lop/db";
 import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 import { hasPermission } from "@/lib/lop/permissions";
 import type { LopLawFirm } from "@/lib/lop/types";
+import { patientCollected } from "@/lib/lop/finance";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +39,24 @@ import { toast } from "sonner";
 interface FirmMetric {
   count: number;
   avgCollected: number;
+  reminderCount: number;
+  lastReminderAt: string | null;
+}
+
+function relativeTime(iso: string | null): string {
+  if (!iso) return "Never";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (ms < 0) return "Just now";
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.floor(months / 12)}y ago`;
 }
 
 function formatCurrency(value: number) {
@@ -83,10 +102,15 @@ export default function LawFirmsPage() {
       if (!silent) setLoading(true);
 
       try {
-        const [firmsResponse, patientsResponse] = await Promise.all([
+        const [firmsResponse, patientsResponse, remindersResponse] = await Promise.all([
           lopDb.select("lop_law_firms", { order: { column: "name" } }),
           lopDb.select("lop_patients", {
-            select: "law_firm_id, llc_billed_charges, pllc_billed_charges",
+            select:
+              "law_firm_id, bill_charges, amount_collected, llc_billed_charges, pllc_billed_charges, total_received_llc, total_received_pllc",
+          }),
+          lopDb.select("lop_reminder_emails", {
+            select: "law_firm_id, sent_at",
+            order: { column: "sent_at", ascending: false },
           }),
         ]);
 
@@ -102,14 +126,37 @@ export default function LawFirmsPage() {
           }
 
           metricSeed[firmId].count += 1;
-          metricSeed[firmId].total += (Number(patient.llc_billed_charges) || 0) + (Number(patient.pllc_billed_charges) || 0);
+          metricSeed[firmId].total += patientCollected(patient);
         }
 
+        const reminderSeed: Record<string, { count: number; lastAt: string | null }> = {};
+        for (const reminder of (remindersResponse.data ?? []) as Record<string, unknown>[]) {
+          const firmId = reminder.law_firm_id as string | undefined;
+          if (!firmId) continue;
+          if (!reminderSeed[firmId]) {
+            reminderSeed[firmId] = { count: 0, lastAt: null };
+          }
+          reminderSeed[firmId].count += 1;
+          const sentAt = reminder.sent_at as string | undefined;
+          if (sentAt && (!reminderSeed[firmId].lastAt || sentAt > reminderSeed[firmId].lastAt!)) {
+            reminderSeed[firmId].lastAt = sentAt;
+          }
+        }
+
+        const firmIds = new Set([
+          ...Object.keys(metricSeed),
+          ...Object.keys(reminderSeed),
+        ]);
+
         const computedMetrics: Record<string, FirmMetric> = {};
-        for (const [firmId, metric] of Object.entries(metricSeed)) {
+        for (const firmId of firmIds) {
+          const billing = metricSeed[firmId];
+          const reminder = reminderSeed[firmId];
           computedMetrics[firmId] = {
-            count: metric.count,
-            avgCollected: metric.count > 0 ? metric.total / metric.count : 0,
+            count: billing?.count ?? 0,
+            avgCollected: billing && billing.count > 0 ? billing.total / billing.count : 0,
+            reminderCount: reminder?.count ?? 0,
+            lastReminderAt: reminder?.lastAt ?? null,
           };
         }
 
@@ -126,7 +173,9 @@ export default function LawFirmsPage() {
     loadFirms();
   }, [loadFirms]);
 
-  useLopDbChange(["lop_law_firms", "lop_patients"], () => loadFirms({ silent: true }));
+  useLopDbChange(["lop_law_firms", "lop_patients", "lop_reminder_emails"], () =>
+    loadFirms({ silent: true }),
+  );
 
   const openDialog = (firm?: LopLawFirm) => {
     if (firm) {
@@ -440,7 +489,9 @@ export default function LawFirmsPage() {
           <>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
               {filteredFirms.map((firm) => {
-                const metric = firmMetrics[firm.id] ?? { count: 0, avgCollected: 0 };
+                const metric =
+                  firmMetrics[firm.id] ??
+                  ({ count: 0, avgCollected: 0, reminderCount: 0, lastReminderAt: null } as FirmMetric);
                 const active = firm.is_active;
 
                 return (
@@ -565,6 +616,25 @@ export default function LawFirmsPage() {
                           <span className="truncate text-xs text-slate-500">
                             {firm.primary_phone || "No phone on file"}
                           </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-100/70 px-3 py-2">
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                            Reminders Sent
+                          </p>
+                          <p className="text-sm font-bold text-slate-900">
+                            {metric.reminderCount}
+                          </p>
+                        </div>
+                        <div className="text-right min-w-0">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                            Last
+                          </p>
+                          <p className="truncate text-xs font-medium text-slate-600">
+                            {relativeTime(metric.lastReminderAt)}
+                          </p>
                         </div>
                       </div>
                     </div>

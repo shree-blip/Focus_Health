@@ -9,10 +9,13 @@ import twilio from "twilio";
  *
  * HIPAA: Requires authenticated LOP user (scheduler, front_desk, or admin).
  *
- * Sends scheduling notifications to:
+ * Sends expected-walk-in notifications to:
  * 1. Facility director — email
  * 2. Front desk — email
  * 3. Patient — email + SMS (if phone on file)
+ *
+ * Wording note: ER walk-in centers cannot offer "appointments" — these messages
+ * frame the entry as an expected walk-in arrival window, not a guaranteed slot.
  *
  * Body: { patientId: string }
  */
@@ -23,6 +26,11 @@ function toE164(phone: string): string | null {
   if (digits.length === 10) return `+1${digits}`;
   if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
   return null;
+}
+
+/** Build a Google Maps directions URL for a postal address. */
+function directionsUrl(address: string): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 }
 export async function POST(request: NextRequest) {
   try {
@@ -53,7 +61,8 @@ export async function POST(request: NextRequest) {
     // Fetch patient with facility and law firm info
     const patientRes = await pool.query(
       `SELECT p.first_name, p.last_name, p.email, p.phone, p.expected_arrival, p.arrival_window_min, p.facility_id,
-              f.name AS facility_name, f.director_email, f.front_desk_email, lf.name AS law_firm_name
+              f.name AS facility_name, f.address AS facility_address, f.phone AS facility_phone,
+              f.director_email, f.front_desk_email, lf.name AS law_firm_name
        FROM lop_patients p
        LEFT JOIN lop_facilities f ON f.id = p.facility_id
        LEFT JOIN lop_law_firms lf ON lf.id = p.law_firm_id
@@ -64,6 +73,8 @@ export async function POST(request: NextRequest) {
     if (!patient) return NextResponse.json({ error: "Patient not found." }, { status: 404 });
 
     const facilityName = patient.facility_name ?? "Focus Health ER";
+    const facilityAddress = patient.facility_address as string | null;
+    const facilityPhone = patient.facility_phone as string | null;
     const lawFirmName = patient.law_firm_name ?? "N/A";
     const patientName = `${patient.first_name} ${patient.last_name}`;
     const facility = { name: facilityName, director_email: patient.director_email, front_desk_email: patient.front_desk_email };
@@ -81,8 +92,9 @@ export async function POST(request: NextRequest) {
           hour: "numeric",
           minute: "2-digit",
         })
-      : "Not scheduled";
+      : "Not set";
     const windowMin = patient.arrival_window_min ?? 60;
+    const mapsUrl = facilityAddress ? directionsUrl(facilityAddress) : null;
 
     const twilioSid = process.env.TWILIO_ACCOUNT_SID;
     const twilioToken = process.env.TWILIO_AUTH_TOKEN;
@@ -125,19 +137,33 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const subject = `LOP Patient Scheduled – ${patientName} – ${facilityName}`;
+    const subject = `Expected Walk-In – ${patientName} – ${facilityName}`;
+
+    const facilityLocationRow = facilityAddress
+      ? `<tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Location</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${facilityAddress}${
+          mapsUrl ? ` &middot; <a href="${mapsUrl}" style="color: #0B3B91;">Directions</a>` : ""
+        }</td></tr>`
+      : "";
+    const facilityPhoneRow = facilityPhone
+      ? `<tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Facility Phone</td><td style="padding: 8px; border: 1px solid #e2e8f0;"><a href="tel:${facilityPhone.replace(/[^0-9+]/g, "")}" style="color: #0B3B91;">${facilityPhone}</a></td></tr>`
+      : "";
 
     // Staff email (director + front desk)
     const staffHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1e293b;">LOP Patient Scheduled</h2>
-        <p>A new LOP patient has been scheduled at <strong>${facilityName}</strong>.</p>
+        <h2 style="color: #1e293b;">Expected Walk-In</h2>
+        <p>An LOP patient is expected to walk in at <strong>${facilityName}</strong>.</p>
         <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
           <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Patient</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${patientName}</td></tr>
           <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Expected Arrival</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${arrivalStr}</td></tr>
           <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Arrival Window</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${windowMin} minutes</td></tr>
           <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Law Firm</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${lawFirmName}</td></tr>
+          ${facilityLocationRow}
+          ${facilityPhoneRow}
         </table>
+        <p style="color: #475569; font-size: 13px;">
+          This is an expected walk-in, not a guaranteed appointment. Treatment order may shift if higher-acuity patients arrive.
+        </p>
         <p style="color: #64748b; font-size: 12px; margin-top: 24px;">
           This is an automated notification from Focus Health LOP Dashboard.
         </p>
@@ -145,16 +171,26 @@ export async function POST(request: NextRequest) {
     `;
 
     // Patient email — friendlier tone, no internal details
+    const patientLocationBlock = facilityAddress
+      ? `<table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+          <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Address</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${facilityAddress}${
+            mapsUrl ? ` &middot; <a href="${mapsUrl}" style="color: #0B3B91;">Get directions</a>` : ""
+          }</td></tr>
+          ${facilityPhone ? `<tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Phone</td><td style="padding: 8px; border: 1px solid #e2e8f0;"><a href="tel:${facilityPhone.replace(/[^0-9+]/g, "")}" style="color: #0B3B91;">${facilityPhone}</a></td></tr>` : ""}
+        </table>`
+      : "";
+
     const patientHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1e293b;">Your Visit at ${facilityName}</h2>
+        <h2 style="color: #1e293b;">Your Walk-In at ${facilityName}</h2>
         <p>Dear ${patient.first_name},</p>
-        <p>You have been scheduled for a visit at <strong>${facilityName}</strong>.</p>
+        <p>We are expecting your walk-in at <strong>${facilityName}</strong>. Please plan to arrive within the window below.</p>
         <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-          <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Expected Time</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${arrivalStr}</td></tr>
+          <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold;">Expected Walk-In</td><td style="padding: 8px; border: 1px solid #e2e8f0;">${arrivalStr}</td></tr>
         </table>
-        <p>Please note that emergency patients may affect scheduling. We appreciate your patience and understanding.</p>
-        <p>If you have any questions, please contact our team.</p>
+        ${patientLocationBlock}
+        <p>This is an expected walk-in, not a guaranteed appointment. Higher-acuity emergencies may affect the order of care; we appreciate your patience.</p>
+        <p>If you have questions, please call the facility directly using the number above.</p>
         <p style="color: #64748b; font-size: 12px; margin-top: 24px;">
           Focus Health
         </p>
@@ -184,7 +220,7 @@ export async function POST(request: NextRequest) {
       await transporter.sendMail({
         from: process.env.SMTP_FROM ?? "noreply@getfocushealth.com",
         to: patientEmail,
-        subject: `Your Upcoming Visit – ${facilityName}`,
+        subject: `Your Expected Walk-In – ${facilityName}`,
         html: patientHtml,
       });
       sentCount += 1;
@@ -195,7 +231,10 @@ export async function POST(request: NextRequest) {
     if (twilioSid && twilioToken && twilioFrom && patientPhone) {
       try {
         const twilioClient = twilio(twilioSid, twilioToken);
-        const smsBody = `Hi ${patient.first_name}, your visit at ${facilityName} is scheduled for ${arrivalStr}. Reply STOP to opt out.`;
+        // SMS includes address + facility phone when available; kept under 320 chars to stay within 2 SMS segments.
+        const smsLocation = facilityAddress ? ` Address: ${facilityAddress}.` : "";
+        const smsCall = facilityPhone ? ` Call ${facilityPhone} with questions.` : "";
+        const smsBody = `Hi ${patient.first_name}, ${facilityName} is expecting your walk-in around ${arrivalStr}. This is not a guaranteed appointment.${smsLocation}${smsCall} Reply STOP to opt out.`;
         console.log("[SMS DEBUG] Sending SMS from", twilioFrom, "to", patientPhone);
         const msg = await twilioClient.messages.create({
           body: smsBody,
