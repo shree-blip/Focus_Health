@@ -246,16 +246,27 @@ export default function PatientDetailPage({
           case_status: form.case_status,
           lop_letter_status: form.lop_letter_status,
           medical_records_status: form.medical_records_status,
-          bill_charges: form.bill_charges || null,
-          amount_collected: form.amount_collected || null,
-          reduction_amount: form.reduction_amount || null,
+          bill_charges: form.bill_charges ?? null,
+          amount_collected: form.amount_collected ?? null,
+          reduction_amount: form.reduction_amount ?? null,
           billing_date: form.billing_date || null,
           date_paid: form.date_paid || null,
+          llc_billed_charges: form.llc_billed_charges ?? null,
+          pllc_billed_charges: form.pllc_billed_charges ?? null,
+          total_received_llc: form.total_received_llc ?? null,
+          total_received_pllc: form.total_received_pllc ?? null,
           billing_tags: form.billing_tags ?? [],
           medical_record_tags: form.medical_record_tags ?? [],
           follow_up_note: form.follow_up_note || null,
           intake_notes: form.intake_notes || null,
           law_firm_id: form.law_firm_id || null,
+          mrn: form.mrn || null,
+          date_of_service: form.date_of_service || null,
+          disposition_status: form.disposition_status || null,
+          chief_complaint: form.chief_complaint || null,
+          primary_insurance: form.primary_insurance || null,
+          is_lop_case: form.is_lop_case ?? false,
+          referral_source: form.referral_source || null,
           updated_by: lopUser?.id,
         },
         { id },
@@ -575,38 +586,38 @@ export default function PatientDetailPage({
           <TabsList className="flex h-auto w-full flex-wrap gap-1 bg-transparent p-0">
             <TabsTrigger
               value="overview"
-              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-[#0B3B91] data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="billing"
-              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-[#0B3B91] data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Billing &amp; Status
             </TabsTrigger>
             <TabsTrigger
               value="documents"
-              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-[#0B3B91] data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Documents ({documents.length})
             </TabsTrigger>
             <TabsTrigger
               value="reminders"
-              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-[#0B3B91] data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Reminders ({reminders.length})
             </TabsTrigger>
             <TabsTrigger
               value="activity"
-              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm"
+              className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-[#0B3B91] data-[state=active]:text-white data-[state=active]:shadow-md"
             >
               Activity ({auditLogs.length})
             </TabsTrigger>
             {canUseAi && (
               <TabsTrigger
                 value="ai-summary"
-                className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-[#0B3B91] data-[state=active]:shadow-sm gap-1"
+                className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-[#0B3B91] data-[state=active]:text-white data-[state=active]:shadow-md gap-1"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 AI Summary
@@ -782,6 +793,90 @@ export default function PatientDetailPage({
             </div>
           </section>
 
+          {/* Clinical Details */}
+          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
+            <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Clinical Details</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>MRN</Label>
+                <Input
+                  value={(form.mrn as string) ?? ""}
+                  onChange={(e) => updateForm("mrn", e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="Medical Record Number"
+                />
+              </div>
+              <div>
+                <Label>Date of Service</Label>
+                <Input
+                  type="date"
+                  value={(form.date_of_service as string) ?? ""}
+                  onChange={(e) => updateForm("date_of_service", e.target.value)}
+                  disabled={!canEdit}
+                />
+              </div>
+              <div>
+                <Label>Disposition Status</Label>
+                <Select
+                  value={(form.disposition_status as string) ?? ""}
+                  onValueChange={(v) => updateForm("disposition_status", v)}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select disposition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="discharged">Discharged</SelectItem>
+                    <SelectItem value="ama">AMA</SelectItem>
+                    <SelectItem value="mse">MSE</SelectItem>
+                    <SelectItem value="lwbs">LWBS</SelectItem>
+                    <SelectItem value="eloped_lbtc">Eloped / LBTC</SelectItem>
+                    <SelectItem value="observation">Observation</SelectItem>
+                    <SelectItem value="transferred">Transferred</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Chief Complaint</Label>
+                <Input
+                  value={(form.chief_complaint as string) ?? ""}
+                  onChange={(e) => updateForm("chief_complaint", e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="e.g. Motor vehicular collision"
+                />
+              </div>
+              <div>
+                <Label>Primary Insurance</Label>
+                <Input
+                  value={(form.primary_insurance as string) ?? ""}
+                  onChange={(e) => updateForm("primary_insurance", e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="e.g. Self-Pay, MVC / LOP Case"
+                />
+              </div>
+              <div>
+                <Label>Referral Source</Label>
+                <Input
+                  value={(form.referral_source as string) ?? ""}
+                  onChange={(e) => updateForm("referral_source", e.target.value)}
+                  disabled={!canEdit}
+                  placeholder="e.g. Attorney, Walk-in"
+                />
+              </div>
+              <div className="flex items-center gap-3 pt-5">
+                <input
+                  type="checkbox"
+                  id="is_lop_case"
+                  checked={!!(form.is_lop_case)}
+                  onChange={(e) => updateForm("is_lop_case", e.target.checked)}
+                  disabled={!canEdit}
+                  className="h-4 w-4 rounded border-slate-300 accent-[#0B3B91]"
+                />
+                <Label htmlFor="is_lop_case" className="cursor-pointer">LOP Case</Label>
+              </div>
+            </div>
+          </section>
+
           {/* Notes */}
           <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
             <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Notes</h3>
@@ -882,42 +977,99 @@ export default function PatientDetailPage({
           <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.05)] lg:p-8">
             <h3 className="mb-5 text-sm font-bold text-[#0B3B91]">Billing</h3>
             {canViewFinancial ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <Label>Bill Charges ($)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={(form.bill_charges as string) ?? ""}
-                      onChange={(e) => updateForm("bill_charges", e.target.value)}
-                      disabled={!canEditBilling}
-                    />
-                  </div>
-                  <div>
-                    <Label>Amount Collected ($)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={(form.amount_collected as string) ?? ""}
-                      onChange={(e) =>
-                        updateForm("amount_collected", e.target.value)
-                      }
-                      disabled={!canEditBilling}
-                    />
-                  </div>
-                  <div>
-                    <Label>Reduction Amount ($)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Must match reduction letter"
-                      value={(form.reduction_amount as string) ?? ""}
-                      onChange={(e) => updateForm("reduction_amount", e.target.value)}
-                      disabled={!canEditBilling}
-                    />
+              <div className="space-y-5">
+                {/* LLC / PLLC Billed Charges */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">LLC &amp; PLLC Charges</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>LLC Billed Charges ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={form.llc_billed_charges != null ? String(form.llc_billed_charges) : ""}
+                        onChange={(e) => updateForm("llc_billed_charges", e.target.value === "" ? null : parseFloat(e.target.value))}
+                        disabled={!canEditBilling}
+                      />
+                    </div>
+                    <div>
+                      <Label>PLLC Billed Charges ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={form.pllc_billed_charges != null ? String(form.pllc_billed_charges) : ""}
+                        onChange={(e) => updateForm("pllc_billed_charges", e.target.value === "" ? null : parseFloat(e.target.value))}
+                        disabled={!canEditBilling}
+                      />
+                    </div>
+                    <div>
+                      <Label>Total Received — LLC ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={form.total_received_llc != null ? String(form.total_received_llc) : ""}
+                        onChange={(e) => updateForm("total_received_llc", e.target.value === "" ? null : parseFloat(e.target.value))}
+                        disabled={!canEditBilling}
+                      />
+                    </div>
+                    <div>
+                      <Label>Total Received — PLLC ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={form.total_received_pllc != null ? String(form.total_received_pllc) : ""}
+                        onChange={(e) => updateForm("total_received_pllc", e.target.value === "" ? null : parseFloat(e.target.value))}
+                        disabled={!canEditBilling}
+                      />
+                    </div>
                   </div>
                 </div>
+
+                {/* Legacy / General Billing */}
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">General Billing</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Bill Charges ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={form.bill_charges != null ? String(form.bill_charges) : ""}
+                        onChange={(e) => updateForm("bill_charges", e.target.value === "" ? null : e.target.value)}
+                        disabled={!canEditBilling}
+                      />
+                    </div>
+                    <div>
+                      <Label>Amount Collected ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={form.amount_collected != null ? String(form.amount_collected) : ""}
+                        onChange={(e) => updateForm("amount_collected", e.target.value === "" ? null : e.target.value)}
+                        disabled={!canEditBilling}
+                      />
+                    </div>
+                    <div>
+                      <Label>Reduction Amount ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Must match reduction letter"
+                        value={form.reduction_amount != null ? String(form.reduction_amount) : ""}
+                        onChange={(e) => updateForm("reduction_amount", e.target.value === "" ? null : e.target.value)}
+                        disabled={!canEditBilling}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <Label>Billing Date</Label>
