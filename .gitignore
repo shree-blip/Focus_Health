@@ -11,11 +11,15 @@ node_modules
 dist
 dist-ssr
 .next
-.vercel
 .env
 .env.*
 !.env.example
 *.local
+
+# Google Cloud
+.gcloud
+gha-creds-*.json
+**/service-account-*.json
 
 # Editor directories and files
 .vscode/*

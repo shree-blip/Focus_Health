@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
+import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 import { hasPermission } from "@/lib/lop/permissions";
 import type {
   LopUser,
@@ -246,22 +247,29 @@ function UsersTab() {
     facility_ids: [] as string[],
   });
 
-  const loadUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await lopDb.select("lop_users", {
-        select: "*, lop_user_facilities(facility_id)",
-        order: { column: "full_name" },
-      });
-      setUsers((data as UserRow[]) ?? []);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadUsers = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
+      try {
+        const { data } = await lopDb.select("lop_users", {
+          select: "*, lop_user_facilities(facility_id)",
+          order: { column: "full_name" },
+        });
+        setUsers((data as UserRow[]) ?? []);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+
+  useLopDbChange(["lop_users", "lop_user_facilities"], () =>
+    loadUsers({ silent: true }),
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -764,21 +772,26 @@ function FacilitiesTab() {
     is_active: true,
   });
 
-  const loadFacilities = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await lopDb.select("lop_facilities", {
-        order: { column: "name" },
-      });
-      setFacilities((data as LopFacility[]) ?? []);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadFacilities = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
+      try {
+        const { data } = await lopDb.select("lop_facilities", {
+          order: { column: "name" },
+        });
+        setFacilities((data as LopFacility[]) ?? []);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     loadFacilities();
   }, [loadFacilities]);
+
+  useLopDbChange("lop_facilities", () => loadFacilities({ silent: true }));
 
   const openDialog = (facility?: LopFacility) => {
     if (facility) {
@@ -1209,21 +1222,26 @@ function ConfigTab() {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [form, setForm] = useState({ key: "", value: "", description: "" });
 
-  const loadConfigs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await lopDb.select("lop_config", {
-        order: { column: "key" },
-      });
-      setConfigs((data as ConfigRow[]) ?? []);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadConfigs = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
+      try {
+        const { data } = await lopDb.select("lop_config", {
+          order: { column: "key" },
+        });
+        setConfigs((data as ConfigRow[]) ?? []);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     loadConfigs();
   }, [loadConfigs]);
+
+  useLopDbChange("lop_config", () => loadConfigs({ silent: true }));
 
   const openDialog = (config?: ConfigRow) => {
     if (config) {
@@ -1539,9 +1557,9 @@ function AuditTab() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterAction, setFilterAction] = useState<string>("all");
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
+  const loadLogs = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
       try {
         const { data } = await lopDb.select("lop_audit_log", {
           select: "*, lop_users(full_name)",
@@ -1550,10 +1568,17 @@ function AuditTab() {
         });
         setLogs((data as AuditLogWithUser[]) ?? []);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
-    })();
-  }, []);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    loadLogs();
+  }, [loadLogs]);
+
+  useLopDbChange("lop_audit_log", () => loadLogs({ silent: true }));
 
   const actionTypes = useMemo(() => {
     const set = new Set(logs.map((l) => l.action.startsWith("phi_read:") ? "phi_read" : l.action));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { lopDb } from "@/lib/lop/db";
+import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 
 import { hasPermission } from "@/lib/lop/permissions";
 import {
@@ -157,9 +158,9 @@ export default function PatientsListPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [facilityFilter, setFacilityFilter] = useState<string>("all");
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
+  const load = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
 
       try {
         const baseSelect = "*, lop_facilities(name, slug), lop_law_firms(name), lop_patient_documents(document_type, status)";
@@ -198,12 +199,20 @@ export default function PatientsListPage() {
       } catch (err) {
         console.error("Failed to load patients:", err);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
-    };
+    },
+    [activeFacilityId],
+  );
 
+  useEffect(() => {
     load();
-  }, [activeFacilityId]);
+  }, [load]);
+
+  useLopDbChange(
+    ["lop_patients", "lop_patient_documents", "lop_facilities", "lop_law_firms"],
+    () => load({ silent: true }),
+  );
 
   useEffect(() => {
     if (activeFacilityId) {

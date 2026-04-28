@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { lopDb } from "@/lib/lop/db";
+import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,
@@ -284,9 +285,9 @@ export default function SchedulingPage() {
   const nowFilter = formatDateTimeFilter(now);
   const week = useMemo(() => getWeekRange(selectedDate), [selectedDate]);
 
-  useEffect(() => {
-    const loadDaySchedule = async () => {
-      setLoading(true);
+  const loadDaySchedule = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
 
       const filters: Array<{
         column: string;
@@ -312,16 +313,15 @@ export default function SchedulingPage() {
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
-    };
+    },
+    [selectedDate, activeFacilityId],
+  );
 
-    loadDaySchedule();
-  }, [selectedDate, activeFacilityId]);
-
-  useEffect(() => {
-    const loadWeekSchedule = async () => {
-      setWeekLoading(true);
+  const loadWeekSchedule = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setWeekLoading(true);
 
       const filters: Array<{
         column: string;
@@ -346,43 +346,56 @@ export default function SchedulingPage() {
       } catch (error) {
         console.error(error);
       } finally {
-        setWeekLoading(false);
+        if (!silent) setWeekLoading(false);
       }
-    };
+    },
+    [week.start, week.end, activeFacilityId],
+  );
 
-    loadWeekSchedule();
-  }, [week.start, week.end, activeFacilityId]);
+  const loadOverduePatients = useCallback(async () => {
+    const filters: Array<{
+      column: string;
+      op: "eq" | "lt";
+      value: unknown;
+    }> = [
+      { column: "case_status", op: "eq", value: "scheduled" },
+      { column: "expected_arrival", op: "lt", value: nowFilter },
+    ];
+
+    if (activeFacilityId) {
+      filters.push({ column: "facility_id", op: "eq", value: activeFacilityId });
+    }
+
+    try {
+      const { data } = await lopDb.select("lop_patients", {
+        select: "*, lop_facilities(name), lop_law_firms(name)",
+        filters,
+        order: { column: "expected_arrival", ascending: true },
+      });
+
+      setOverduePatients((data as SchedulePatient[]) ?? []);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [activeFacilityId, nowFilter]);
 
   useEffect(() => {
-    const loadOverduePatients = async () => {
-      const filters: Array<{
-        column: string;
-        op: "eq" | "lt";
-        value: unknown;
-      }> = [
-        { column: "case_status", op: "eq", value: "scheduled" },
-        { column: "expected_arrival", op: "lt", value: nowFilter },
-      ];
+    loadDaySchedule();
+  }, [loadDaySchedule]);
 
-      if (activeFacilityId) {
-        filters.push({ column: "facility_id", op: "eq", value: activeFacilityId });
-      }
+  useEffect(() => {
+    loadWeekSchedule();
+  }, [loadWeekSchedule]);
 
-      try {
-        const { data } = await lopDb.select("lop_patients", {
-          select: "*, lop_facilities(name), lop_law_firms(name)",
-          filters,
-          order: { column: "expected_arrival", ascending: true },
-        });
-
-        setOverduePatients((data as SchedulePatient[]) ?? []);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
+  useEffect(() => {
     loadOverduePatients();
-  }, [activeFacilityId, nowFilter, patients]);
+  }, [loadOverduePatients, patients]);
+
+  useLopDbChange(["lop_patients", "lop_facilities", "lop_law_firms"], () => {
+    loadDaySchedule({ silent: true });
+    loadWeekSchedule({ silent: true });
+    loadOverduePatients();
+  });
 
   const weekStats = useMemo(() => {
     const dayMap: Record<

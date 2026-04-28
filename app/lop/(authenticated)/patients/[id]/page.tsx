@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 // lopClient removed — file upload now uses /api/lop/upload
 import { lopDb } from "@/lib/lop/db";
+import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 import { hasPermission } from "@/lib/lop/permissions";
 import {
   CASE_STATUS_LABELS,
@@ -166,58 +167,77 @@ export default function PatientDetailPage({
   const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
 
   // Load data
-  const loadData = useCallback(async () => {
-    try {
-      const [patientRes, docsRes, remindersRes, firmsRes, auditRes] = await Promise.all([
-        lopDb.select("lop_patients", {
-          select: "*, lop_facilities(name), lop_law_firms(name)",
-          filters: [{ column: "id", op: "eq", value: id }],
-          single: true,
-        }),
-        lopDb.select("lop_patient_documents", {
-          filters: [{ column: "patient_id", op: "eq", value: id }],
-          order: { column: "created_at", ascending: false },
-        }),
-        lopDb.select("lop_reminder_emails", {
-          filters: [{ column: "patient_id", op: "eq", value: id }],
-          order: { column: "sent_at", ascending: false },
-        }),
-        lopDb.select("lop_law_firms", {
-          select: "id, name",
-          filters: [{ column: "is_active", op: "eq", value: true }],
-          order: { column: "name" },
-        }),
-        lopDb.select("lop_audit_log", {
-          select: "*, lop_users(full_name)",
-          filters: [{ column: "entity_id", op: "eq", value: id }],
-          order: { column: "created_at", ascending: false },
-          limit: 50,
-        }),
-      ]);
+  const loadData = useCallback(
+    async ({ syncForm = true }: { syncForm?: boolean } = {}) => {
+      try {
+        const [patientRes, docsRes, remindersRes, firmsRes, auditRes] = await Promise.all([
+          lopDb.select("lop_patients", {
+            select: "*, lop_facilities(name), lop_law_firms(name)",
+            filters: [{ column: "id", op: "eq", value: id }],
+            single: true,
+          }),
+          lopDb.select("lop_patient_documents", {
+            filters: [{ column: "patient_id", op: "eq", value: id }],
+            order: { column: "created_at", ascending: false },
+          }),
+          lopDb.select("lop_reminder_emails", {
+            filters: [{ column: "patient_id", op: "eq", value: id }],
+            order: { column: "sent_at", ascending: false },
+          }),
+          lopDb.select("lop_law_firms", {
+            select: "id, name",
+            filters: [{ column: "is_active", op: "eq", value: true }],
+            order: { column: "name" },
+          }),
+          lopDb.select("lop_audit_log", {
+            select: "*, lop_users(full_name)",
+            filters: [{ column: "entity_id", op: "eq", value: id }],
+            order: { column: "created_at", ascending: false },
+            limit: 50,
+          }),
+        ]);
 
-      if (patientRes.data) {
-        setPatient(patientRes.data);
-        setForm({
-          ...patientRes.data,
-          billing_tags: patientRes.data.billing_tags ?? [],
-          medical_record_tags: patientRes.data.medical_record_tags ?? [],
-        });
+        if (patientRes.data) {
+          setPatient(patientRes.data);
+          // Only reset the form on initial load or after the user explicitly
+          // saves — never on a background realtime refetch (would clobber
+          // in-progress edits from this same user).
+          if (syncForm) {
+            setForm({
+              ...patientRes.data,
+              billing_tags: patientRes.data.billing_tags ?? [],
+              medical_record_tags: patientRes.data.medical_record_tags ?? [],
+            });
+          }
+        }
+        setDocuments((docsRes.data as unknown[]) ?? []);
+        setReminders((remindersRes.data as unknown[]) ?? []);
+        setAuditLogs((auditRes.data as unknown[]) ?? []);
+        setLawFirms((firmsRes.data as { id: string; name: string }[]) ?? []);
+      } catch (err) {
+        console.error("Failed to load patient data:", err);
+        toast.error(err instanceof Error ? err.message : "Failed to load patient data");
+      } finally {
+        setLoading(false);
       }
-      setDocuments((docsRes.data as unknown[]) ?? []);
-      setReminders((remindersRes.data as unknown[]) ?? []);
-      setAuditLogs((auditRes.data as unknown[]) ?? []);
-      setLawFirms((firmsRes.data as { id: string; name: string }[]) ?? []);
-    } catch (err) {
-      console.error("Failed to load patient data:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to load patient data");
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
+    },
+    [id],
+  );
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useLopDbChange(
+    [
+      "lop_patients",
+      "lop_patient_documents",
+      "lop_reminder_emails",
+      "lop_law_firms",
+      "lop_audit_log",
+    ],
+    () => loadData({ syncForm: false }),
+  );
 
   const updateForm = (field: string, value: unknown) =>
     setForm((f: Record<string, unknown>) => ({ ...f, [field]: value }));
@@ -299,7 +319,10 @@ export default function PatientDetailPage({
         new_values: Object.keys(changes).length > 0 ? changes : null,
       });
 
-      setPatient({ ...patient, ...form });
+      // Refetch canonical server state so joined fields (lop_facilities,
+      // lop_law_firms) and any DB-side coercion stay in sync. The mutation
+      // event from lopDb.update also wakes up the dashboard / list listeners.
+      await loadData();
       toast.success("Patient record updated.");
     } catch (err) {
       console.error("Save error:", err);

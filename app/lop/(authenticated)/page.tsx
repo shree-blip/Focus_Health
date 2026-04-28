@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
+import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 import { hasPermission } from "@/lib/lop/permissions";
-import { CASE_STATUS_LABELS, CASE_STATUS_COLORS, getMissingDocuments, REQUIRED_DOCUMENTS } from "@/lib/lop/types";
+import { CASE_STATUS_LABELS, CASE_STATUS_COLORS, getMissingDocuments } from "@/lib/lop/types";
 import type { LopCaseStatus } from "@/lib/lop/types";
 import {
   Calendar,
-  DollarSign,
   AlertTriangle,
-  TrendingUp,
   Loader2,
   Building2,
   PlusCircle,
@@ -35,9 +34,9 @@ export default function LopDashboardPage() {
   const [recentPatients, setRecentPatients] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
+  const load = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
 
       try {
         // Patients query
@@ -48,7 +47,7 @@ export default function LopDashboardPage() {
           select: "*, lop_patient_documents(document_type, status)",
           filters,
         });
-        const all = patients ?? [];
+        const all = (patients ?? []) as Record<string, unknown>[];
 
         // Today's arrivals
         const todayStart = new Date();
@@ -64,11 +63,11 @@ export default function LopDashboardPage() {
 
         // Financial
         const totalBilled = all.reduce(
-          (sum, p) => sum + (Number(p.bill_charges) || 0),
+          (sum: number, p) => sum + (Number(p.bill_charges) || 0),
           0
         );
         const totalCollected = all.reduce(
-          (sum, p) => sum + (Number(p.amount_collected) || 0),
+          (sum: number, p) => sum + (Number(p.amount_collected) || 0),
           0
         );
 
@@ -118,12 +117,22 @@ export default function LopDashboardPage() {
       } catch (err) {
         console.error("Dashboard load error:", err);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
-    };
+    },
+    [activeFacilityId],
+  );
 
+  useEffect(() => {
     load();
-  }, [activeFacilityId]);
+  }, [load]);
+
+  // Realtime: refetch silently whenever patient/document/firm/facility data
+  // changes anywhere in the app, or when this tab regains focus.
+  useLopDbChange(
+    ["lop_patients", "lop_patient_documents", "lop_law_firms", "lop_facilities"],
+    () => load({ silent: true }),
+  );
 
   const formatCurrency = (n: number) =>
     new Intl.NumberFormat("en-US", {

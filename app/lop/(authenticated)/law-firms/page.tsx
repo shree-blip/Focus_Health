@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
 import { lopDb } from "@/lib/lop/db";
+import { useLopDbChange } from "@/hooks/lop/useLopDbChange";
 import { hasPermission } from "@/lib/lop/permissions";
 import type { LopLawFirm } from "@/lib/lop/types";
 import { Button } from "@/components/ui/button";
@@ -77,50 +78,55 @@ export default function LawFirmsPage() {
     hasPermission(lopUser, "law_firm:create") ||
     hasPermission(lopUser, "law_firm:update");
 
-  const loadFirms = useCallback(async () => {
-    setLoading(true);
+  const loadFirms = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
+      if (!silent) setLoading(true);
 
-    try {
-      const [firmsResponse, patientsResponse] = await Promise.all([
-        lopDb.select("lop_law_firms", { order: { column: "name" } }),
-        lopDb.select("lop_patients", {
-          select: "law_firm_id, llc_billed_charges, pllc_billed_charges",
-        }),
-      ]);
+      try {
+        const [firmsResponse, patientsResponse] = await Promise.all([
+          lopDb.select("lop_law_firms", { order: { column: "name" } }),
+          lopDb.select("lop_patients", {
+            select: "law_firm_id, llc_billed_charges, pllc_billed_charges",
+          }),
+        ]);
 
-      const loadedFirms = (firmsResponse.data as LopLawFirm[]) ?? [];
-      const metricSeed: Record<string, { count: number; total: number }> = {};
+        const loadedFirms = (firmsResponse.data as LopLawFirm[]) ?? [];
+        const metricSeed: Record<string, { count: number; total: number }> = {};
 
-      for (const patient of (patientsResponse.data ?? []) as Record<string, unknown>[]) {
-        const firmId = patient.law_firm_id as string | undefined;
-        if (!firmId) continue;
+        for (const patient of (patientsResponse.data ?? []) as Record<string, unknown>[]) {
+          const firmId = patient.law_firm_id as string | undefined;
+          if (!firmId) continue;
 
-        if (!metricSeed[firmId]) {
-          metricSeed[firmId] = { count: 0, total: 0 };
+          if (!metricSeed[firmId]) {
+            metricSeed[firmId] = { count: 0, total: 0 };
+          }
+
+          metricSeed[firmId].count += 1;
+          metricSeed[firmId].total += (Number(patient.llc_billed_charges) || 0) + (Number(patient.pllc_billed_charges) || 0);
         }
 
-        metricSeed[firmId].count += 1;
-        metricSeed[firmId].total += (Number(patient.llc_billed_charges) || 0) + (Number(patient.pllc_billed_charges) || 0);
-      }
+        const computedMetrics: Record<string, FirmMetric> = {};
+        for (const [firmId, metric] of Object.entries(metricSeed)) {
+          computedMetrics[firmId] = {
+            count: metric.count,
+            avgCollected: metric.count > 0 ? metric.total / metric.count : 0,
+          };
+        }
 
-      const computedMetrics: Record<string, FirmMetric> = {};
-      for (const [firmId, metric] of Object.entries(metricSeed)) {
-        computedMetrics[firmId] = {
-          count: metric.count,
-          avgCollected: metric.count > 0 ? metric.total / metric.count : 0,
-        };
+        setFirms(loadedFirms);
+        setFirmMetrics(computedMetrics);
+      } finally {
+        if (!silent) setLoading(false);
       }
-
-      setFirms(loadedFirms);
-      setFirmMetrics(computedMetrics);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     loadFirms();
   }, [loadFirms]);
+
+  useLopDbChange(["lop_law_firms", "lop_patients"], () => loadFirms({ silent: true }));
 
   const openDialog = (firm?: LopLawFirm) => {
     if (firm) {

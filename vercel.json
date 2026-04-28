@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/lop/auto-remind",
-      "schedule": "0 14 * * *"
-    }
-  ]
-}

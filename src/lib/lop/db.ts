@@ -45,6 +45,20 @@ export function setLopDbAuthUser(id: string | null) {
   _authUserId = id;
 }
 
+export type LopDbOperation = "select" | "insert" | "update" | "upsert" | "delete";
+
+export interface LopDbChangeDetail {
+  table: string;
+  operation: Exclude<LopDbOperation, "select">;
+}
+
+export const LOP_DB_CHANGE_EVENT = "lop-db-change";
+
+function emitChange(detail: LopDbChangeDetail) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<LopDbChangeDetail>(LOP_DB_CHANGE_EVENT, { detail }));
+}
+
 async function call(body: Record<string, unknown>) {
   // HIPAA: Server now authenticates via session cookie, not body.auth_user_id.
   // We still send it as a legacy field but the server ignores it.
@@ -61,6 +75,11 @@ async function call(body: Record<string, unknown>) {
     const err = new Error(json.error || `DB request failed (${res.status})`);
     (err as unknown as Record<string, unknown>).code = res.status;
     throw err;
+  }
+
+  const op = body.operation as LopDbOperation | undefined;
+  if (op && op !== "select") {
+    emitChange({ table: body.table as string, operation: op });
   }
 
   return { data: json.data, error: null };

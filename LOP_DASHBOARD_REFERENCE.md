@@ -12,7 +12,7 @@
 | Framework | Next.js 15 (App Router) | Root: `/Users/focus/Desktop/App-FullStack/focus-health/` |
 | Database | Cloud SQL PostgreSQL 16 | Instance: `focus-health-db` · DB: `focus_health` · User: `focus_app` |
 | Auth | Google OAuth + HMAC session cookies | Cookies: `lop_session`, `focus_admin_session`; signing via `LOP_JWT_SECRET` |
-| AI | OpenAI GPT-4o via Vercel AI SDK | `@ai-sdk/openai` + `ai` package, streaming responses |
+| AI | OpenAI GPT-4o via AI SDK | `@ai-sdk/openai` + `ai` package, streaming responses |
 | Hosting | Google Cloud Run | Service: `focus-health-new` · Region: `us-central1` · URL: `https://focus-health-new-1075627982134.us-central1.run.app` |
 | Cron | Cloud Scheduler | Protected cron routes via `CRON_SECRET` |
 | Storage | Google Cloud Storage | Bucket: `focus-health-assets-adept-box-494606-s9` (private, served via `/api/lop/file`) |
@@ -162,7 +162,7 @@ Applied to PostgreSQL schema:
 | File | Lines | Purpose |
 |------|-------|---------|
 | `src/components/lop/AiChatPanel.tsx` | 368 | **NEW** — Floating chat panel (Sheet), 8 quick actions, markdown renderer, streaming messages |
-| `src/hooks/lop/useAiChat.ts` | 40 | **NEW** — React hook wrapping Vercel AI SDK `useChat`, sends facility_id + context_type |
+| `src/hooks/lop/useAiChat.ts` | 40 | **NEW** — React hook wrapping the `ai` package `useChat`, sends facility_id + context_type |
 | `src/lib/lop/ai-prompts.ts` | 140 | **NEW** — System prompts: BASE, DASHBOARD_BRIEFING, PATIENT_SUMMARY, REPORTS_ANALYSIS, GENERAL_CHAT |
 | `src/lib/lop/ai-context.ts` | 396 | **NEW** — Server-side context builders: `buildDashboardContext`, `buildPatientContext`, `buildReportsContext`, `buildDateFilteredContext` |
 | `src/lib/lop/ai-utils.ts` | 245 | **NEW** — Date expression parser (`parseDateExpression`), data completeness analysis (`analyzePatientCompleteness`, `formatMissingFields`, `TRACKABLE_FIELDS`) |
@@ -425,7 +425,7 @@ Patient detail tabs use shadcn `<Tabs>`. The `<TabsList>` should use `rounded-2x
 | `ea020f6` | Fix PKCE: switch to @supabase/ssr cookie-based auth |
 | `9e72aa1` | Fix login: exclude /lop/auth/callback from middleware auth check |
 | `bb977ec` | Fix LOP login: PKCE flow, auto-link users by email, action spinners |
-| `4dc9b91` | Lazy-init Supabase client (Vercel build fix) |
+| `4dc9b91` | Lazy-init Supabase client (build-time fix) |
 | `64159ea` | LOP PRD compliance: all fields, doc upload, tags, mark arrived, metrics, CSV export |
 | `5034580` | Add LOP Dashboard: patient management, scheduling, law firms, reports, settings |
 | `948c2dc` | Cloud Run fixes: private GCS file proxy, upload path fix, patients loading guard, blog admin persistence via API |

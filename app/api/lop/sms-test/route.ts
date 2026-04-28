@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (!twilioSid || !twilioToken || !twilioFrom) {
       return NextResponse.json({
         success: false,
-        message: "Missing Twilio env vars. Add them in Vercel project settings → Environment Variables, then redeploy.",
+        message: "Missing Twilio env vars. Add them via gcloud run services update --update-secrets (or --set-env-vars) on the focus-health-new service, then redeploy.",
         diagnostics,
       });
     }

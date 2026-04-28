@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 
 /**
  * Automated email cron endpoint.
- * Call via Vercel Cron or external scheduler once daily.
+ * Invoked daily by Google Cloud Scheduler (must include `Authorization: Bearer ${CRON_SECRET}`).
  * For patients missing an LOP letter beyond the configured delay,
  * send a reminder email to the law firm and log it.
  */

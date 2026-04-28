@@ -72,6 +72,7 @@ export function LopShell({ children }: { children: ReactNode }) {
   const [confirmPwd, setConfirmPwd] = useState("");
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdError, setPwdError] = useState("");
   const [pwdSuccess, setPwdSuccess] = useState("");
@@ -87,6 +88,9 @@ export function LopShell({ children }: { children: ReactNode }) {
     setCurrentPwd("");
     setNewPwd("");
     setConfirmPwd("");
+    setShowCurrent(false);
+    setShowNew(false);
+    setShowConfirm(false);
     setPwdError("");
     setPwdSuccess("");
     setProfileOpen(true);
@@ -402,13 +406,25 @@ export function LopShell({ children }: { children: ReactNode }) {
               <Label htmlFor="confirm-pwd" className="text-sm font-medium text-slate-700">
                 Confirm New Password
               </Label>
-              <Input
-                id="confirm-pwd"
-                type="password"
-                placeholder="Re-enter new password"
-                value={confirmPwd}
-                onChange={(e) => setConfirmPwd(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="confirm-pwd"
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Re-enter new password"
+                  value={confirmPwd}
+                  onChange={(e) => setConfirmPwd(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             {pwdError && (
