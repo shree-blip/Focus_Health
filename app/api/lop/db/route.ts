@@ -93,7 +93,11 @@ function parseJoinSpecs(mainTable: string, selectStr: string): { cleanSelect: st
       joins.push({ joinTable: jTable, cols, type: "many", fkCol: revFk, fkIsOnMain: false });
     }
     return ""; // strip from main select
-  }).replace(/,\s*,/g, ",").replace(/,\s*$/, "").replace(/^\s*,/, "").trim() || "*";
+  })
+    .replace(/,(\s*,)+/g, ",")   // collapse multiple consecutive commas
+    .replace(/,\s*$/, "")         // remove trailing comma
+    .replace(/^\s*,/, "")         // remove leading comma
+    .trim() || "*";
   return { cleanSelect: cleanSelect === "" ? "*" : cleanSelect, joins };
 }
 

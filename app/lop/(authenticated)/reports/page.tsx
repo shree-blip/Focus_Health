@@ -166,7 +166,7 @@ export default function ReportsPage() {
       }
 
       const { data } = await lopDb.select("lop_patients", {
-        select: "*, lop_facilities(name), lop_law_firms(id, name)",
+        select: "id, first_name, last_name, case_status, lop_letter_status, facility_id, law_firm_id, created_at, date_of_service, bill_charges, amount_collected, llc_billed_charges, pllc_billed_charges, total_received_llc, total_received_pllc, mrn, disposition_status, chief_complaint, primary_insurance, referral_source, is_lop_case, lop_facilities(name), lop_law_firms(id, name)",
         filters,
       });
 
@@ -199,11 +199,21 @@ export default function ReportsPage() {
   const metrics = useMemo<ReportsMetrics>(() => {
     const totalPatients = filteredPatients.length;
     const totalBilled = filteredPatients.reduce(
-      (sum, patient) => sum + (Number(patient.bill_charges) || 0),
+      (sum, patient) => {
+        const llc = Number(patient.llc_billed_charges) || 0;
+        const pllc = Number(patient.pllc_billed_charges) || 0;
+        const legacy = Number(patient.bill_charges) || 0;
+        return sum + (llc + pllc > 0 ? llc + pllc : legacy);
+      },
       0
     );
     const totalCollected = filteredPatients.reduce(
-      (sum, patient) => sum + (Number(patient.amount_collected) || 0),
+      (sum, patient) => {
+        const llc = Number(patient.total_received_llc) || 0;
+        const pllc = Number(patient.total_received_pllc) || 0;
+        const legacy = Number(patient.amount_collected) || 0;
+        return sum + (llc + pllc > 0 ? llc + pllc : legacy);
+      },
       0
     );
     const avgBilled = totalPatients > 0 ? totalBilled / totalPatients : 0;
@@ -243,8 +253,14 @@ export default function ReportsPage() {
       }
 
       firmMap[firmId].patientCount += 1;
-      firmMap[firmId].totalBilled += Number(patient.bill_charges) || 0;
-      firmMap[firmId].totalCollected += Number(patient.amount_collected) || 0;
+      const fLlc = Number(patient.llc_billed_charges) || 0;
+      const fPllc = Number(patient.pllc_billed_charges) || 0;
+      const fBill = Number(patient.bill_charges) || 0;
+      firmMap[firmId].totalBilled += (fLlc + fPllc > 0 ? fLlc + fPllc : fBill);
+      const cLlc = Number(patient.total_received_llc) || 0;
+      const cPllc = Number(patient.total_received_pllc) || 0;
+      const cLegacy = Number(patient.amount_collected) || 0;
+      firmMap[firmId].totalCollected += (cLlc + cPllc > 0 ? cLlc + cPllc : cLegacy);
     }
 
     const firmMetrics = Object.values(firmMap)
@@ -278,8 +294,14 @@ export default function ReportsPage() {
       }
 
       facilityMap[facilityId].count += 1;
-      facilityMap[facilityId].billed += Number(patient.bill_charges) || 0;
-      facilityMap[facilityId].collected += Number(patient.amount_collected) || 0;
+      const fac_llc = Number(patient.llc_billed_charges) || 0;
+      const fac_pllc = Number(patient.pllc_billed_charges) || 0;
+      const fac_bill = Number(patient.bill_charges) || 0;
+      facilityMap[facilityId].billed += (fac_llc + fac_pllc > 0 ? fac_llc + fac_pllc : fac_bill);
+      const fac_cllc = Number(patient.total_received_llc) || 0;
+      const fac_cpllc = Number(patient.total_received_pllc) || 0;
+      const fac_col = Number(patient.amount_collected) || 0;
+      facilityMap[facilityId].collected += (fac_cllc + fac_cpllc > 0 ? fac_cllc + fac_cpllc : fac_col);
     }
 
     return {
