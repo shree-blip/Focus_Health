@@ -4,14 +4,7 @@
  */
 import { createHmac, timingSafeEqual } from "crypto";
 
-const _rawSecret = process.env.LOP_JWT_SECRET || process.env.ADMIN_SESSION_SECRET;
-if (!_rawSecret) {
-  throw new Error(
-    "[HIPAA] LOP_JWT_SECRET environment variable is not set. " +
-    "Sessions cannot be signed — refusing to start with an insecure fallback."
-  );
-}
-const LOP_JWT_SECRET = _rawSecret;
+const LOP_JWT_SECRET = process.env.LOP_JWT_SECRET || process.env.ADMIN_SESSION_SECRET;
 export const LOP_SESSION_COOKIE = "lop_session";
 const SESSION_MAX_AGE = 60 * 60 * 8; // 8 hours
 
@@ -23,6 +16,12 @@ export interface LopSessionPayload {
 }
 
 function sign(data: string): string {
+  if (!LOP_JWT_SECRET) {
+    throw new Error(
+      "[HIPAA] LOP_JWT_SECRET environment variable is not set. " +
+      "Sessions cannot be signed — refusing to use an insecure fallback."
+    );
+  }
   return createHmac("sha256", LOP_JWT_SECRET).update(data).digest("hex");
 }
 
