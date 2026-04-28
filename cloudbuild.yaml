@@ -1,0 +1,28 @@
+steps:
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - focus-health-new
+      - --source
+      - .
+      - --region
+      - us-central1
+      - --project
+      - adept-box-494606-s9
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --add-cloudsql-instances
+      - adept-box-494606-s9:us-central1:focus-health-db
+      - --set-env-vars
+      - "DB_USER=focus_app,DB_NAME=focus_health,CLOUD_SQL_CONNECTION_NAME=adept-box-494606-s9:us-central1:focus-health-db,LOP_JWT_SECRET=lop-focus-health-2024-secure,NEXT_PUBLIC_GOOGLE_CLIENT_ID=540299638751-0ghd0f3b4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com,SMTP_HOST=smtp.gmail.com,SMTP_PORT=587,SMTP_USER=info@getfocushealth.com"
+      - --set-secrets
+      - "DB_PASSWORD=focus-db-password:latest,GOOGLE_CLIENT_SECRET=google-client-secret:latest,SMTP_PASS=smtp-pass:latest,OPENAI_API_KEY=openai-api-key:latest,CRON_SECRET=cron-secret:latest"
+      - --quiet
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: "1200s"
