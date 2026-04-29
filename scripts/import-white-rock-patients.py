@@ -198,6 +198,7 @@ def main():
             total_received_llc, total_received_pllc,
             case_status, lop_letter_status, medical_records_status
         ) VALUES %s
+        ON CONFLICT DO NOTHING
     """, [
         (
             r[0], r[1], r[2], r[3], r[4],
@@ -209,7 +210,7 @@ def main():
     ])
 
     conn.commit()
-    print(f"✓ Imported {len(rows)} patient records for ER of White Rock.")
+    print(f"✓ Imported up to {len(rows)} patient records for ER of White Rock (duplicates silently skipped).")
     cur.close()
     conn.close()
 

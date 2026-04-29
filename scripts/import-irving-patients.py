@@ -199,6 +199,7 @@ with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
                     %s, %s, %s, %s, %s, %s, %s,
                     true
                 )
+                ON CONFLICT DO NOTHING
             """, (
                 FACILITY_ID, lf_id,
                 first, last, dob, dos, mrn,
@@ -208,7 +209,10 @@ with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
                 check_date, mr_notes, notes_val,
             ))
             conn.commit()
-            stats["inserted"] += 1
+            if cur.rowcount > 0:
+                stats["inserted"] += 1
+            else:
+                stats["skipped"] = stats.get("skipped", 0) + 1
         except Exception as e:
             conn.rollback()
             print(f"  ERROR {first} {last}: {e}")
@@ -217,4 +221,5 @@ with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
 conn.close()
 print(f"\n{'─'*45}")
 print(f"  Inserted : {stats['inserted']}")
+print(f"  Skipped  : {stats.get('skipped', 0)} (already existed)")
 print(f"  Bad rows : {stats['bad']}")

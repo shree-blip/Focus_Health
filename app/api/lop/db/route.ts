@@ -18,6 +18,7 @@ const ALLOWED_TABLES = [
   "lop_law_firms",
   "lop_patients",
   "lop_patient_documents",
+  "lop_patient_identities",
   "lop_reminder_emails",
   "lop_audit_log",
   "lop_config",

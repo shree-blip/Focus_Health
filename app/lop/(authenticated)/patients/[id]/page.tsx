@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   ArrowLeft,
+  History,
   Loader2,
   Save,
   Search,
@@ -229,6 +230,11 @@ export default function PatientDetailPage({
   const [sendingReminder, setSendingReminder] = useState(false);
   const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
 
+  // Other cases for the same patient identity
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [otherCases, setOtherCases] = useState<any[]>([]);
+  const [otherCasesLoading, setOtherCasesLoading] = useState(false);
+
   // Load data
   const loadData = useCallback(
     async ({ syncForm = true }: { syncForm?: boolean } = {}) => {
@@ -290,6 +296,23 @@ export default function PatientDetailPage({
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Load other cases once we have the patient's identity_id
+  useEffect(() => {
+    const identityId = patient?.identity_id;
+    if (!identityId) { setOtherCases([]); return; }
+    setOtherCasesLoading(true);
+    lopDb.select("lop_patients", {
+      select: "id, first_name, last_name, case_status, date_of_service, facility_id, law_firm_id, bill_charges, amount_collected, lop_facilities(name), lop_law_firms(name)",
+      filters: [
+        { column: "identity_id", op: "eq",  value: identityId },
+        { column: "id",          op: "neq", value: id },
+      ],
+      order: { column: "date_of_service", ascending: false },
+    }).then(({ data }) => {
+      setOtherCases((data as unknown[]) ?? []);
+    }).finally(() => setOtherCasesLoading(false));
+  }, [patient?.identity_id, id]);
 
   useLopDbChange(
     [
@@ -703,6 +726,15 @@ export default function PatientDetailPage({
             >
               Activity ({auditLogs.length})
             </TabsTrigger>
+            {patient?.identity_id && (
+              <TabsTrigger
+                value="other-cases"
+                className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-[#0B3B91] data-[state=active]:text-white data-[state=active]:shadow-md gap-1"
+              >
+                <History className="h-3.5 w-3.5" />
+                Other Cases {otherCases.length > 0 && `(${otherCases.length})`}
+              </TabsTrigger>
+            )}
             {canUseAi && (
               <TabsTrigger
                 value="ai-summary"
@@ -1563,6 +1595,78 @@ export default function PatientDetailPage({
               )}
           </section>
         </TabsContent>
+
+        {/* ==================== Other Cases Tab ==================== */}
+        {patient?.identity_id && (
+          <TabsContent value="other-cases" className="space-y-4 mt-4">
+            <section className="overflow-hidden rounded-[30px] bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-6 py-5">
+                <h2 className="font-heading text-xl font-bold text-[#0B3B91]">Other Cases — Same Patient</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  All recorded visits for this person across facilities and law firms.
+                </p>
+              </div>
+              {otherCasesLoading ? (
+                <div className="flex items-center justify-center gap-2 py-12 text-slate-400">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Loading…
+                </div>
+              ) : otherCases.length === 0 ? (
+                <div className="py-12 text-center text-sm text-slate-400">
+                  No other cases found for this patient identity.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left">
+                    <thead>
+                      <tr className="bg-slate-50/80">
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Facility</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Law Firm</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Date of Service</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Status</th>
+                        <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Billed</th>
+                        <th className="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Collected</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {(otherCases as Record<string, unknown>[]).map((c) => {
+                        const facility = (c.lop_facilities as Record<string, string> | null)?.name ?? "—";
+                        const firm     = (c.lop_law_firms  as Record<string, string> | null)?.name ?? "—";
+                        const dos      = c.date_of_service ? new Date(c.date_of_service as string).toLocaleDateString() : "—";
+                        const billed   = c.bill_charges    ? `$${Number(c.bill_charges).toLocaleString()}` : "—";
+                        const collected = c.amount_collected ? `$${Number(c.amount_collected).toLocaleString()}` : "—";
+                        const status   = (c.case_status as string ?? "").replace(/_/g, " ");
+                        return (
+                          <tr key={c.id as string} className="group hover:bg-slate-50/60">
+                            <td className="px-6 py-4 text-sm font-medium text-slate-800">{facility}</td>
+                            <td className="px-6 py-4 text-sm text-slate-600">{firm}</td>
+                            <td className="px-6 py-4 text-sm text-slate-600">{dos}</td>
+                            <td className="px-6 py-4">
+                              <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-medium capitalize text-slate-600">
+                                {status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right text-sm text-slate-700">{billed}</td>
+                            <td className="px-6 py-4 text-right text-sm font-semibold text-emerald-600">{collected}</td>
+                            <td className="px-6 py-4 text-right">
+                              <Link
+                                href={`/lop/patients/${c.id as string}`}
+                                className="text-xs font-semibold text-[#0B3B91] hover:underline"
+                              >
+                                View case →
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          </TabsContent>
+        )}
 
         {/* ==================== AI Summary Tab ==================== */}
         {canUseAi && (

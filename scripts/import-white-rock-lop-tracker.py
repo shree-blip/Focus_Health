@@ -195,6 +195,7 @@ def main() -> int:
 
     inserted = 0
     updated = 0
+    skipped = 0
     for p in parsed:
         cur.execute(
             "SELECT id FROM lop_patients WHERE facility_id = %s AND mrn = %s LIMIT 1",
@@ -261,6 +262,7 @@ def main() -> int:
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
+                ON CONFLICT DO NOTHING
                 """,
                 (
                     p["facility_id"], p["law_firm_id"],
@@ -273,10 +275,13 @@ def main() -> int:
                     p["intake_notes"], p["billing_tags"], p["is_lop_case"],
                 ),
             )
-            inserted += 1
+            if cur.rowcount > 0:
+                inserted += 1
+            else:
+                skipped += 1
 
     conn.commit()
-    print(f"\n✓ {inserted} inserted, {updated} updated, {len(parsed)} total rows processed.")
+    print(f"\n✓ {inserted} inserted, {updated} updated, {skipped} skipped (duplicates), {len(parsed)} total rows processed.")
     cur.close()
     conn.close()
     return 0

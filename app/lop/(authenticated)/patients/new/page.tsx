@@ -15,11 +15,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertTriangle,
   ArrowLeft,
   Building2,
+  ExternalLink,
   FileText,
+  History,
   Loader2,
   MapPin,
+  RefreshCw,
   Search,
   UserRound,
 } from "lucide-react";
@@ -33,6 +37,29 @@ export default function NewPatientPage() {
   const [lawFirmSearch, setLawFirmSearch] = useState("");
   const lawFirmSearchRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [dupeWarning, setDupeWarning] = useState<
+    { id: string; name: string; caseStatus: string; dos: string | null; createdAt: string }[]
+  >([]);
+  const [confirmDupe, setConfirmDupe] = useState(false);
+
+  // Returning-patient identity state
+  type IdentityMatch = {
+    id: string;
+    first_name: string;
+    last_name: string;
+    date_of_birth: string | null;
+    phone: string | null;
+    case_count: number;
+    latest_dos: string | null;
+    facilities: string[];
+    law_firms: string[];
+  };
+  const [identityMatches, setIdentityMatches] = useState<IdentityMatch[]>([]);
+  const [identitySearching, setIdentitySearching] = useState(false);
+  const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(null);
+  const [returningConfirmed, setReturningConfirmed] = useState(false);
+  const identitySearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [mandatoryFields, setMandatoryFields] = useState<string[]>([
     "first_name",
     "last_name",
@@ -95,8 +122,43 @@ export default function NewPatientPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFacilityId]);
 
-  const update = (field: string, value: string) =>
+  const update = (field: string, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
+    // Trigger live identity search when name or DOB changes
+    if (["first_name", "last_name", "date_of_birth"].includes(field)) {
+      setSelectedIdentityId(null);
+      setReturningConfirmed(false);
+    }
+  };
+
+  // Debounced identity search — fires when name+DOB are filled
+  useEffect(() => {
+    if (identitySearchTimer.current) clearTimeout(identitySearchTimer.current);
+    const { first_name, last_name } = form;
+    if (!first_name.trim() || !last_name.trim()) {
+      setIdentityMatches([]);
+      return;
+    }
+    identitySearchTimer.current = setTimeout(async () => {
+      setIdentitySearching(true);
+      try {
+        const params = new URLSearchParams({
+          q: `${first_name.trim()} ${last_name.trim()}`,
+        });
+        if (form.date_of_birth) params.set("dob", form.date_of_birth);
+        const res = await fetch(`/api/lop/identity?${params}`, { credentials: "same-origin" });
+        if (res.ok) {
+          const json = await res.json() as { identities: IdentityMatch[] };
+          setIdentityMatches(json.identities ?? []);
+        }
+      } catch {
+        // silent
+      } finally {
+        setIdentitySearching(false);
+      }
+    }, 600);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.first_name, form.last_name, form.date_of_birth]);
 
   const isRequired = (field: string) => mandatoryFields.includes(field);
 
@@ -131,29 +193,63 @@ export default function NewPatientPage() {
       return;
     }
 
+    // ── Returning patient: require acknowledgement if identity matches exist ─
+    if (identityMatches.length > 0 && !returningConfirmed && !selectedIdentityId) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast.error("Please review the returning patient matches above before continuing.");
+      return;
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     setSaving(true);
     try {
+      // Resolve identity_id — use selected/matched one or find-or-create
+      let resolvedIdentityId: string | null = selectedIdentityId;
+      if (!resolvedIdentityId) {
+        try {
+          const res = await fetch("/api/lop/identity", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({
+              first_name: form.first_name.trim(),
+              last_name:  form.last_name.trim(),
+              date_of_birth: form.date_of_birth || null,
+              phone: form.phone || null,
+              email: form.email || null,
+            }),
+          });
+          if (res.ok) {
+            const json = await res.json() as { identityId: string };
+            resolvedIdentityId = json.identityId ?? null;
+          }
+        } catch {
+          // Non-blocking — patient will be created without identity_id
+        }
+      }
+
       const { data, error } = await lopDb.insert(
         "lop_patients",
         {
-          facility_id: form.facility_id,
-          first_name: form.first_name.trim(),
-          last_name: form.last_name.trim(),
+          facility_id:   form.facility_id,
+          identity_id:   resolvedIdentityId,
+          first_name:    form.first_name.trim(),
+          last_name:     form.last_name.trim(),
           date_of_birth: form.date_of_birth || null,
-          phone: form.phone || null,
-          email: form.email || null,
+          phone:         form.phone || null,
+          email:         form.email || null,
           address_line1: form.address_line1 || null,
           address_line2: form.address_line2 || null,
-          city: form.city || null,
-          state: form.state || null,
-          zip: form.zip || null,
+          city:          form.city || null,
+          state:         form.state || null,
+          zip:           form.zip || null,
           date_of_accident: form.date_of_accident || null,
-          law_firm_id: form.law_firm_id || null,
+          law_firm_id:   form.law_firm_id || null,
           expected_arrival: form.expected_arrival || null,
-          intake_notes: form.intake_notes || null,
-          case_status: form.expected_arrival ? "scheduled" : "arrived",
-          created_by: lopUser?.id ?? null,
-          updated_by: lopUser?.id ?? null,
+          intake_notes:  form.intake_notes || null,
+          case_status:   form.expected_arrival ? "scheduled" : "arrived",
+          created_by:    lopUser?.id ?? null,
+          updated_by:    lopUser?.id ?? null,
         },
         { select: "id", single: true },
       );
@@ -215,6 +311,151 @@ export default function NewPatientPage() {
           </p>
         </div>
       </div>
+
+      {/* ── Returning patient identity matches ── */}
+      {identityMatches.length > 0 && (
+        <div className="mb-6 max-w-5xl overflow-hidden rounded-2xl border border-blue-200 bg-blue-50">
+          <div className="flex items-start gap-4 px-6 py-5">
+            <History className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
+            <div className="flex-1">
+              <p className="font-semibold text-blue-900">
+                Returning patient detected — {identityMatches.length} existing identity match{identityMatches.length > 1 ? "es" : ""}
+              </p>
+              <p className="mt-0.5 text-sm text-blue-700">
+                This person may have visited before. Link this new case to their existing record, or proceed as a new patient if it&apos;s a different person.
+              </p>
+              <div className="mt-4 space-y-3">
+                {identityMatches.map((im) => (
+                  <div
+                    key={im.id}
+                    className={`rounded-xl border p-4 transition-colors cursor-pointer ${
+                      selectedIdentityId === im.id
+                        ? "border-blue-500 bg-white shadow-sm"
+                        : "border-blue-200 bg-white/60 hover:border-blue-400"
+                    }`}
+                    onClick={() => {
+                      setSelectedIdentityId(im.id === selectedIdentityId ? null : im.id);
+                      setReturningConfirmed(true);
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-semibold text-slate-800">
+                          {im.first_name} {im.last_name}
+                          {im.date_of_birth && (
+                            <span className="ml-2 text-xs font-normal text-slate-500">
+                              DOB: {new Date(im.date_of_birth).toLocaleDateString()}
+                            </span>
+                          )}
+                          {im.phone && (
+                            <span className="ml-2 text-xs font-normal text-slate-500">{im.phone}</span>
+                          )}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-600">
+                          {im.case_count} prior case{im.case_count !== 1 ? "s" : ""}
+                          {im.latest_dos && ` · Last visit ${new Date(im.latest_dos).toLocaleDateString()}`}
+                          {im.facilities?.length > 0 && ` · ${im.facilities.join(", ")}`}
+                        </p>
+                        {im.law_firms?.length > 0 && (
+                          <p className="mt-0.5 text-xs text-slate-500">
+                            Law firm{im.law_firms.length > 1 ? "s" : ""}: {im.law_firms.join(", ")}
+                          </p>
+                        )}
+                      </div>
+                      <div className="shrink-0">
+                        {selectedIdentityId === im.id ? (
+                          <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">Selected</span>
+                        ) : (
+                          <span className="rounded-full border border-blue-300 px-3 py-1 text-xs font-semibold text-blue-600">Link this case</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {selectedIdentityId && (
+                  <button
+                    type="button"
+                    onClick={() => { setReturningConfirmed(true); }}
+                    className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+                  >
+                    <RefreshCw className="mr-1.5 inline h-3.5 w-3.5" />
+                    Create new case for this patient
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIdentityMatches([]);
+                    setSelectedIdentityId(null);
+                    setReturningConfirmed(true);
+                  }}
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Different person — continue as new
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {identitySearching && (
+        <div className="mb-4 flex items-center gap-2 text-sm text-slate-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Checking for returning patient…
+        </div>
+      )}
+
+      {/* ── Duplicate patient warning ── */}
+      {dupeWarning.length > 0 && (
+        <div className="mb-6 max-w-5xl overflow-hidden rounded-2xl border border-amber-200 bg-amber-50">
+          <div className="flex items-start gap-4 px-6 py-5">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+            <div className="flex-1">
+              <p className="font-semibold text-amber-800">
+                Possible duplicate detected — {dupeWarning.length} existing record{dupeWarning.length > 1 ? "s" : ""} with
+                this name at this facility:
+              </p>
+              <ul className="mt-3 space-y-2">
+                {dupeWarning.map((p) => (
+                  <li key={p.id} className="flex items-center gap-3 text-sm text-amber-700">
+                    <span className="font-medium">{p.name}</span>
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs capitalize">
+                      {p.caseStatus.replace(/_/g, " ")}
+                    </span>
+                    {p.dos && <span className="text-amber-500">DOS: {p.dos}</span>}
+                    <Link
+                      href={`/lop/patients/${p.id}`}
+                      target="_blank"
+                      className="ml-auto flex items-center gap-1 text-xs font-semibold text-[#0B3B91] hover:underline"
+                    >
+                      View record <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setConfirmDupe(true); setDupeWarning([]); }}
+                  className="rounded-xl bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+                >
+                  This is a new visit — proceed anyway
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDupeWarning([])}
+                  className="rounded-xl border border-amber-300 px-5 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Bento Form Grid ── */}
       <form id="intake-form" onSubmit={handleSubmit} className="grid max-w-5xl grid-cols-12 gap-6 lg:gap-8">
