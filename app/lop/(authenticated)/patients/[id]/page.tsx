@@ -221,6 +221,7 @@ export default function PatientDetailPage({
   // Document upload dialog
   const [docDialogOpen, setDocDialogOpen] = useState(false);
   const [docUploading, setDocUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
   const [docForm, setDocForm] = useState({
     document_type: "lop_letter" as string,
     notes: "",
@@ -480,12 +481,20 @@ export default function PatientDetailPage({
   /* ---- Upload / add document record ---- */
   const handleDocUpload = async () => {
     setDocUploading(true);
+    setUploadStatus("");
     try {
       let filePath: string | null = null;
       let fileName: string | null = null;
       let fileUrl: string | null = null;
 
       if (docFile) {
+        const isPdf = docFile.type === "application/pdf";
+        const isLarge = docFile.size > 2 * 1024 * 1024; // > 2 MB
+        if (isPdf && isLarge) {
+          setUploadStatus("Compressing PDF\u2026");
+        } else {
+          setUploadStatus("Uploading\u2026");
+        }
         const ext = docFile.name.split(".").pop();
         const storagePath = `${id}/${Date.now()}-${docForm.document_type}.${ext}`;
         const uploadForm = new FormData();
@@ -504,8 +513,15 @@ export default function PatientDetailPage({
         filePath = uploadData.storage_path;
         fileName = docFile.name;
         fileUrl = uploadData.url;
+        if (uploadData.originalSize && uploadData.compressedSize) {
+          const saved = Math.round((1 - uploadData.compressedSize / uploadData.originalSize) * 100);
+          if (saved >= 5) {
+            toast.info(`PDF compressed \u2014 ${saved}% smaller`);
+          }
+        }
       }
 
+      setUploadStatus("Saving record\u2026");
       const { error } = await lopDb.insert("lop_patient_documents", {
         patient_id: id,
         document_type: docForm.document_type,
@@ -534,12 +550,14 @@ export default function PatientDetailPage({
       setDocDialogOpen(false);
       setDocFile(null);
       setDocForm({ document_type: "lop_letter", notes: "", status: "requested" });
+      setUploadStatus("");
       loadData();
     } catch (err) {
       console.error(err);
       toast.error("Failed to upload document.");
     } finally {
       setDocUploading(false);
+      setUploadStatus("");
     }
   };
 
@@ -1754,8 +1772,12 @@ export default function PatientDetailPage({
                 {docUploading && (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 )}
-                <Upload className="h-4 w-4 mr-2" />
-                {docFile ? "Upload & Save" : "Save Record"}
+                {!docUploading && <Upload className="h-4 w-4 mr-2" />}
+                {docUploading
+                  ? (uploadStatus || "Uploading\u2026")
+                  : docFile
+                  ? "Upload & Save"
+                  : "Save Record"}
               </Button>
             </div>
           </div>
@@ -1770,7 +1792,7 @@ export default function PatientDetailPage({
 /* ------------------------------------------------------------------ */
 function PatientAiSummary({ patientId }: { patientId: string }) {
   const [triggered, setTriggered] = useState(false);
-  const { messages, isLoading, append, setMessages } = useAiChat({
+  const { messages, isLoading, append, setMessages, error } = useAiChat({
     contextType: "patient_summary",
     contextId: patientId,
   });
@@ -1831,6 +1853,12 @@ function PatientAiSummary({ patientId }: { patientId: string }) {
         ) : aiResponse ? (
           <div className="prose prose-sm prose-slate max-w-none text-sm [&>*:first-child]:mt-0">
             <PatientAiMarkdown content={aiResponse} />
+          </div>
+        ) : error ? (
+          <div className="rounded-xl bg-red-50 border border-red-200 p-4">
+            <p className="text-sm font-semibold text-red-700 mb-1">AI Error</p>
+            <p className="text-xs text-red-500">{error.message ?? "Request failed. Check that you have AI access enabled."}</p>
+            <button onClick={handleRegenerate} className="mt-2 text-xs text-red-600 font-semibold hover:underline">Try again</button>
           </div>
         ) : (
           <p className="text-sm text-indigo-500 py-2">Failed to load. Click Regenerate.</p>

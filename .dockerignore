@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env*
+!.env.example
+node_modules
+.next
+*.log
+*.md
+scripts/
+focus-health-seo-phase-1-to-5/
+Letter of Protections & Records/
+public/*.csv
+*.csv
