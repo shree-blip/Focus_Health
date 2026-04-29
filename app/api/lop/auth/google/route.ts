@@ -3,7 +3,7 @@ import { OAuth2Client } from "google-auth-library";
 import { query, queryOne } from "@/lib/db";
 import { createLopSessionToken, getLopSessionCookieOptions, LOP_SESSION_COOKIE } from "@/lib/lop/lop-auth";
 
-const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1075627982134-d0d7rc5lervhic878otmcunl9l5skb5a.apps.googleusercontent.com");
 
 export async function POST(req: NextRequest) {
   try {
