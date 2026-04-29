@@ -1,15 +1,12 @@
 # syntax=docker/dockerfile:1
-FROM node:20-slim AS base
+# Use official bun image (debian variant) so bun is pre-installed
+FROM oven/bun:1-debian AS base
 
-# Install Ghostscript (for server-side PDF compression) + curl for healthchecks
+# Install Ghostscript (for server-side PDF compression)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ghostscript \
-    curl \
+    ca-certificates \
   && rm -rf /var/lib/apt/lists/*
-
-# Install bun
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:$PATH"
 
 WORKDIR /app
 
