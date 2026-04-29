@@ -35,14 +35,15 @@ SKIP_FOLDERS: set[str] = set()
 def detect_doc_type(filename):
     fn = filename.upper()
     if re.search(r"\bLOP\b", fn):              return "lop_letter"
-    if "AFFIDAVIT" in fn:                      return "affidavits"
-    if "CHART" in fn:                          return "charts"
-    if "FACILIT" in fn:                        return "facility_records"
-    if re.search(r"PROFESSIONAL|PROFIS", fn):  return "professional_records"
-    if "REDUCTION" in fn:                      return "reduction"
-    if re.search(r"[-_ ]MR\.PDF$|[-_ ]MR[-_ ]|MEDICAL.RECORD", fn):
-                                               return "medical_records"
-    return "document"
+    if "AFFIDAVIT" in fn:                      return "affidavit"
+    if "DROP" in fn:                           return "drop_letter"
+    if re.search(r"REDUCTION", fn):            return "reduction_letter_unsigned"
+    if re.search(r"CHECK\b|CHECK.IMAGE", fn): return "check_image"
+    if "FACILIT" in fn:                        return "bill_llc"
+    if re.search(r"PROFESSIONAL|PROFIS", fn):  return "bill_pllc"
+    if re.search(r"[-_ ]MR\.PDF$|[-_ ]MR[-_ ]|MEDICAL.RECORD|CHART", fn):
+                                               return "medical_record"
+    return "medical_record"
 
 
 def norm_words(s):
