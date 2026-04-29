@@ -150,23 +150,34 @@ with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
         # case_status enum: scheduled|arrived|intake_complete|in_progress|
         #                   follow_up_needed|paid|partial_paid|case_dropped|
         #                   closed_no_recovery|no_show
-        cs = comp_stat.lower()
-        if "complete" in cs and "in" not in cs:
+        cs  = comp_stat.lower()
+        ll  = lop_stat.lower()  # used in both case_status and lop_letter_status logic
+
+        if "case dropped" in ll or "declined" in ll:
+            case_status = "case_dropped"
+        elif "complete" in cs and "in" not in cs:
             case_status = "paid"
         elif "withdraw" in cs:
             case_status = "case_dropped"
+        elif "medical" in ll or "billing records" in ll:
+            # "Medical/ Billing Records Shared" — records sent to firm, awaiting payment
+            case_status = "follow_up_needed"
         else:
             case_status = "in_progress"
 
         # lop_letter_status → lop_document_status enum:
         # not_requested|requested|received|missing
-        ll = lop_stat.lower()
-        if "sent" in ll or "complete" in ll:
+        if "medical" in ll or "billing records" in ll:
+            # Records have been shared with the law firm → received
             lop_letter_status = "received"
-        elif "pending" in ll or "request" in ll:
+        elif "sent" in ll or "complete" in ll:
+            lop_letter_status = "received"
+        elif "pending" in ll or "request" in ll or "pt. auth" in ll:
             lop_letter_status = "requested"
         elif "missing" in ll:
             lop_letter_status = "missing"
+        elif "case dropped" in ll or "declined" in ll:
+            lop_letter_status = "not_requested"
         else:
             lop_letter_status = "not_requested"
 
