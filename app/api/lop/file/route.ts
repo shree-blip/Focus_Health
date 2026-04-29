@@ -26,8 +26,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "path is required" }, { status: 400 });
     }
 
-    // Only allow access to lop-documents prefix
-    if (!path.startsWith("lop-documents/")) {
+    // Only allow access to lop-documents and patient-docs prefixes
+    if (!path.startsWith("lop-documents/") && !path.startsWith("patient-docs/")) {
       return NextResponse.json({ error: "Invalid path" }, { status: 400 });
     }
 

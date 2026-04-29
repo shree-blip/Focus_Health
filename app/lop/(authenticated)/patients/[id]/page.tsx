@@ -16,6 +16,17 @@ import {
   ALL_DOCUMENT_TYPES,
   getMissingDocuments,
 } from "@/lib/lop/types";
+
+const GCS_BUCKET_PREFIX = "gs://focus-health-assets-adept-box-494606-s9/";
+function getDocPreviewUrl(fileUrl: string | null, storagePath: string | null): string | null {
+  // For script-uploaded docs: storage_path is gs://bucket/object-path
+  if (storagePath && storagePath.startsWith(GCS_BUCKET_PREFIX)) {
+    const objectPath = storagePath.slice(GCS_BUCKET_PREFIX.length);
+    return `/api/lop/file?path=${encodeURIComponent(objectPath)}`;
+  }
+  // For UI-uploaded docs: file_url is already a proxy URL
+  return fileUrl;
+}
 import type {
   LopCaseStatus,
   LopDocumentStatus,
@@ -50,7 +61,7 @@ import {
   FileText,
   Plus,
   X,
-  Download,
+  Eye,
   Trash2,
   CheckCircle2,
   AlertCircle,
@@ -1386,17 +1397,24 @@ export default function PatientDetailPage({
                             doc.status as LopDocumentStatus
                           ] ?? doc.status}
                         </span>
-                        {doc.file_url && (
-                          <a
-                            href={doc.file_url as string}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Button variant="ghost" size="icon">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </a>
-                        )}
+                        {(() => {
+                          const previewUrl = getDocPreviewUrl(
+                            doc.file_url as string | null,
+                            doc.storage_path as string | null
+                          );
+                          return previewUrl ? (
+                            <a
+                              href={previewUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Preview document"
+                            >
+                              <Button variant="ghost" size="icon">
+                                <Eye className="h-4 w-4 text-blue-500" />
+                              </Button>
+                            </a>
+                          ) : null;
+                        })()}
                         {canUploadDocs && (
                           <Button
                             variant="ghost"
