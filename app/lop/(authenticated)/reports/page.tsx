@@ -137,6 +137,8 @@ export default function ReportsPage() {
   const [nameFilter, setNameFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [lowThreshold, setLowThreshold] = useState(3000);
+  const [firmSearch, setFirmSearch] = useState("");
+  const [showFirmSearch, setShowFirmSearch] = useState(false);
 
 
   useEffect(() => {
@@ -373,6 +375,65 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportFacilityCsv = () => {
+    const rows = metrics.facilityMetrics.map((f) => ({
+      facility: f.name,
+      patients: f.count,
+      total_billed: f.billed,
+      total_collected: f.collected,
+      outstanding: Math.max(0, f.billed - f.collected),
+    }));
+    const header = Object.keys(rows[0] ?? {}).join(",");
+    const csv = header + "\n" + rows.map((r) => Object.values(r).map((v) => `"${String(v)}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `facility-totals-${datePreset}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportPdf = () => {
+    const fmt = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+    const dateLabel = getPresetLabel(datePreset, customFrom, customTo);
+    const firmRows = metrics.firmMetrics.map((f) =>
+      `<tr><td>${f.firmName}</td><td>${f.patientCount}</td><td>${fmt(f.totalBilled)}</td><td>${fmt(f.totalCollected)}</td><td>${fmt(f.avgCollected)}</td></tr>`
+    ).join("");
+    const facilityRows = metrics.facilityMetrics.map((f) =>
+      `<tr><td>${f.name}</td><td>${f.count}</td><td>${fmt(f.billed)}</td><td>${fmt(f.collected)}</td></tr>`
+    ).join("");
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>LOP Report</title><style>
+      body{font-family:Arial,sans-serif;padding:32px;color:#1e293b;font-size:13px}
+      h1{color:#0B3B91;margin-bottom:4px}p.sub{color:#64748b;margin:0 0 24px}
+      .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+      .kpi{border:1px solid #e2e8f0;border-radius:10px;padding:14px}
+      .kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:6px}
+      .kpi .value{font-size:22px;font-weight:800;color:#0B3B91}
+      h2{color:#0B3B91;font-size:15px;margin:24px 0 10px}
+      table{width:100%;border-collapse:collapse;margin-bottom:28px}
+      th{background:#f1f5f9;padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#64748b}
+      td{padding:8px 12px;border-bottom:1px solid #e2e8f0;font-size:12px}
+      @media print{body{padding:16px}.no-print{display:none}}
+    </style></head><body>
+      <h1>LOP Report — ${scopeFacilityLabel}</h1>
+      <p class="sub">${dateLabel} &bull; Generated ${new Date().toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "long", day: "numeric" })}</p>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Total Patients</div><div class="value">${metrics.totalPatients}</div></div>
+        <div class="kpi"><div class="label">Total Billed</div><div class="value">${fmt(metrics.totalBilled)}</div></div>
+        <div class="kpi"><div class="label">Total Collected</div><div class="value">${fmt(metrics.totalCollected)}</div></div>
+        <div class="kpi"><div class="label">Avg Collected</div><div class="value">${fmt(metrics.avgCollected)}</div></div>
+      </div>
+      <h2>Collections by Law Firm</h2>
+      <table><thead><tr><th>Firm</th><th>Patients</th><th>Total Billed</th><th>Collected</th><th>Avg Col</th></tr></thead><tbody>${firmRows || "<tr><td colspan='5'>No data</td></tr>"}</tbody></table>
+      <h2>Facility Totals</h2>
+      <table><thead><tr><th>Facility</th><th>Patients</th><th>Total Billed</th><th>Total Collected</th></tr></thead><tbody>${facilityRows || "<tr><td colspan='4'>No data</td></tr>"}</tbody></table>
+      <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script>
+    </body></html>`;
+    const w = window.open("", "_blank");
+    if (w) { w.document.write(html); w.document.close(); }
+  };
+
   if (!hasPermission(lopUser, "reports:read")) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -407,6 +468,16 @@ export default function ReportsPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-full border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              onClick={handleExportPdf}
+              disabled={filteredPatients.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Export PDF
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -867,13 +938,31 @@ export default function ReportsPage() {
                   </h2>
                   <button
                     type="button"
-                    className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-[#0B3B91]"
+                    onClick={() => { setShowFirmSearch((v) => !v); setFirmSearch(""); }}
+                    className={`rounded-xl p-2 transition-colors hover:bg-slate-50 ${
+                      showFirmSearch ? "bg-[#0B3B91]/10 text-[#0B3B91]" : "text-slate-400 hover:text-[#0B3B91]"
+                    }`}
+                    title="Search firms"
                   >
                     <Search className="h-4 w-4" />
                   </button>
                 </div>
+                {showFirmSearch && (
+                  <div className="px-6 py-3 border-b border-slate-100">
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                      <input
+                        autoFocus
+                        placeholder="Search by firm name..."
+                        value={firmSearch}
+                        onChange={(e) => setFirmSearch(e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#0B3B91]/40 focus:bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
 
-                {metrics.firmMetrics.length === 0 ? (
+                {metrics.firmMetrics.filter((f) => !firmSearch || f.firmName.toLowerCase().includes(firmSearch.toLowerCase())).length === 0 ? (
                   <div className="px-6 py-16 text-center text-sm text-slate-500">
                     No data with assigned law firms for this filter set.
                   </div>
@@ -900,7 +989,9 @@ export default function ReportsPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {metrics.firmMetrics.map((firm) => (
+                        {metrics.firmMetrics
+                          .filter((f) => !firmSearch || f.firmName.toLowerCase().includes(firmSearch.toLowerCase()))
+                          .map((firm) => (
                           <tr
                             key={firm.firmId}
                             className={cn(
@@ -943,9 +1034,12 @@ export default function ReportsPage() {
                   </h2>
                   <button
                     type="button"
-                    className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-[#0B3B91]"
+                    onClick={handleExportFacilityCsv}
+                    disabled={metrics.facilityMetrics.length === 0}
+                    className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-[#0B3B91] disabled:opacity-40"
+                    title="Export facility totals as CSV"
                   >
-                    <Building2 className="h-4 w-4" />
+                    <Download className="h-4 w-4" />
                   </button>
                 </div>
 
