@@ -164,25 +164,26 @@ export default function ReportsPage() {
 
       setLoading(true);
 
-      const filters: Array<{
+      // No date filter for "all" — fetch everything
+      const baseFilters: Array<{
         column: string;
         op: "eq" | "gte" | "lte";
         value: unknown;
-      }> = [
-        { column: "created_at", op: "gte", value: range.from },
-        { column: "created_at", op: "lte", value: `${range.to}T23:59:59` },
+      }> = datePreset === "all" ? [] : [
+        { column: "date_of_service", op: "gte", value: range.from },
+        { column: "date_of_service", op: "lte", value: `${range.to}T23:59:59` },
       ];
 
       const effectiveFacility =
         activeFacilityId || (facilityFilter !== "all" ? facilityFilter : null);
 
       if (effectiveFacility) {
-        filters.push({ column: "facility_id", op: "eq", value: effectiveFacility });
+        baseFilters.push({ column: "facility_id", op: "eq", value: effectiveFacility });
       }
 
       const { data } = await lopDb.select("lop_patients", {
         select: "id, first_name, last_name, case_status, lop_letter_status, facility_id, law_firm_id, created_at, date_of_service, bill_charges, amount_collected, reduction_amount, billing_date, date_paid, llc_billed_charges, pllc_billed_charges, total_received_llc, total_received_pllc, mrn, disposition_status, chief_complaint, primary_insurance, referral_source, is_lop_case, lop_facilities(name), lop_law_firms(id, name)",
-        filters,
+        filters: baseFilters,
       });
 
       setPatients((data as Record<string, unknown>[]) ?? []);
@@ -546,23 +547,32 @@ export default function ReportsPage() {
               <span className="font-semibold text-slate-700">{filteredPatients.length}</span>{" "}
               patient{filteredPatients.length === 1 ? "" : "s"}
             </span>
-            {(nameFilter || statusFilter !== "all" || facilityFilter !== "all" || datePreset !== "ytd") && (
-              <>
-                <span className="text-slate-300">•</span>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
-                  {getPresetLabel(datePreset, customFrom, customTo)}
-                </span>
-                {statusFilter !== "all" && (
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
-                    {CASE_STATUS_LABELS[statusFilter as keyof typeof CASE_STATUS_LABELS] ?? statusFilter}
-                  </span>
-                )}
-                {nameFilter && (
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
-                    "{nameFilter}"
-                  </span>
-                )}
-              </>
+            <span className="text-slate-300">•</span>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+              {getPresetLabel(datePreset, customFrom, customTo)}
+            </span>
+            {statusFilter !== "all" && (
+              <span className="rounded-full bg-[#0B3B91]/10 px-3 py-1 text-xs font-semibold text-[#0B3B91] ring-1 ring-[#0B3B91]/20">
+                {CASE_STATUS_LABELS[statusFilter as keyof typeof CASE_STATUS_LABELS] ?? statusFilter}
+              </span>
+            )}
+            {facilityFilter !== "all" && !activeFacilityId && (
+              <span className="rounded-full bg-[#0B3B91]/10 px-3 py-1 text-xs font-semibold text-[#0B3B91] ring-1 ring-[#0B3B91]/20">
+                {facilities.find((f) => f.id === facilityFilter)?.name ?? "Facility"}
+              </span>
+            )}
+            {nameFilter.trim() && (
+              <span className="rounded-full bg-[#0B3B91]/10 px-3 py-1 text-xs font-semibold text-[#0B3B91] ring-1 ring-[#0B3B91]/20">
+                "{nameFilter}"
+              </span>
+            )}
+            {(statusFilter !== "all" || (facilityFilter !== "all" && !activeFacilityId) || nameFilter.trim()) && (
+              <button
+                onClick={() => { setStatusFilter("all"); setFacilityFilter("all"); setNameFilter(""); }}
+                className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-500 ring-1 ring-red-200 hover:bg-red-100"
+              >
+                Clear filters
+              </button>
             )}
           </div>
         </section>
