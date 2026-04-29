@@ -32,7 +32,6 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
 
 # Copy built artifacts and required runtime files
 COPY --from=builder /app/public ./public
@@ -42,4 +41,5 @@ COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
 
-CMD ["node_modules/.bin/next", "start", "-p", "3000"]
+# Cloud Run injects PORT (default 8080) — use shell form so $PORT is evaluated
+CMD node_modules/.bin/next start -p ${PORT:-3000}
