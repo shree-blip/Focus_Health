@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2, KeyRound, Mail } from "lucide-react";
 
 // Google Client ID is a public value — safe to hardcode
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "540299638751-0ghd0f3n4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "540299638751-0ghd0f3b4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com";
 
 type Method = "password" | "otp";
 
