@@ -428,7 +428,7 @@ export default function ReportsPage() {
       <table><thead><tr><th>Firm</th><th>Patients</th><th>Total Billed</th><th>Collected</th><th>Avg Col</th></tr></thead><tbody>${firmRows || "<tr><td colspan='5'>No data</td></tr>"}</tbody></table>
       <h2>Facility Totals</h2>
       <table><thead><tr><th>Facility</th><th>Patients</th><th>Total Billed</th><th>Total Collected</th></tr></thead><tbody>${facilityRows || "<tr><td colspan='4'>No data</td></tr>"}</tbody></table>
-      <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script>
+      ${"<script>"}window.onload=()=>{window.print();window.onafterprint=()=>window.close();}${"</script>"}
     </body></html>`;
     const w = window.open("", "_blank");
     if (w) { w.document.write(html); w.document.close(); }
