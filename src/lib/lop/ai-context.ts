@@ -178,8 +178,8 @@ ${commonlyMissing.map(([label, count]) => `  - ${label}: missing in ${count} of 
 PATIENTS WITH LOWEST COMPLETENESS (up to 10):
 ${worstCompleteness.map((c) => `- ${c.name}: ${c.score}% complete (${c.missing} fields missing${c.criticalMissing.length > 0 ? `, critical: ${c.criticalMissing.join(", ")}` : ""})`).join("\n") || "All patients fully complete"}
 
-ALL PATIENTS SUMMARY (${all.length} total):
-${all.map((p) => {
+ALL PATIENTS SUMMARY (showing up to 200 of ${all.length} total — sorted by most recent):
+${[...all].sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime()).slice(0, 200).map((p) => {
     const comp = analyzePatientCompleteness(p);
     return `- ${p.first_name} ${p.last_name} | status: ${p.case_status} | facility: ${(p.lop_facilities as Rec)?.name ?? "N/A"} | firm: ${(p.lop_law_firms as Rec)?.name ?? "N/A"} | billed: $${(Number(p.bill_charges) || 0).toLocaleString()} | collected: $${(Number(p.amount_collected) || 0).toLocaleString()} | completeness: ${comp.score}% | created: ${toDateStr(p.created_at)} | arrival: ${toDateStr(p.expected_arrival)}`;
   }).join("\n") || "No patients"}
