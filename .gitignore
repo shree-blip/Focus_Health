@@ -41,3 +41,4 @@ public/ErOfLufkin-Event1.1 | Videos & Movies on Vimeo.html
 # Patient records - stored in GCS, not git
 Letter of Protections & Records/
 *.csv
+.vercel

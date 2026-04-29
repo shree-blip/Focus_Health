@@ -12,6 +12,7 @@ export interface LopUser {
   full_name: string;
   role: string;
   is_active: boolean;
+  ai_access: boolean;
 }
 
 /**
@@ -50,7 +51,7 @@ export function getAdminClient(): never {
  */
 export async function getLopUser(lopUserId: string) {
   return queryOne<LopUser>(
-    `SELECT id, auth_user_id, email, full_name, role, is_active
+    `SELECT id, auth_user_id, email, full_name, role, is_active, ai_access
      FROM lop_users WHERE id = $1 AND is_active = TRUE`,
     [lopUserId]
   );
@@ -68,7 +69,7 @@ export async function requireLopAuth(): Promise<{ authUserId: string; lopUser: L
     if (!session) return null;
 
     const lopUser = await queryOne<LopUser>(
-      `SELECT id, auth_user_id, email, full_name, role, is_active
+      `SELECT id, auth_user_id, email, full_name, role, is_active, ai_access
        FROM lop_users WHERE id = $1 AND is_active = TRUE`,
       [session.lopUserId]
     );

@@ -45,10 +45,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Only admin can use AI
-    if (auth.lopUser.role !== "admin") {
+    // Only admin or users with explicit ai_access can use AI
+    const canUseAi = auth.lopUser.role === "admin" || auth.lopUser.ai_access === true;
+    if (!canUseAi) {
       return NextResponse.json(
-        { error: "AI features require admin role" },
+        { error: "AI features require admin role or AI access permission" },
         { status: 403 },
       );
     }

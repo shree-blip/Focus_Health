@@ -53,6 +53,8 @@ export interface LopUser {
   full_name: string;
   role: LopUserRole;
   is_active: boolean;
+  /** Grants chatbot / AI Assistant access to non-admin users */
+  ai_access: boolean;
   created_at: string;
   updated_at: string;
   facilities?: LopFacility[];

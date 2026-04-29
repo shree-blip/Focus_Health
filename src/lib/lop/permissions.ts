@@ -36,8 +36,8 @@ const PERMISSIONS: Record<string, LopUserRole[]> = {
   // Email
   "email:send": ["medical_records", "admin"],
 
-  // AI assistant
-  "ai:use": ["admin"],
+  // AI assistant — also gated by per-user ai_access flag (see hasPermission)
+  "ai:use": ["admin"],  // admin always allowed; other roles allowed via ai_access flag
 
   // Admin
   "users:manage": ["admin"],
@@ -48,6 +48,10 @@ const PERMISSIONS: Record<string, LopUserRole[]> = {
 
 export function hasPermission(user: LopUser | null, action: string): boolean {
   if (!user || !user.is_active) return false;
+  // ai:use: admins always allowed; any non-admin with ai_access flag also allowed
+  if (action === "ai:use") {
+    return user.role === "admin" || user.ai_access === true;
+  }
   const allowed = PERMISSIONS[action];
   if (!allowed) return false;
   return allowed.includes(user.role);

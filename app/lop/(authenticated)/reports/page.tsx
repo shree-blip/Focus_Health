@@ -1132,7 +1132,17 @@ export default function ReportsPage() {
                       window.dispatchEvent(
                         new CustomEvent("open-ai-chat", {
                           detail: {
-                            prompt: `Analyze these report metrics and provide actionable insights, revenue optimization suggestions, and risk flags.\n\n${reportData}`,
+                            prompt: `You are performing a PREDICTIVE FORECAST analysis on this LOP dashboard data. Do the following in order:
+
+1. **Revenue Projection (Next 30/60/90 Days)** — Based on current pipeline statuses, estimate expected collections. Use collection rate trends per law firm and facility to quantify.
+2. **Law Firm Risk Assessment** — Rank all law firms by risk. Flag any with collection rate below 50%, high volume of missing docs, or stalled cases (>60 days no change).
+3. **Facility Performance Comparison** — Compare each facility's efficiency: cases per month, avg billing, collection rate. Identify the worst and best performer.
+4. **Liquidity Risks** — Identify patients/cases most at risk of becoming uncollectable. Calculate total at-risk revenue (open cases 90+ days old, no payment activity).
+5. **Document Gap Impact** — Estimate revenue delayed or at risk due to missing lop_letter, medical_record, or bill_llc documents. Which law firm is contributing most to this delay?
+6. **Top 5 Actionable Recommendations** — Specific steps to increase collections in the next 30 days.
+
+DATA:
+${reportData}`,
                           },
                         })
                       );

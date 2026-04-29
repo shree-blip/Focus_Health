@@ -2,6 +2,7 @@
 
 import { useChat, type UseChatOptions } from "ai/react";
 import { useLopAuth } from "@/components/lop/LopAuthProvider";
+import { toast } from "sonner";
 
 interface UseAiChatOptions {
   contextType?: "general" | "dashboard_briefing" | "patient_summary" | "reports_analysis";
@@ -22,6 +23,21 @@ export function useAiChat(opts: UseAiChatOptions = {}) {
       report_data: opts.reportData,
     },
     initialMessages: [],
+    onError: (err) => {
+      // Surface API errors (403, 500, stream errors) instead of silently failing
+      const message = err?.message ?? "AI request failed";
+      const isAuth = message.toLowerCase().includes("403") ||
+                     message.toLowerCase().includes("admin") ||
+                     message.toLowerCase().includes("permission") ||
+                     message.toLowerCase().includes("authentication");
+      toast.error(
+        isAuth
+          ? "AI access denied. Ask an admin to enable AI access for your account."
+          : `AI Error: ${message}`,
+        { duration: 6000 }
+      );
+      console.error("[useAiChat] error:", err);
+    },
   };
 
   const chat = useChat(chatOptions);
@@ -36,5 +52,6 @@ export function useAiChat(opts: UseAiChatOptions = {}) {
     setMessages: chat.setMessages,
     append: chat.append,
     setInput: chat.setInput,
+    error: chat.error,
   };
 }

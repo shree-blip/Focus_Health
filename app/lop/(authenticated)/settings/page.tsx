@@ -33,6 +33,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
+  Bot,
   Building2,
   ChevronDown,
   ChevronRight,
@@ -244,6 +245,7 @@ function UsersTab() {
     email: "",
     role: "front_desk" as LopUserRole,
     is_active: true,
+    ai_access: false,
     facility_ids: [] as string[],
   });
 
@@ -290,6 +292,7 @@ function UsersTab() {
         email: user.email,
         role: user.role,
         is_active: user.is_active,
+        ai_access: user.ai_access ?? false,
         facility_ids:
           user.lop_user_facilities?.map((uf) => uf.facility_id) ?? [],
       });
@@ -300,6 +303,7 @@ function UsersTab() {
         email: "",
         role: "front_desk",
         is_active: true,
+        ai_access: false,
         facility_ids: [],
       });
     }
@@ -323,6 +327,8 @@ function UsersTab() {
             email: form.email.trim(),
             role: form.role,
             is_active: form.is_active,
+            // admins always keep ai_access; for others, use explicit flag
+            ai_access: form.role === "admin" ? true : form.ai_access,
           },
           { id: editingUser.id },
         );
@@ -350,11 +356,13 @@ function UsersTab() {
             full_name: editingUser.full_name,
             role: editingUser.role,
             is_active: editingUser.is_active,
+            ai_access: editingUser.ai_access,
           },
           new_values: {
             full_name: form.full_name.trim(),
             role: form.role,
             is_active: form.is_active,
+            ai_access: form.role === "admin" ? true : form.ai_access,
             facility_ids: form.facility_ids,
           },
         });
@@ -369,6 +377,7 @@ function UsersTab() {
             email: form.email.trim(),
             role: form.role,
             is_active: form.is_active,
+            ai_access: form.role === "admin" ? true : form.ai_access,
           },
           { select: "id", single: true },
         );
@@ -394,6 +403,7 @@ function UsersTab() {
             full_name: form.full_name.trim(),
             email: form.email.trim(),
             role: form.role,
+            ai_access: form.role === "admin" ? true : form.ai_access,
           },
         });
 
@@ -588,6 +598,13 @@ function UsersTab() {
                       >
                         {ROLE_LABELS[user.role]}
                       </span>
+                      {/* AI Access badge */}
+                      {(user.ai_access || user.role === "admin") && (
+                        <span className="flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-600">
+                          <Bot className="h-3 w-3" />
+                          AI
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-start gap-3">
                       <Building2 className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
@@ -720,6 +737,33 @@ function UsersTab() {
               />
               <Label>Active account</Label>
             </div>
+
+            {/* AI Chatbot Access — only meaningful for non-admin roles */}
+            {form.role !== "admin" && (
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-4 py-3">
+                <div className="flex items-center gap-2.5">
+                  <Bot className="h-4 w-4 text-indigo-500" />
+                  <div>
+                    <Label className="text-indigo-900">AI Chatbot Access</Label>
+                    <p className="text-[11px] text-indigo-400 mt-0.5">
+                      Allow this user to use the AI Assistant
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={form.ai_access}
+                  onCheckedChange={(v) =>
+                    setForm((p) => ({ ...p, ai_access: v }))
+                  }
+                />
+              </div>
+            )}
+            {form.role === "admin" && (
+              <div className="flex items-center gap-2.5 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 text-indigo-500">
+                <Bot className="h-4 w-4" />
+                <span className="text-xs font-medium">Admin role — AI access always enabled</span>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 pt-2">
               <Button

@@ -32,10 +32,10 @@ import {
 const QUICK_ACTIONS = [
   { label: "Daily Briefing", icon: Sparkles, prompt: "Give me today's operational briefing." },
   { label: "Missing Data", icon: ClipboardList, prompt: "Which patients have incomplete profiles? For each patient with missing data, list ALL missing fields grouped by category (Demographics, Contact, Address, Case, Financial, Scheduling, Notes, Documents). Show their data completeness scores and flag critical missing fields." },
-  { label: "Missing Docs", icon: FileText, prompt: "Which patients have missing required documents? List them with what's missing." },
+  { label: "Docs by Firm", icon: FileText, prompt: "Break down missing required documents (lop_letter, medical_record, bill_llc) by law firm. For each law firm: how many patients are missing each document type, and list each patient's name, which docs are missing, their case status, and when they were created. Sort firms by worst doc compliance first." },
   { label: "Today's Activity", icon: Calendar, prompt: "Show me everything that happened today — new patients, status changes, arrivals, payments, and any notable events." },
-  { label: "This Week", icon: CalendarRange, prompt: "Give me a summary of this week — new patients added, cases resolved, payments received, arrivals, and key changes." },
-  { label: "Collections", icon: DollarSign, prompt: "Analyze our collection rate. Which law firms have the lowest collection rates?" },
+  { label: "This Week", icon: CalendarRange, prompt: "Give me a summary of this week — new patients added, cases resolved, payments received, arrivals, and key changes. Also break down missing document gaps for patients created this week, grouped by law firm." },
+  { label: "Collections", icon: DollarSign, prompt: "Analyze our collection rate. Which law firms have the lowest collection rates? Also flag any law firm where a high proportion of their patients have missing required documents, as this may be blocking settlements." },
   { label: "Follow-Ups", icon: AlertTriangle, prompt: "List all patients needing follow-up with their current notes and how long they've been in that status." },
   { label: "Performance", icon: BarChart3, prompt: "Compare performance across all facilities — patient volume, billing, collection rates, and data completeness." },
 ];
@@ -54,6 +54,7 @@ export function AiChatPanel() {
     stop,
     setMessages,
     append,
+    error,
   } = useAiChat({ contextType: "general" });
 
   // Auto-scroll to bottom on new messages
@@ -209,6 +210,15 @@ export function AiChatPanel() {
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span>Analyzing…</span>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {error && !isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] rounded-2xl bg-red-50 border border-red-200 px-4 py-2.5 text-sm">
+                    <p className="font-semibold text-red-700 text-xs mb-0.5">Request failed</p>
+                    <p className="text-red-500 text-xs">{error.message ?? "Unknown error"}</p>
                   </div>
                 </div>
               )}

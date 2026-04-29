@@ -80,6 +80,7 @@ export default function LawFirmsPage() {
   const [firmMetrics, setFirmMetrics] = useState<Record<string, FirmMetric>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFirm, setEditingFirm] = useState<LopLawFirm | null>(null);
   const [saving, setSaving] = useState(false);
@@ -329,6 +330,17 @@ export default function LawFirmsPage() {
     });
   }, [firms, search]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  const FIRMS_PAGE_SIZE = 25;
+  const firmsTotalPages = Math.max(1, Math.ceil(filteredFirms.length / FIRMS_PAGE_SIZE));
+  const paginatedFirms = useMemo(
+    () => filteredFirms.slice((page - 1) * FIRMS_PAGE_SIZE, page * FIRMS_PAGE_SIZE),
+    [filteredFirms, page],
+  );
+
   const summary = useMemo(() => {
     const activeCount = filteredFirms.filter((firm) => firm.is_active).length;
     const totalPatients = filteredFirms.reduce(
@@ -488,7 +500,7 @@ export default function LawFirmsPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {filteredFirms.map((firm) => {
+              {paginatedFirms.map((firm) => {
                 const metric =
                   firmMetrics[firm.id] ??
                   ({ count: 0, avgCollected: 0, reminderCount: 0, lastReminderAt: null } as FirmMetric);
@@ -642,6 +654,63 @@ export default function LawFirmsPage() {
                 );
               })}
             </div>
+
+            {firmsTotalPages > 1 && (
+              <div className="mt-6 flex items-center justify-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={page === 1}
+                  onClick={() => setPage((current) => current - 1)}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-slate-500 transition-colors hover:bg-white disabled:pointer-events-none disabled:opacity-40"
+                >
+                  ← Prev
+                </button>
+
+                {Array.from({ length: firmsTotalPages }, (_, i) => i + 1)
+                  .filter((n) => {
+                    if (firmsTotalPages <= 7) return true;
+                    if (n === 1 || n === firmsTotalPages) return true;
+                    if (Math.abs(n - page) <= 1) return true;
+                    return false;
+                  })
+                  .reduce<(number | "…")[]>((acc, n, idx, arr) => {
+                    if (idx > 0 && typeof arr[idx - 1] === "number" && n - (arr[idx - 1] as number) > 1) {
+                      acc.push("…");
+                    }
+                    acc.push(n);
+                    return acc;
+                  }, [])
+                  .map((item, idx) =>
+                    item === "…" ? (
+                      <span key={`ellipsis-${idx}`} className="px-1 text-sm text-slate-400">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setPage(item as number)}
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                          page === item
+                            ? "bg-[#0B3B91] text-white shadow-sm"
+                            : "text-slate-600 hover:bg-white"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+
+                <button
+                  type="button"
+                  disabled={page === firmsTotalPages}
+                  onClick={() => setPage((current) => current + 1)}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-slate-500 transition-colors hover:bg-white disabled:pointer-events-none disabled:opacity-40"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
 
             <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
               <div className="rounded-[30px] border border-white/70 bg-white/80 p-8 shadow-[0_24px_48px_rgba(9,20,40,0.06)] backdrop-blur-xl lg:col-span-2">

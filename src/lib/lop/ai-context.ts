@@ -13,6 +13,14 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Rec = Record<string, any>;
 
+/** pg returns timestamp columns as Date objects; normalise to YYYY-MM-DD string */
+function toDateStr(val: unknown): string {
+  if (!val) return "N/A";
+  if (val instanceof Date) return val.toISOString().split("T")[0];
+  if (typeof val === "string") return val.split("T")[0];
+  return String(val);
+}
+
 export async function buildDashboardContext(facilityId?: string | null): Promise<string> {
   const patientSql = facilityId
     ? `SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name,
@@ -173,8 +181,41 @@ ${worstCompleteness.map((c) => `- ${c.name}: ${c.score}% complete (${c.missing} 
 ALL PATIENTS SUMMARY (${all.length} total):
 ${all.map((p) => {
     const comp = analyzePatientCompleteness(p);
-    return `- ${p.first_name} ${p.last_name} | status: ${p.case_status} | facility: ${(p.lop_facilities as Rec)?.name ?? "N/A"} | firm: ${(p.lop_law_firms as Rec)?.name ?? "N/A"} | billed: $${(Number(p.bill_charges) || 0).toLocaleString()} | collected: $${(Number(p.amount_collected) || 0).toLocaleString()} | completeness: ${comp.score}% | created: ${p.created_at?.split("T")[0] ?? "N/A"} | arrival: ${p.expected_arrival?.split("T")[0] ?? "N/A"}`;
-  }).join("\n") || "No patients"}`;
+    return `- ${p.first_name} ${p.last_name} | status: ${p.case_status} | facility: ${(p.lop_facilities as Rec)?.name ?? "N/A"} | firm: ${(p.lop_law_firms as Rec)?.name ?? "N/A"} | billed: $${(Number(p.bill_charges) || 0).toLocaleString()} | collected: $${(Number(p.amount_collected) || 0).toLocaleString()} | completeness: ${comp.score}% | created: ${toDateStr(p.created_at)} | arrival: ${toDateStr(p.expected_arrival)}`;
+  }).join("\n") || "No patients"}
+
+LAW FIRM MISSING DOCUMENT BREAKDOWN:
+${(() => {
+    const requiredDocs = ["lop_letter", "medical_record", "bill_llc"];
+    const firmDocMap: Record<string, { firmName: string; patients: Array<{ name: string; missing: string[]; status: string; created: string }> }> = {};
+    for (const p of all) {
+      const firmName = (p.lop_law_firms as Rec)?.name ?? "No Firm";
+      const firmId = p.law_firm_id ?? "none";
+      const docs: Rec[] = Array.isArray(p.lop_patient_documents) ? p.lop_patient_documents : [];
+      const receivedSet = new Set(docs.filter((d) => d.status === "received").map((d) => d.document_type));
+      const missing = requiredDocs.filter((t) => !receivedSet.has(t));
+      if (missing.length > 0) {
+        if (!firmDocMap[firmId]) firmDocMap[firmId] = { firmName, patients: [] };
+        firmDocMap[firmId].patients.push({
+          name: `${p.first_name} ${p.last_name}`,
+          missing,
+          status: p.case_status ?? "unknown",
+          created: toDateStr(p.created_at),
+        });
+      }
+    }
+    const entries = Object.values(firmDocMap).sort((a, b) => b.patients.length - a.patients.length);
+    if (entries.length === 0) return "All patients have complete required documents.";
+    return entries.map((e) => {
+      const docSummary: Record<string, number> = {};
+      for (const pat of e.patients) {
+        for (const m of pat.missing) docSummary[m] = (docSummary[m] || 0) + 1;
+      }
+      const docLine = Object.entries(docSummary).map(([d, c]) => `${d}(${c})`).join(", ");
+      const patLines = e.patients.map((pat) => `  - ${pat.name} | missing: ${pat.missing.join(", ")} | status: ${pat.status} | created: ${pat.created}`).join("\n");
+      return `[${e.firmName}] — ${e.patients.length} patients missing docs (${docLine}):\n${patLines}`;
+    }).join("\n\n");
+  })()}`;
 }
 
 export async function buildPatientContext(patientId: string): Promise<string> {
@@ -256,10 +297,10 @@ REMINDERS SENT (${(reminders ?? []).length}):
 ${(reminders ?? []).slice(0, 10).map((r: Rec) => `- ${r.sent_at}: ${r.email_type} to ${r.recipient_email} (${r.status})`).join("\n") || "No reminders sent"}
 
 AUDIT TIMELINE (recent ${Math.min((auditLogs ?? []).length, 15)} events):
-${(auditLogs ?? []).slice(0, 15).map((a: Rec) => `- ${a.created_at}: ${a.action}`).join("\n") || "No audit entries"}
+${(auditLogs ?? []).slice(0, 15).map((a: Rec) => `- ${toDateStr(a.created_at)}: ${a.action}`).join("\n") || "No audit entries"}
 
-CREATED: ${patient.created_at}
-LAST UPDATED: ${patient.updated_at}`;
+CREATED: ${toDateStr(patient.created_at)}
+LAST UPDATED: ${toDateStr(patient.updated_at)}`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -326,7 +367,9 @@ export async function buildDateFilteredContext(
   const facFilter = facilityId ? ` AND p.facility_id = '${facilityId}'` : "";
 
   const [createdRes, arrivalsRes, paidRes, auditRes] = await Promise.all([
-    pool.query(`SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name ${baseJoin} WHERE p.created_at >= $1 AND p.created_at <= $2${facFilter}`, [dateFrom, dateToEnd]),
+    pool.query(`SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name,
+              json_agg(DISTINCT jsonb_build_object('document_type', pd.document_type, 'status', pd.status)) FILTER (WHERE pd.id IS NOT NULL) AS lop_patient_documents
+       ${baseJoin} LEFT JOIN lop_patient_documents pd ON pd.patient_id = p.id WHERE p.created_at >= $1 AND p.created_at <= $2${facFilter} GROUP BY p.id, f.name, lf.name`, [dateFrom, dateToEnd]),
     pool.query(`SELECT p.*, f.name AS facility_name ${baseJoin} WHERE p.expected_arrival >= $1 AND p.expected_arrival <= $2${facFilter}`, [dateFrom, dateToEnd]),
     pool.query(`SELECT p.*, f.name AS facility_name, lf.name AS law_firm_name ${baseJoin} WHERE p.date_paid >= $1 AND p.date_paid <= $2${facFilter}`, [dateFrom, dateToEnd]),
     pool.query(
@@ -360,7 +403,7 @@ QUERY RANGE: ${dateFrom} to ${dateTo}
 FACILITY SCOPE: ${facilityId ? "Single Facility" : "All Facilities"}
 
 PATIENTS CREATED IN RANGE (${created.length}):
-${created.map((p) => `- ${p.first_name} ${p.last_name} | status: ${p.case_status} | facility: ${(p.lop_facilities as Rec)?.name ?? "N/A"} | firm: ${(p.lop_law_firms as Rec)?.name ?? "N/A"} | billed: $${(Number(p.bill_charges) || 0).toLocaleString()} | created: ${p.created_at?.split("T")[0]}`).join("\n") || "None"}
+${created.map((p) => `- ${p.first_name} ${p.last_name} | status: ${p.case_status} | facility: ${(p.lop_facilities as Rec)?.name ?? "N/A"} | firm: ${(p.lop_law_firms as Rec)?.name ?? "N/A"} | billed: $${(Number(p.bill_charges) || 0).toLocaleString()} | created: ${toDateStr(p.created_at)}`).join("\n") || "None"}
 
 ARRIVALS IN RANGE (${arrivals.length}):
 ${arrivals.map((p) => `- ${p.first_name} ${p.last_name} | arrival: ${p.expected_arrival} | status: ${p.case_status} | facility: ${(p.lop_facilities as Rec)?.name ?? "N/A"}`).join("\n") || "None"}
@@ -373,6 +416,37 @@ RANGE FINANCIAL SUMMARY:
 - Total Collected (payments): $${totalCollectedPaid.toLocaleString()}
 - Unique Patients Involved: ${allUnique.length}
 
+LAW FIRM MISSING DOCUMENT BREAKDOWN (patients created in range):
+${(() => {
+    const requiredDocs = ["lop_letter", "medical_record", "bill_llc"];
+    const firmDocMap: Record<string, { firmName: string; patients: Array<{ name: string; missing: string[]; status: string; created: string }> }> = {};
+    for (const p of created) {
+      const firmName = (p.lop_law_firms as Rec)?.name ?? "No Firm";
+      const firmId = p.law_firm_id ?? "none";
+      const docs: Rec[] = Array.isArray(p.lop_patient_documents) ? p.lop_patient_documents : [];
+      const receivedSet = new Set(docs.filter((d) => d.status === "received").map((d) => d.document_type));
+      const missing = requiredDocs.filter((t) => !receivedSet.has(t));
+      if (missing.length > 0) {
+        if (!firmDocMap[firmId]) firmDocMap[firmId] = { firmName, patients: [] };
+        firmDocMap[firmId].patients.push({
+          name: `${p.first_name} ${p.last_name}`,
+          missing,
+          status: p.case_status ?? "unknown",
+          created: toDateStr(p.created_at),
+        });
+      }
+    }
+    const entries = Object.values(firmDocMap).sort((a, b) => b.patients.length - a.patients.length);
+    if (entries.length === 0) return `All ${created.length} patients created in this range have complete required documents.`;
+    return entries.map((e) => {
+      const docSummary: Record<string, number> = {};
+      for (const pat of e.patients) for (const m of pat.missing) docSummary[m] = (docSummary[m] || 0) + 1;
+      const docLine = Object.entries(docSummary).map(([d, c]) => `${d}(${c})`).join(", ");
+      const patLines = e.patients.map((pat) => `  - ${pat.name} | missing: ${pat.missing.join(", ")} | status: ${pat.status} | created: ${pat.created}`).join("\n");
+      return `[${e.firmName}] — ${e.patients.length} patients missing docs (${docLine}):\n${patLines}`;
+    }).join("\n\n");
+  })()}
+
 AUDIT EVENTS IN RANGE (${audits.length}):
-${audits.slice(0, 30).map((a) => `- ${a.created_at}: ${a.action} (entity: ${a.entity_type}/${a.entity_id ?? "N/A"})`).join("\n") || "No audit events"}`;
+${audits.slice(0, 30).map((a) => `- ${toDateStr(a.created_at)}: ${a.action} (entity: ${a.entity_type}/${a.entity_id ?? "N/A"})`).join("\n") || "No audit events"}`;
 }

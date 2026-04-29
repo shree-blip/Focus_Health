@@ -157,6 +157,7 @@ export default function PatientsListPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [facilityFilter, setFacilityFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
 
   const load = useCallback(
     async ({ silent = false }: { silent?: boolean } = {}) => {
@@ -220,6 +221,10 @@ export default function PatientsListPage() {
     }
   }, [activeFacilityId]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, facilityFilter]);
+
   const searchScopedPatients = useMemo(() => {
     return patients.filter((patient) => {
       if (facilityFilter !== "all" && patient.facility_id !== facilityFilter) {
@@ -248,6 +253,13 @@ export default function PatientsListPage() {
 
     return searchScopedPatients.filter((patient) => patient.case_status === statusFilter);
   }, [searchScopedPatients, statusFilter]);
+
+  const PAGE_SIZE = 50;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page],
+  );
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { all: searchScopedPatients.length };
@@ -541,7 +553,7 @@ export default function PatientsListPage() {
             <>
               <div className="lg:hidden">
                 <div className="space-y-3 p-4">
-                  {filtered.map((patient) => {
+                  {paginated.map((patient) => {
                     const missingDocs = getMissingRequiredDocumentCount(patient);
                     const collectedAmount = Number(patient.amount_collected) || 0;
 
@@ -718,7 +730,7 @@ export default function PatientsListPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filtered.map((patient) => {
+                    {paginated.map((patient) => {
                       const missingDocs = getMissingRequiredDocumentCount(patient);
 
                       return (
@@ -832,8 +844,19 @@ export default function PatientsListPage() {
               <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm font-medium text-slate-500">
                   Showing{" "}
-                  <span className="font-bold text-[#0B3B91]">{filtered.length}</span> of{" "}
-                  <span className="font-bold text-slate-700">{patients.length}</span> patients
+                  <span className="font-bold text-[#0B3B91]">
+                    {filtered.length === 0
+                      ? 0
+                      : (page - 1) * PAGE_SIZE + 1}
+                    {filtered.length > 1
+                      ? `–${Math.min(page * PAGE_SIZE, filtered.length)}`
+                      : ""}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-slate-700">{filtered.length}</span> patients
+                  {filtered.length < patients.length && (
+                    <span className="text-slate-400"> (filtered from {patients.length})</span>
+                  )}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
@@ -846,6 +869,63 @@ export default function PatientsListPage() {
                   </span>
                 </div>
               </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-1.5 border-t border-slate-100 bg-white px-6 py-4">
+                  <button
+                    type="button"
+                    disabled={page === 1}
+                    onClick={() => setPage((current) => current - 1)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    ← Prev
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((n) => {
+                      if (totalPages <= 7) return true;
+                      if (n === 1 || n === totalPages) return true;
+                      if (Math.abs(n - page) <= 1) return true;
+                      return false;
+                    })
+                    .reduce<(number | "…")[]>((acc, n, idx, arr) => {
+                      if (idx > 0 && typeof arr[idx - 1] === "number" && n - (arr[idx - 1] as number) > 1) {
+                        acc.push("…");
+                      }
+                      acc.push(n);
+                      return acc;
+                    }, [])
+                    .map((item, idx) =>
+                      item === "…" ? (
+                        <span key={`ellipsis-${idx}`} className="px-1 text-sm text-slate-400">
+                          …
+                        </span>
+                      ) : (
+                        <button
+                          key={item}
+                          type="button"
+                          onClick={() => setPage(item as number)}
+                          className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                            page === item
+                              ? "bg-[#0B3B91] text-white shadow-sm"
+                              : "text-slate-600 hover:bg-slate-100"
+                          }`}
+                        >
+                          {item}
+                        </button>
+                      )
+                    )}
+
+                  <button
+                    type="button"
+                    disabled={page === totalPages}
+                    onClick={() => setPage((current) => current + 1)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
