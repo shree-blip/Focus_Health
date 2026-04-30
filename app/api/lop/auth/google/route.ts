@@ -3,7 +3,11 @@ import { OAuth2Client } from "google-auth-library";
 import { query, queryOne } from "@/lib/db";
 import { createLopSessionToken, getLopSessionCookieOptions, LOP_SESSION_COOKIE } from "@/lib/lop/lop-auth";
 
-const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1075627982134-d0d7rc5lervhic878otmcunl9l5skb5a.apps.googleusercontent.com");
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  "540299638751-0ghd0f3b4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com";
+
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,7 +19,7 @@ export async function POST(req: NextRequest) {
     // Verify the Google ID token
     const ticket = await client.verifyIdToken({
       idToken: credential,
-      audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      audience: GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
     if (!payload?.email) {

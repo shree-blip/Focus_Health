@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { GoogleOAuthProvider, GoogleLogin, type CredentialResponse } from "@react-oauth/google";
@@ -8,9 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Loader2, KeyRound, Mail } from "lucide-react";
-
-// Google Client ID is a public value — safe to hardcode
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1075627982134-d0d7rc5lervhic878otmcunl9l5skb5a.apps.googleusercontent.com";
 
 type Method = "password" | "otp";
 
@@ -332,8 +329,46 @@ function LoginForm() {
 }
 
 export default function LopLoginPage() {
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadGoogleClientId = async () => {
+      try {
+        const res = await fetch("/api/lop/auth/google/config", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error("Failed to load Google sign-in config");
+        const data = (await res.json()) as { clientId?: string };
+        if (!cancelled) {
+          setGoogleClientId(data.clientId ?? null);
+        }
+      } catch {
+        if (!cancelled) {
+          setGoogleClientId(null);
+        }
+      }
+    };
+
+    void loadGoogleClientId();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!googleClientId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={googleClientId}>
       <Suspense
         fallback={
           <div className="min-h-screen flex items-center justify-center">
