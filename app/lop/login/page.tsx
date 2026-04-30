@@ -330,7 +330,7 @@ function LoginForm() {
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-  "540299638751-0ghd0f3b4m5lefmr28mree3flcuem5m3.apps.googleusercontent.com";
+  "1075627982134-d0d7rc5lervhic878otmcunl9l5skb5a.apps.googleusercontent.com";
 
 export default function LopLoginPage() {
   return (
